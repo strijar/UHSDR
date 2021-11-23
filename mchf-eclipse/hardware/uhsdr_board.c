@@ -39,6 +39,9 @@
 // Transceiver state public structure
 __IO __MCHF_SPECIALMEM TransceiverState ts;
 
+uint32_t mem_data[4][2][20];
+uint32_t xvtr_data[4][3];
+uint16_t bw_data[10][20];
 
 static void Board_Led_Init(void)
 {

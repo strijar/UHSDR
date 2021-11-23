@@ -243,9 +243,9 @@ typedef struct {
 }
 keyer_mode_t;
 
-uint32_t mem_data[4][2][20];
-uint32_t xvtr_data[4][3];
-uint16_t bw_data[10][20];
+extern uint32_t mem_data[4][2][20];
+extern uint32_t xvtr_data[4][3];
+extern uint16_t bw_data[10][20];
 
 typedef enum
 {
