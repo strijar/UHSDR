@@ -128,12 +128,13 @@ void BootFail_Handler(uint8_t count)
 /**
  * @brief  Programs the internal Flash memory
  */
-mchf_bootloader_error_t COMMAND_ProgramFlashMemory()
+//mchf_bootloader_error_t COMMAND_ProgramFlashMemory()
+mchf_bootloader_error_t COMMAND_ProgramFlashMemory(uint32_t LastPGAddress)
 {
     mchf_bootloader_error_t retval = BL_ERR_NONE;
 
     uint8_t readflag = TRUE;
-    uint32_t LastPGAddress = APPLICATION_ADDRESS;
+//    uint32_t LastPGAddress = APPLICATION_ADDRESS;
 
     do
     {
@@ -193,7 +194,7 @@ void COMMAND_UPLOAD(void)
 
         /* Init written byte counter */
         uint32_t offset = 0;
-        uint8_t* address = (uint8_t*)APPLICATION_ADDRESS;
+        uint8_t* address = (uint8_t*)CONFIG_START_ADDRESS;//APPLICATION_ADDRESS;
 
 
         /* Open binary file to write on it */
@@ -201,10 +202,13 @@ void COMMAND_UPLOAD(void)
         if (res == FR_OK)
         {
             uint32_t counterread = 0;
+            uint32_t fw_leight = flashIf_userFlashSize();
             /* Read flash memory */
-            while ((offset != flashIf_userFlashSize() && res == FR_OK))
+//            while ((offset != flashIf_userFlashSize() && res == FR_OK))
+            while ((offset != fw_leight && res == FR_OK))
             {
-                for (counterread = 0; counterread < BUFFER_SIZE && offset != flashIf_userFlashSize(); counterread++,offset++)
+//            	for (counterread = 0; counterread < BUFFER_SIZE && offset != flashIf_userFlashSize(); counterread++,offset++)
+                for (counterread = 0; counterread < BUFFER_SIZE && offset != fw_leight; counterread++,offset++)
                 {
                         RAM_Buf[counterread] = address[offset];
                 }
@@ -217,6 +221,58 @@ void COMMAND_UPLOAD(void)
         if (res != FR_OK)
         {
             FlashFail_Handler(BL_ERR_WRITEDISK);
+        }
+    }
+    else
+    {
+        FlashFail_Handler(BL_ERR_FLASHPROTECT);
+    }
+}
+
+/**
+ * @brief read flash and write config on disk
+ */
+void COMMAND_UPLOAD_CONF(void)
+{
+
+    UINT bytesWritten;
+    FRESULT res = FR_OK;
+
+    /* green LED on command upload */
+    mchfBl_PinOn(LEDGREEN);
+    /* Get the read out protection status */
+    FlagStatus readoutstatus = flashIf_ReadOutProtectionStatus();
+    if (readoutstatus == 0)
+    {
+        /* Remove UPLOAD file if exist on flash disk */
+        f_unlink (UPLOAD_FILENAME_CONF);
+
+        /* Init written byte counter */
+        uint32_t offset = 0;
+        uint8_t* address = (uint8_t*)CONFIG_START_ADDRESS;
+
+
+        /* Open binary file to write on it */
+        res = f_open(&file, UPLOAD_FILENAME_CONF, FA_CREATE_ALWAYS | FA_WRITE);
+        if (res == FR_OK)
+        {
+            uint32_t counterread = 0;
+            /* Read flash memory */
+            while ((offset != CONFIG_LEIGHT && res == FR_OK))
+            {
+                for (counterread = 0; counterread < BUFFER_SIZE && offset != CONFIG_LEIGHT; counterread++,offset++)
+                {
+                        RAM_Buf[counterread] = address[offset];
+                }
+                /* Write buffer to file */
+                res = f_write (&file, RAM_Buf, counterread, &bytesWritten);
+            }
+            /* Close file and filesystem */
+            f_close (&file);
+        }
+        if (res != FR_OK)
+        {
+        	Bootloader_PrintLine("Problem writing " UPLOAD_FILE_CONF);
         }
     }
     else
@@ -252,12 +308,61 @@ void COMMAND_DOWNLOAD(void)
         } else
         {
             /* Program flash memory */
-            retval = COMMAND_ProgramFlashMemory();
+//            retval = COMMAND_ProgramFlashMemory();
+        	retval = COMMAND_ProgramFlashMemory(APPLICATION_ADDRESS);
         }
 
         /* Close file and filesystem */
         f_close (&fileR);
         ///f_mount(0, NULL);
+    }
+    else
+    {
+        /* the binary file is not available */
+        retval = BL_ERR_NOIMAGE;
+    }
+
+    flashIf_FlashLock();
+
+    if (retval != BL_ERR_NONE)
+    {
+        FlashFail_Handler(retval);
+    }
+}
+
+/**
+ * @brief  flash file
+ */
+void COMMAND_DOWNLOAD_CONF(void)
+{
+    mchf_bootloader_error_t retval = BL_ERR_NONE;
+
+    /* Flash unlock */
+    flashIf_FlashUnlock();
+
+    /* Reading for flash active: Red LED on */
+    mchfBl_PinOn(LEDRED);
+
+    /* Open the binary file to be downloaded */
+    if (f_open(&fileR, DOWNLOAD_FILENAME_CONF, FA_READ) == FR_OK)
+    {
+        /* Erase FLASH sectors to download image */
+        if (f_size(&fileR) > CONFIG_LEIGHT)
+        {
+            retval = BL_ERR_FLASHTOOSMALL;
+        } else if ( flashIf_EraseSectors(CONFIG_START_ADDRESS, CONFIG_LEIGHT) != HAL_OK)
+        {
+            /* Flash erase error */
+            retval = BL_ERR_FLASHERASE;
+        } else
+        {
+            /* Program flash memory */
+//            retval = COMMAND_ProgramFlashMemory();
+        	retval = COMMAND_ProgramFlashMemory(CONFIG_START_ADDRESS);
+        }
+
+        /* Close file and filesystem */
+        f_close (&fileR);
     }
     else
     {

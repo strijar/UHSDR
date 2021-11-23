@@ -171,9 +171,8 @@ void TransceiverStateInit(void)
     ts.menu_mode		= 0;					// menu mode
     ts.menu_item		= 0;					// menu item selection
     ts.menu_var			= 0;					// menu item change variable
-    ts.menu_var_changed	        = 0;				// TRUE if a menu variable was changed and that an EEPROM save should be done
-
-    //NO INIT NEEDED? SET BEFORE USE? ts.tx_mic_boost             = MIC_BOOST_DEFAULT;		// no extra gain. electret element assumed
+    ts.menu_var_changed	= 0;					// TRUE if a menu variable was changed and that an EEPROM save should be done
+    //NO INIT NEEDED? SET BEFORE USE? ts.tx_mic_boost = MIC_BOOST_DEFAULT;		// no extra gain. electret element assumed
 
     //CONFIG LOADED:ts.tx_audio_source	= TX_AUDIO_MIC;				// default source is microphone
     //NO INIT NEEDED, SET BEFORE USE: ts.tx_mic_gain_mult	= MIC_GAIN_DEFAULT;			// actual operating value for microphone gain
@@ -267,7 +266,8 @@ void TransceiverStateInit(void)
 
     //CONFIG LOADED:ts.filter_disp_colour = FILTER_DISP_COLOUR_DEFAULT;
     ts.vfo_mem_flag = 0;						// when TRUE, memory mode is enabled
-    ts.mem_disp = 0;						// when TRUE, memory display is enabled
+    ts.mem_disp = 0;						// when TRUE, memory list is enabled
+    ts.xvtr_disp = false;                        // when TRUE, XVTR list is enabled
     //CONFIG LOADED:ts.fm_subaudible_tone_gen_select = 0;				// lookup ("tone number") used to index the table generation (0 corresponds to "tone disabled")
     //CONFIG LOADED:ts.fm_tone_burst_mode = 0;					// this is the setting for the tone burst generator
     ts.fm_tone_burst_timing = 0;					// used to time the duration of the tone burst
@@ -281,8 +281,11 @@ void TransceiverStateInit(void)
     ts.display = &mchf_display;
 
     ts.show_debug_info = false;					// dont show coordinates on LCD
-    //CONFIG LOADED:ts.tune_power_level = 0;					// Tune with FULL POWER
-    //CONFIG LOADED:ts.xlat = 0;							// 0 = report base frequency, 1 = report xlat-frequency;
+    ts.show_wide_spectrum = false;              // default mode of spectrum wide on screen
+    //CONFIG LOADED:ts.tune_power_level = 0;	// Tune with FULL POWER
+    ts.power_scale_gen = 100;                   // power scale for Gen, %
+    ts.power_scale_gen_full = 100;              // power scale for Gen, FULL POWER, %
+    //CONFIG LOADED:ts.xlat = 0;				// 0 = report base frequency, 1 = report xlat-frequency;
     ts.audio_int_counter = 0;					// test DL2FW
     ts.cat_band_index =255;						// no CAT command arrived
 
@@ -306,19 +309,68 @@ void TransceiverStateInit(void)
     {
 
     	ts.keyer_mode.macro[idx][0] = '\0';
-    	strcpy((char *) ts.keyer_mode.cap[idx], "BTN");
-
+//    	strcpy((char *) ts.keyer_mode.cap[idx], "BTN");
+    	strcpy((char *) ts.keyer_mode.cap[idx], "EMPTY");
     }
-    ts.buffered_tx = false;
+//    ts.buffered_tx = false;
+    ts.keyer_mode_tx = 0;
+    ts.keyer_cycled_tx_active = false;
+    ts.keyer_cycled_tx_timer = 0;
+    ts.keyer_cycled_tx_button = 1;
+    ts.keyer_cycled_interval = 3; // 3 sec.
+    ts.cw_beacon_interval = 18000; // 3 min
+    ts.swbi = BEACON_INTERVAL_3M; // cw beacon interval numerator
+    ts.peak_ind_tune = 3; // timer 0.75 sec
     ts.cw_text_entry = false;
+
+    ts.ExtFMenuActive = false;
+    ts.XvtrFMenuActive = false;
+    ts.MenuOfFMenusActive = false;
 
     ts.debug_si5351a_pllreset = 2;		//start with "reset on IQ Divider"
 
-    ts.vswr_protection_threshold = 1; // OFF
+    ts.debug_vswr_protection_threshold = 1; // OFF
 
     //CONFIG LOADED:ts.expflags1 = 0; // Used to hold flags for options in Debug/Expert menu, stored in EEPROM location "EEPROM_EXPFLAGS1"
 
-    ts.band_effective = NULL; // this is an invalid band number, which will trigger a redisplay of the band name and the effective power
+    ts.lotx_dacs_present = false; // TX LO Supression DACs MCP4725 (x096/x097) is not present
+    for (int idx = 0; idx < 15; idx++) // Band calibrated values for DACs MCP4725
+    {
+        ts.cal_lo_tx_supr0[idx] = 2048; // Half of +5V for each
+        ts.cal_lo_tx_supr1[idx] = 2048; // Half of +5V for each
+    }
+	ts.band_index = 255;                   // Index of current band in table (by tune freq) - invalid for start
+	ts.HereIsEnableCB26Mc = false;         // Tune on enable CB band 26 Mc
+	ts.HereIsEnableCB27Mc = false;         // Tune on enable CB band 27 Mc
+    ts.band_lo_tx_supr = 255; // Invalid band number (the band of currently selected frequency (CB band 27 MHz == 28 MHz))
+    ts.band_lo_tx_supr_old = 255; // Invalid band number - old value bla-bla-bla
+
+    ts.band_effective = NULL;  // this is an invalid band number, which will trigger a redisplay of the band name and the effective power
+#ifdef SDR_AMBER
+    ts.amber_input_state = 0;              // Amber - state of RX input group, - PRE(amp)
+    ts.amber_io8_present = false;          // I/Ox8 PCF8574A
+    ts.amber_io8_state = 255;
+    ts.amber_io4_present = false;          // I/Ox4 PCA9536
+    ts.amber_io4_state = 0;
+    ts.amber_dac_pwr_tx_present = false;   // DAC MCP4725 for TX PWR reg.
+    ts.amber_dac_pwr_tx_state = 2048;
+    ts.amber_pa_bandcode_mode = 0;
+#endif
+    ts.box_colour = 2;         // =Blue - screen boxes colour
+    ts.txtline_colour = 9;     // =Yellow - ticker colour
+    ts.cw_smooth = 1;          // smooth of CW signal edges == 5 ms
+    ts.cw_smooth_len = 2;      // duration of CW signal edges
+    ts.cw_smooth_steps = 9;    // duration steps of CW signal edges
+
+    ts.anr_n_taps = 64;
+    ts.anr_delay = 12; //16;
+    ts.anr_two_mu_int = 100;
+    ts.anr_gamma_int = 100;
+    ts.dummy = 0;
+    ts.disabled_tp = false;
+#ifdef FAST_FREQ_ENC
+    ts.freq_enc_timer = 0;
+#endif
 }
 
 // #include "Trace.h"
@@ -348,6 +400,9 @@ int mchfMain(void)
     ///trace_puts("Hello mcHF World!");
     // trace_printf(" %u\n", 1u);
 
+
+//    *(__IO uint32_t*)(SRAM2_BASE) = 0x0;	// clearing delay prevent for bootloader
+
     // Set default transceiver state
     TransceiverStateInit();
 
@@ -360,7 +415,7 @@ int mchfMain(void)
     // HW init
     Board_InitMinimal();
     // Show logo & HW Info
-    UiDriver_StartUpScreenInit();
+    UiDriver_StartUpScreenInit(2000);
 
     if (ts.display != DISPLAY_NONE)
     {
@@ -401,10 +456,35 @@ int mchfMain(void)
     AudioDriver_Init();
 
     // Audio Driver Hardware Init
+    ts.codecCS4270_present = false;
+    ts.rf_gain_codecCS4270 = 1.0;
     ts.codec_present = Codec_Reset(ts.samp_rate) == HAL_OK;
 
+#ifndef SDR_AMBER
     UiDriver_StartupScreen_LogIfProblem(ts.codec_present == false,
             "Audiocodec WM8731 NOT detected!");
+#else
+
+#ifdef UI_BRD_MCHF
+    UiDriver_StartupScreen_LogIfProblem(ts.codec_present == false,
+            "Audiocodec WM8731 NOT detected!");
+#else // OVI40 or Amber
+    UiDriver_StartupScreen_LogIfProblem(ts.codecWM8731_Audio_present == false,
+            "Audio codec WM8731 NOT detected!");
+    if(ts.codecCS4270_present)
+    {
+        // Amber-UI board
+    }
+    else if(!(ts.codec_present) && ts.codecWM8731_Audio_present)
+    {
+        UiDriver_StartupScreen_LogIfProblem(true,
+             "IQ codec WM8731/AS4270 NOT detected!");
+    }
+    // Test
+    GPIO_ResetBits(BAND1_PIO,BAND1);
+#endif
+
+#endif
 
     const char* bl_version = Board_BootloaderVersion();
 
@@ -418,6 +498,13 @@ int mchfMain(void)
 
     ts.rx_gain[RX_AUDIO_SPKR].value_old = 0;		// Force update of volume control
 
+	// TX LO Supression DACs MCP4725 (x096/x097) is present?
+    ts.lotx_dacs_present = (UhsdrHw_I2C_DeviceReady(SERIALEEPROM_I2C,LO_TX_SUPR_DAC0_WRITE) == HAL_OK) && (UhsdrHw_I2C_DeviceReady(SERIALEEPROM_I2C,LO_TX_SUPR_DAC1_WRITE) == HAL_OK);
+#ifdef SDR_AMBER
+    ts.amber_io8_present = UhsdrHw_I2C_DeviceReady(SERIALEEPROM_I2C,AMBER_IO8_WRITE) == HAL_OK;
+    ts.amber_io4_present = UhsdrHw_I2C_DeviceReady(SERIALEEPROM_I2C,AMBER_IO4_WRITE) == HAL_OK;
+    ts.amber_dac_pwr_tx_present = UhsdrHw_I2C_DeviceReady(SI5351A_I2C,AMBER_DAC_PWR_TX_WRITE) == HAL_OK;
+#endif
 #ifdef USE_FREEDV
     FreeDV_Init();
     // we now try to place a marker after last dynamically
@@ -425,7 +512,7 @@ int mchfMain(void)
     Canary_Create();
 #endif
 
-    UiDriver_StartUpScreenFinish();
+    UiDriver_StartUpScreenFinish(2000);
 
     // We initialize the requested demodulation mode
     // and update the screen accordingly

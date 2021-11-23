@@ -163,7 +163,7 @@ void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hi2s)
 }
 #endif
 
-#if defined(UI_BRD_OVI40)
+#if defined(UI_BRD_OVI40) && defined(USE_32_IQ_BITS) && defined(USE_32_AUDIO_BITS)
 static void UhsdrHWI2s_Sai32Bits(SAI_HandleTypeDef* hsai)
 {
     hsai->hdmarx->Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
@@ -172,26 +172,42 @@ static void UhsdrHWI2s_Sai32Bits(SAI_HandleTypeDef* hsai)
 
     HAL_SAI_InitProtocol(hsai, SAI_I2S_STANDARD, SAI_PROTOCOL_DATASIZE_32BIT, 2);
 }
+
+static void UhsdrHWI2s_Sai24Bits(SAI_HandleTypeDef* hsai)
+{
+    hsai->hdmarx->Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+    hsai->hdmarx->Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+    HAL_DMA_Init(hsai->hdmarx);
+
+    HAL_SAI_InitProtocol(hsai, SAI_I2S_STANDARD, SAI_PROTOCOL_DATASIZE_24BIT, 2);
+}
 #endif
 
-static void UhsdrHwI2s_SetBitWidth()
+static void UhsdrHwI2s_SetBitWidth(void)
 {
 #if defined(USE_32_IQ_BITS)
     #if defined(UI_BRD_MCHF)
-    hi2s3.Init.DataFormat = I2S_DATAFORMAT_32B;
-    HAL_I2S_Init(&hi2s3);
-
+        hi2s3.Init.DataFormat = I2S_DATAFORMAT_32B;
+        HAL_I2S_Init(&hi2s3);
     #endif
     #if defined(UI_BRD_OVI40)
-    UhsdrHWI2s_Sai32Bits(&hsai_BlockA2);
-    UhsdrHWI2s_Sai32Bits(&hsai_BlockB2);
+        if(ts.codecCS4270_present)
+        {
+            UhsdrHWI2s_Sai24Bits(&hsai_BlockA2);
+            UhsdrHWI2s_Sai24Bits(&hsai_BlockB2);
+        }
+        else
+        {
+            UhsdrHWI2s_Sai32Bits(&hsai_BlockA2);
+            UhsdrHWI2s_Sai32Bits(&hsai_BlockB2);
+        }
     #endif
 #endif
 
 #if defined(USE_32_AUDIO_BITS)
     #if defined(UI_BRD_OVI40)
-    UhsdrHWI2s_Sai32Bits(&hsai_BlockA1);
-    UhsdrHWI2s_Sai32Bits(&hsai_BlockB1);
+        UhsdrHWI2s_Sai32Bits(&hsai_BlockA1);
+        UhsdrHWI2s_Sai32Bits(&hsai_BlockB1);
     #endif
 #endif
 }

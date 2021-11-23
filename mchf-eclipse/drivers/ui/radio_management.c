@@ -39,7 +39,6 @@
 #include "ui_configuration.h"
 #include "ui_menu.h"  // for CONFIG_160M_FULL_POWER_ADJUST and Co.
 #include "ui_driver.h" // for SWR_MIN_CALC_POWER
-
 #include "config_storage.h"
 
 #include "cw_gen.h"
@@ -107,7 +106,6 @@ static const BandInfo bi_2m_r2_3 =     { .tune = 144000000,    .size = 4000000, 
 static const BandInfo bi_70cm_r1 =     { .tune = 430000000,    .size = 10000000,   .name = "70cm",  BAND_MODE_70};
 static const BandInfo bi_70cm_r2_3 =   { .tune = 430000000,    .size = 20000000,   .name = "70cm",  BAND_MODE_70};
 static const BandInfo bi_23cm_all =    { .tune = 1240000000,   .size = 60000000,   .name = "23cm",  BAND_MODE_23};
-
 static const BandInfo bi_160m_r3_thai ={ .tune = 1800000,      .size = 200000,     .name = "160m",  BAND_MODE_160};
 static const BandInfo bi_80m_r3_thai = { .tune = 3500000,      .size = 100000,     .name = "80m",   BAND_MODE_80};
 static const BandInfo bi_2m_r3_thai =  { .tune = 144000000,    .size = 3000000,    .name = "2m",    BAND_MODE_2};
@@ -290,7 +288,7 @@ const pa_info_t mchf_pa =
 {
         .name  = "mcHF PA",
         .reference_power = 5000.0,
-        .max_freq = 32000000,
+        .max_freq = 55000000,//32000000,
         .min_freq =  1800000,
         .max_am_power = 2000,
         .max_power = 10000,
@@ -336,7 +334,8 @@ static void RadioManagement_SetHWFiltersForFrequency(uint32_t freq);
 uint32_t RadioManagement_GetRealFreqTranslationMode(uint32_t txrx_mode, uint32_t dmod_mode, uint32_t iq_freq_mode)
 {
     uint32_t retval = iq_freq_mode;
-    if (dmod_mode == DEMOD_CW && txrx_mode == TRX_MODE_TX)
+//  if (dmod_mode == DEMOD_CW && txrx_mode == TRX_MODE_TX) // UB8JDC
+    if (!(ts.expflags1 & EXPFLAGS1_CLEAR_TX_CW_RTTY_BPSK) && dmod_mode == DEMOD_CW && txrx_mode == TRX_MODE_TX)
     {
         retval = FREQ_IQ_CONV_MODE_OFF;
     }
@@ -377,10 +376,31 @@ void RadioManagement_ChangeCodec(uint32_t codec, bool enableCodec)
 float32_t RadioManagement_CalculatePowerFactorScale(float32_t powerMw)
 {
     float32_t retval = 1.0;
+#ifndef SDR_AMBER
     if (powerMw > 0)
     {
         retval = sqrtf(powerMw / mchf_pa.reference_power);
     }
+#else
+    if(!ts.amber_dac_pwr_tx_present || !(ts.expflags2 & EXPFLAGS2_ALT_PWR_CTRL))
+    {
+        if (powerMw > 0) { retval = sqrtf(powerMw / mchf_pa.reference_power); }
+    }
+    else
+    {
+        uint16_t vol = DAC_5W;
+        if(powerMw == 0)        { vol = DAC_5W;  } // FULL
+        else if(powerMw < 500)  { vol = DAC_5MW; }
+        else if(powerMw < 1000) { vol = DAC_05W; }
+        else if(powerMw < 2000) { vol = DAC_1W;  }
+        else if(powerMw < 4000) { vol = DAC_2W;  }
+        else if(powerMw < 5000) { vol = DAC_4W;  }
+        else                    { vol = DAC_5W;  }
+
+        ts.amber_dac_pwr_tx_state = vol;
+        ALT_RWP_CTRL_DAC_WriteReg(vol);
+    }
+#endif
     return retval;
 }
 
@@ -400,18 +420,30 @@ static bool RadioManagement_SetBandPowerFactor(const BandInfo* band, int32_t pow
     {
         // TX outside bands **very dirty hack**
         //  FIXME: calculate based on 2 frequency points close the selected frequency, should be inter-/extrapolated
-        uint32_t freq_min = RadioManagement_GetBandInfo(BAND_MODE_80)->tune;
-        float32_t adj_min = ts.pwr_adj[ADJ_REF_PWR][BAND_MODE_80] / (RadioManagement_IsPowerFactorReduce(freq_min)? 400.0: 100.0);
+//        uint32_t freq_min = RadioManagement_GetBandInfo(BAND_MODE_80)->tune;
+        uint32_t freq_min = 3600000;
+//        float32_t adj_min = ts.pwr_adj[ADJ_REF_PWR][BAND_MODE_80] / (RadioManagement_IsPowerFactorReduce(freq_min)? 400: 100);
+        float32_t adj_min = ts.pwr_adj[ADJ_REF_PWR][BAND_MODE_80];
+        adj_min /= RadioManagement_IsPowerFactorReduce(df.tune_old)? 400.0: 100.0;
 
-        uint32_t freq_max = RadioManagement_GetBandInfo(BAND_MODE_10)->tune;
-        float32_t adj_max = ts.pwr_adj[ADJ_REF_PWR][BAND_MODE_10] / (RadioManagement_IsPowerFactorReduce(freq_max)? 400.0: 100.0);
+//        uint32_t freq_max = RadioManagement_GetBandInfo(BAND_MODE_10)->tune;
+        uint32_t freq_max = 28600000;
+//        float32_t adj_max = ts.pwr_adj[ADJ_REF_PWR][BAND_MODE_10] / (RadioManagement_IsPowerFactorReduce(freq_max)? 400: 100);
+        float32_t adj_max = ts.pwr_adj[ADJ_REF_PWR][BAND_MODE_10];
+        adj_max /= RadioManagement_IsPowerFactorReduce(df.tune_old)? 400.0: 100.0;
 
-        float32_t delta_f = (float32_t)df.tune_old - (float32_t)freq_min; // we must convert to a signed type
+        uint32_t t_freq = df.tune_old;
+        t_freq = t_freq <= 3600000 ? 3600000 : t_freq;
+        t_freq = t_freq >= 28600000 ? 28600000 : t_freq;
+
+//        float32_t delta_f = (float32_t)df.tune_old - (float32_t)freq_min; // we must convert to a signed type
+        float32_t delta_f = (float32_t)t_freq - (float32_t)freq_min;
         float32_t delta_points = freq_max - freq_min;
 
         float32_t freq_mult = delta_f / delta_points;
 
         pf_bandvalue =  freq_mult * (adj_max - adj_min) + adj_min;
+        pf_bandvalue = pf_bandvalue * ((ts.power_level == PA_LEVEL_FULL && RadioManagement_CBFullPwrEnabled())? ts.power_scale_gen_full : ts.power_scale_gen) / 100.0;
     }
     else
     {
@@ -421,10 +453,10 @@ static bool RadioManagement_SetBandPowerFactor(const BandInfo* band, int32_t pow
 
     float32_t power_factor_scale = 1.0 ;
     // now rescale to power levels below reference power (i.e for mcHF <5 watts) if necessary.
-    if (power != 0)
-    {
+//    if (power != 0)
+//    {
         power_factor_scale = RadioManagement_CalculatePowerFactorScale(power);
-    }
+//    }
 
     float32_t power_factor = pf_bandvalue * power_factor_scale;
 
@@ -463,40 +495,117 @@ bool RadioManagement_SetPowerLevel(const BandInfo* band, power_level_t power_lev
 {
     bool retval = false;
     bool power_modified = false;
+    uint32_t t_freq = df.tune_new;//ts.tune_freq;
+    bool HereIsEnableCBband = false;
 
     int32_t power = power_level < mchf_power_levelsInfo.count ? mchf_power_levelsInfo.levels[power_level].mW : -1;
+    ts.band_index = band->band_mode;
 
     if (power != -1 && band != NULL)
     {
         if (RadioManagement_IsGenericBand(band))
+//        {
+//            if(ts.flags1 & FLAGS1_TX_OUTSIDE_BANDS)
+//            {
+//            	power = 50; // ~50 mW limit;
+//                power_modified = true;
+//                // I never will use this function (DF8OE)
+//            }
+//            else
+//            {
+//                power = 5; // 5mW, use very low value in case of wrong call to this function
+//                power_modified = true;
+//            }
+//        }
+//
+//        if(ts.dmod_mode == DEMOD_AM)                // in AM mode?
+//        {
+//            if(power > mchf_pa.max_am_power || power == 0)     // yes, power over am limits?
+//            {
+//                power = mchf_pa.max_am_power;  // force to keep am limits
+//                power_modified = true;
+//            }
+//        }
+//        else if(power > mchf_pa.reference_power)
+//        {
+//            power = 0; //  0 == full power
+//            power_level = PA_LEVEL_FULL;
+//        }
         {
-            if(ts.flags1 & FLAGS1_TX_OUTSIDE_BANDS)
-            {
-                power = 50; // ~50 mW limit;
-                power_modified = true;
-                // I never will use this function (DF8OE)
-            }
-            else
-            {
-                power = 5; // 5mW, use very low value in case of wrong call to this function
-                power_modified = true;
-            }
+//        	HereIsEnableCBband = ((ts.expflags1 & EXPFLAGS1_CB_27MC_TX_ENABLE) && (t_freq >= 26960000) && (t_freq <= 27860000)) || ((ts.expflags1 & EXPFLAGS1_CB_26MC_TX_ENABLE) && (t_freq >= 25670000) && (t_freq <= 26100000));
+//        	ts.HereIsEnableCB26Mc = ((ts.expflags1 & EXPFLAGS1_CB_26MC_TX_ENABLE) && (t_freq >= 25670000) && (t_freq <= 26100000));
+        	ts.HereIsEnableCB26Mc = ((ts.expflags1 & EXPFLAGS1_CB_26MC_TX_ENABLE) && (t_freq >= 25670000) && (t_freq < 26960000));
+//        	ts.HereIsEnableCB27Mc = ((ts.expflags1 & EXPFLAGS1_CB_27MC_TX_ENABLE) && (t_freq >= 26960000) && (t_freq <= 27860000));
+        	ts.HereIsEnableCB27Mc = ((ts.expflags1 & EXPFLAGS1_CB_27MC_TX_ENABLE) && (t_freq >= 26960000) && (t_freq <= 27991250));
+        	HereIsEnableCBband = ts.HereIsEnableCB26Mc || ts.HereIsEnableCB27Mc;
+//        	if (HereIsEnableCBband && ((ts.dmod_mode == DEMOD_AM) || (ts.dmod_mode == DEMOD_FM) || (ts.dmod_mode == DEMOD_USB))) // We are working in enable CB band & mode
+        	if (!(ts.flags1 & FLAGS1_TX_OUTSIDE_BANDS) && (HereIsEnableCBband && ((ts.dmod_mode == DEMOD_AM) || (ts.dmod_mode == DEMOD_FM) || (ts.dmod_mode == DEMOD_USB) || (ts.dmod_mode == DEMOD_CW)))) // We are working in enable CB band & mode
+        	{
+        	    if (ts.expflags1 & EXPFLAGS1_CB_10W_TX_ENABLE) // enabled any mode 10W
+        	    {
+        	        // no restrictions
+        	    }
+//        		if((ts.dmod_mode == DEMOD_AM) || (ts.dmod_mode == DEMOD_FM))
+//        		if((ts.dmod_mode == DEMOD_AM) || (ts.dmod_mode == DEMOD_FM) || (ts.dmod_mode == DEMOD_CW))
+        	    else if((ts.dmod_mode == DEMOD_AM) || (ts.dmod_mode == DEMOD_FM) || (ts.dmod_mode == DEMOD_CW))
+				{
+					if (power > 4000.0 || power == 0)
+					{
+						power = 4000; // 4W limit;
+						power_modified = true;
+					}
+				}
+				else if ((ts.dmod_mode == DEMOD_USB) && !(ts.expflags1 & EXPFLAGS1_CB_12W_SSB_TX_ENABLE))
+				{
+					if (power > 4000.0 || power == 0)
+					{
+						power = 4000; // 4W limit;
+						power_modified = true;
+					}
+				}
+
+        	}
+        	else
+        	{
+        		if(ts.flags1 & FLAGS1_TX_OUTSIDE_BANDS)
+				{
+        		    // nothing to do
+
+//#ifndef OPEN_TX_OUTBAND // =================================================
+//					power = 50; // ~50 mW limit;
+//					power_modified = true;
+//#else // ===================================================================
+//					if (power > 5000.0 || power == 0)
+//					{
+//						power = 5000; // 5W limit;
+//					}
+//#endif //===================================================================
+					// I never will use this function (DF8OE)
+				}
+				else
+				{
+					power = 5; // 5mW, use very low value in case of wrong call to this function
+					power_modified = true;
+				}
+        	}
         }
 
-        if(ts.dmod_mode == DEMOD_AM)                // in AM mode?
+        if (!HereIsEnableCBband)
         {
-            if(power > mchf_pa.max_am_power || power == 0)     // yes, power over am limits?
-            {
-                power = mchf_pa.max_am_power;  // force to keep am limits
-                power_modified = true;
-            }
+			if (ts.dmod_mode == DEMOD_AM)                // in AM mode?
+			{
+				if(power > mchf_pa.max_am_power || power == 0)     // yes, power over am limits?
+				{
+					power = mchf_pa.max_am_power;  // force to keep am limits
+					power_modified = true;
+				}
+			}
+			else if(power > mchf_pa.reference_power)
+			{
+				power = 0; //  0 == full power
+				power_level = PA_LEVEL_FULL;
+			}
         }
-        else if(power > mchf_pa.reference_power)
-        {
-            power = 0; //  0 == full power
-            power_level = PA_LEVEL_FULL;
-        }
-
 
         // Calculate TX power factor - see if power changed
         bool pf_change = RadioManagement_SetBandPowerFactor(band, power);
@@ -514,9 +623,30 @@ bool RadioManagement_SetPowerLevel(const BandInfo* band, power_level_t power_lev
             }
         }
     }
-
     return retval;
 }
+
+bool RadioManagement_CBFullPwrEnabled()
+{
+    bool retval = false;
+    uint32_t t_freq = df.tune_new;
+/*
+    bool HereIsEnableCBband = ((ts.expflags1 & EXPFLAGS1_CB_26MC_TX_ENABLE) && (t_freq >= 25670000) && (t_freq <= 26100000)) || \
+            ((ts.expflags1 & EXPFLAGS1_CB_27MC_TX_ENABLE) && (t_freq >= 26960000) && (t_freq <= 27860000));
+*/
+    bool HereIsEnableCBband = ((ts.expflags1 & EXPFLAGS1_CB_26MC_TX_ENABLE) && (t_freq >= 25670000) && (t_freq < 26960000)) || \
+            ((ts.expflags1 & EXPFLAGS1_CB_27MC_TX_ENABLE) && (t_freq >= 26960000) && (t_freq <= 27991250));
+
+    if(HereIsEnableCBband)
+    {
+        if ((ts.expflags1 & EXPFLAGS1_CB_10W_TX_ENABLE) || ((ts.dmod_mode == DEMOD_USB) && (ts.expflags1 & EXPFLAGS1_CB_12W_SSB_TX_ENABLE)))
+        {
+            retval = true;
+        }
+    }
+    return retval;
+}
+
 
 bool RadioManagement_Tune(bool tune)
 {
@@ -587,7 +717,8 @@ int32_t RadioManagement_GetCWDialOffset()
 bool RadioManagement_IsTxAtZeroIF(uint8_t dmod_mode, uint8_t digital_mode)
 {
     return  (
-                dmod_mode == DEMOD_CW ||
+//              dmod_mode == DEMOD_CW ||  // UB8JDC
+                (dmod_mode == DEMOD_CW && !(ts.expflags1 & EXPFLAGS1_CLEAR_TX_CW_RTTY_BPSK)) ||
                 (dmod_mode == DEMOD_DIGI &&
                     (
 #ifdef USE_FREEDV
@@ -595,9 +726,11 @@ bool RadioManagement_IsTxAtZeroIF(uint8_t dmod_mode, uint8_t digital_mode)
 #else
                             false
 #endif
-                            || is_demod_psk()
+//                            || is_demod_psk() // UB8JDC
+                              || (is_demod_psk() && !(ts.expflags1 & EXPFLAGS1_CLEAR_TX_CW_RTTY_BPSK))
 #ifdef USE_RTTY_PROCESSOR
-                            || is_demod_rtty()
+//                            || is_demod_rtty() // UB8JDC
+                              || (is_demod_rtty() && !(ts.expflags1 & EXPFLAGS1_CLEAR_TX_CW_RTTY_BPSK))
 #endif
                     )
                 )
@@ -668,6 +801,14 @@ void RadioManagement_SetPaBias()
     {
         calc_var = 255;
     }
+
+#ifdef SDR_AMBER
+    if ((ts.expflags2 & EXPFLAGS2_XVTR_OFF_PA) && (ts.xverter_mode & 0xf)) // OFF PA on XVTR TX & XVTR mode ON
+    {
+        calc_var = 0; // disable PA bias
+    }
+#endif
+
     Board_SetPaBiasValue(calc_var);
 }
 
@@ -770,11 +911,18 @@ void RadioManagement_MuteTemporarilyRxAudio()
 
 Oscillator_ResultCodes_t RadioManagement_ValidateFrequencyForTX(uint32_t dial_freq)
 {
+//  // we check with the si570 code if the frequency is tunable, we do not tune to it.
+//	Oscillator_ResultCodes_t osc_res = osc->prepareNextFrequency(RadioManagement_Dial2TuneFrequency(dial_freq, TRX_MODE_TX), df.temp_factor);
+//    bool osc_ok = osc_res == OSC_OK || osc_res == OSC_TUNE_LIMITED;
+//
+
     // get bandinfo to check if this is rx_only
     const BandInfo* bi = RadioManagement_GetBand(dial_freq);
-
+	
     // we also check if our PA is able to support this frequency
     bool pa_ok = dial_freq >= mchf_pa.min_freq && dial_freq <= mchf_pa.max_freq;
+
+//    return pa_ok && osc_ok ? osc_res: OSC_TUNE_IMPOSSIBLE;
 
     Oscillator_ResultCodes_t retval = (pa_ok && bi != NULL && bi->rx_only == false)? OSC_OK : OSC_TUNE_IMPOSSIBLE;
 
@@ -1130,14 +1278,68 @@ typedef struct BandFilterDescriptor
 // to the highest.
 static const BandFilterDescriptor mchf_rf_bandFilters[] =
 {
+#ifndef SDR_AMBER
     {  4000000,  0 },
     {  8000000,  1 },
     { 16000000,  2 },
     { 32000000,  3 },
+#else // Amber
+    {  1800000,  4 },
+    {  2000000,  5 },
+    {  4000000,  0 },
+    {  8000000,  1 },
+    { 16000000,  2 },
+    { 32000000,  3 },
+    { 60000000,  6 },
+#endif
 };
 
 const int BAND_FILTER_NUM = sizeof(mchf_rf_bandFilters)/sizeof(BandFilterDescriptor);
 
+#ifdef SDR_AMBER
+void RadioManagement_Set_PA_Bandcode(uint32_t freq)
+{
+    uint8_t state = ts.amber_io4_state;
+
+    if(!ts.amber_pa_bandcode_mode)           // OFF
+    {
+        state = 0;
+    }
+    else if (ts.amber_pa_bandcode_mode == 1) // 4 LPF 3.5-30Mc as in mcHF, direct control
+    {
+        if(freq      <=  4000000) {state = 0x01;}
+        else if(freq <=  8000000) {state = 0x02;}
+        else if(freq <= 16000000) {state = 0x04;}
+        else                      {state = 0x08;}
+    }
+    else if (ts.amber_pa_bandcode_mode == 2) // 4 LPF 3.5-30Mc as in mcHF, bin code A0, A1
+    {
+        if(freq      <=  4000000) {state = 0x00;}
+        else if(freq <=  8000000) {state = 0x01;}
+        else if(freq <= 16000000) {state = 0x02;}
+        else                      {state = 0x03;}
+    }
+    else if (ts.amber_pa_bandcode_mode == 3) // Yaesu ACC FT-891. A0,A1,A2,A3 -> A,B,C,D
+    {
+        if(freq      <   2500000) {state = 0x01;}
+        else if(freq <   4100000) {state = 0x02;}
+        else if(freq <   7500000) {state = 0x03;}
+        else if(freq <  11500000) {state = 0x04;}
+        else if(freq <  14500000) {state = 0x05;}
+        else if(freq <  20900000) {state = 0x06;}
+        else if(freq <  21500000) {state = 0x07;}
+        else if(freq <  25500000) {state = 0x08;}
+        else if(freq <  41500000) {state = 0x09;}
+        else                      {state = 0x0A;}
+    }
+
+    if(state != ts.amber_io4_state)
+    {
+        ts.amber_io4_state = state;
+        Board_AmberIOx4_Write(1, state);
+    }
+}
+#endif
 
 /**
  * @brief Select and activate the correct BPF for the frequency given in @p freq
@@ -1149,14 +1351,36 @@ const int BAND_FILTER_NUM = sizeof(mchf_rf_bandFilters)/sizeof(BandFilterDescrip
  */
 static void RadioManagement_SetHWFiltersForFrequency(uint32_t freq)
 {
+    uint8_t bandmode_t;
+
+#ifdef SDR_AMBER
+    if (ts.amber_io4_present && ts.amber_pa_bandcode_mode) // chip are here and PA bandcode output is not OFF
+    {
+        RadioManagement_Set_PA_Bandcode(freq);
+    }
+#endif
+
     for (int idx = 0; idx < BAND_FILTER_NUM; idx++)
     {
         if(freq < mchf_rf_bandFilters[idx].upper)       // are we low enough if frequency for this band filter?
         {
-            if(ts.filter_band != mchf_rf_bandFilters[idx].band_mode)
+            bandmode_t = mchf_rf_bandFilters[idx].band_mode;
+#ifdef SDR_AMBER
+            if(!(ts.expflags2 & EXPFLAGS2_3_ADD_BPF))
             {
-                Board_SelectLpfBpf(mchf_rf_bandFilters[idx].band_mode);
-                ts.filter_band = mchf_rf_bandFilters[idx].band_mode;
+                if(bandmode_t == 5)
+                {
+                    bandmode_t = 4;
+                }
+            }
+#endif
+//            if(ts.filter_band != mchf_rf_bandFilters[idx].band_mode)
+            if(ts.filter_band != bandmode_t)
+            {
+//                Board_SelectLpfBpf(mchf_rf_bandFilters[idx].band_mode);
+//                ts.filter_band = mchf_rf_bandFilters[idx].band_mode;
+                Board_SelectLpfBpf(bandmode_t);
+                ts.filter_band = bandmode_t;
                 nr_params.first_time = 1; // in case of any Bandfilter change restart the NR routine
             }
             break;
@@ -1178,7 +1402,8 @@ static const CouplingDescriptor mchf_rf_coupling[] =
     { 4250000, COUPLING_80M},
     { 8000000, COUPLING_40M},
     { 16000000, COUPLING_20M},
-    { 32000000, COUPLING_15M},
+    { 25000000, COUPLING_15M},
+    { 32000000, COUPLING_10M},
     { 60000000, COUPLING_6M},
 };
 
@@ -1227,7 +1452,7 @@ bool RadioManagement_IsPowerFactorReduce(uint32_t freq)
 void RadioManagement_SetDemodMode(uint8_t new_mode)
 {
     ts.dsp.inhibit++;
-    ads.af_disabled++;
+//    ads.af_disabled++;
 
     if (new_mode == DEMOD_DIGI)
     {
@@ -1407,6 +1632,11 @@ void RadioManagement_Request_TxOff()
     // the CAT code deasserts RTS before we actually switched to TX.
     ts.ptt_req = false;
     ts.tx_stop_req = true;
+    if(ts.cw_keyer_speed != ts.cw_keyer_speed_bak)
+    {
+        ts.cw_keyer_speed = ts.cw_keyer_speed_bak;
+        CwGen_SetSpeed();
+    }
 }
 
 const int32_t ptt_debounce_time = 3; // n*10ms, delay for debouncing manually started TX (using the PTT button / input line)
@@ -1432,6 +1662,16 @@ void RadioManagement_HandlePttOnOff()
             // the ptt request has been processed
             ts.ptt_req = false;
         }
+#ifdef SDR_AMBER_PTT_ALT
+        else if (Board_PttAltLinePressed())
+        {
+            if(ts.txrx_mode == TRX_MODE_RX && (RadioManagement_IsTxDisabled() == false))
+            {
+                RadioManagement_SwitchTxRx(TRX_MODE_TX,false);
+            }
+            ts.tx_stop_req = true;
+        }
+#endif
         else if (CatDriver_CatPttActive() == false)
         {
             // When CAT driver "pressed" PTT skip auto return to RX
@@ -1751,10 +1991,9 @@ bool RadioManagement_UpdatePowerAndVSWR()
 
         swrm.vswr = (1+sqrtf(swrm.rev_pwr/swrm.fwd_pwr))/(1-sqrtf(swrm.rev_pwr/swrm.fwd_pwr));
 
-		// Perform VSWR protection iff threshold is > 1 AND enough forward power exists for a valid calculation
-        if ( ts.vswr_protection_threshold > 1 && swrm.fwd_pwr >= SWR_MIN_CALC_POWER)
+        if ( ts.debug_vswr_protection_threshold > 1 )
         {
-            if ( swrm.vswr > ts.vswr_protection_threshold )
+            if ((swrm.fwd_pwr >= SWR_MIN_CALC_POWER) && ( swrm.vswr > ts.debug_vswr_protection_threshold ))
             {
                 RadioManagement_DisablePaBias ( );
                 swrm.high_vswr_detected = true;
@@ -1959,7 +2198,7 @@ bool RadioManagement_TxPermitted()
 bool RadioManagement_Transverter_IsEnabled()
 {
     return (ts.xverter_mode & 0xf) > 0;
-    }
+}
 
 uint64_t RadioManagement_Transverter_GetFreq(const uint32_t dial_freq, const uint8_t trx_mode)
 {

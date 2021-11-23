@@ -223,6 +223,16 @@ int UiDriverEncoderRead(const uint32_t encId)
             encSel[encId].value_old = encSel[encId].value_new;
         }
     }
+    // encoders reverse
+//    if(((ts.expflags1 & EXPFLAGS1_ENC123_REVERSE) && (encId < 3)) || ((ts.expflags1 & EXPFLAGS1_ENC4_REVERSE) && (encId == 3)))
+    if(((ts.expflags1 & EXPFLAGS1_ENC1_REVERSE) && (encId == 0)) ||
+            ((ts.expflags2 & EXPFLAGS2_ENC2_REVERSE) && (encId == 1)) ||
+            ((ts.expflags2 & EXPFLAGS2_ENC3_REVERSE) && (encId == 2)) ||
+            ((ts.expflags1 & EXPFLAGS1_ENC4_REVERSE) && (encId == 3)))
+    {
+    pot_diff = -pot_diff;
+    }
+
     return pot_diff;
 }
 

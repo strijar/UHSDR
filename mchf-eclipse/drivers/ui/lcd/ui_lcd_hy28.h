@@ -24,31 +24,88 @@
 // Colors definitions, go to http://www.color-hex.com/
 // choose a new one and declare here
 //
-#define White          		0xFFFF
-#define Black          		0x0000
-#define Grey           		RGB(0xb8,0xbc,0xa8)	//=0xBDF5
-#define Blue           		RGB(0x50,0x50,0xFF)	// Brighter Blue	//Original - 0x001F =#0000FF
-#define Blue2          		0x051F				// =#00A0FF
-#define Red            		RGB(0xFF,0x38,0x38)	// Brighter (easier to see) Red	//Original 0xF800 =#FF0000
-#define	Red2				RGB(0xFF,0x80,0x80)	// Even "brighter" red (almost pink)
-#define Red3				RGB(0xFF,0xC0,0xC0) // A sort of pink-ish, pale red
-#define Magenta        		RGB(0xFF,0x30,0xFF)	// Brighter Magenta	//Original 0xF81F =#FF00FF
-#define Green          		0x07E0				// =#00FF00
-#define Cyan           		0x7FFF
-#define Yellow         		RGB(0xFF,0xFF,0x20)	// "Yellower" and brighter	//Original - 0xFFE0 =#FFFF00
+#define White               0xFFFF
+#define Black               0x0000
 
-#define Orange				RGB(0xFF,0xA8,0x20)	//"Orange-er" and brighter	//Original - RGB(0xF6,0xA0,0x1A)
-#define Cream				RGB(0xED,0xE7,0xD7)
-
-#define Grey1				RGB(0x80,0x80,0x80)
-#define Grey2				RGB(0xC0,0xC0,0xC0)
-#define Grey3				RGB(0xA6,0xA8,0xAD)
-#define Grey4				RGB(0x40,0x40,0x40)
-#define Grey5               RGB(0x60,0x60,0x60)
-#define	Grey6				RGB(0x78,0x78,0x78)
-
-#define	RX_Grey				RGB(0xb8,0xdb,0xa8)	// slightly green grey
-#define TX_Grey				RGB(0xe8,0xad,0xa0)	// slightly red(ish) grey (more magenta, actually...)
+#ifdef GREY_STYLE
+	#define Grey           		0xBDF5 //RGB(0xb8,0xbc,0xa8)
+	#define Blue           		0x632C //RGB(0x66,0x66,0x66)
+	#define Blue2          		0x4A69 //RGB(0x4C,0x4C,0x4C)
+	#define Blue3               0x1082 //RGB(0x10,0x10,0x10)
+	#define Red            		0x8C51 //RGB(0x89,0x89,0x89)
+	#define	Red2				0xA534 //RGB(0xA7,0xA7,0xA7)
+	#define Red3				0xD69A //RGB(0xD0,0xD0,0xD0)
+	#define Red4				0x18E3 //RGB(0x1C,0x1C,0x1C)
+	#define Magenta        		0x94B2 //RGB(0x95,0x95,0x95)
+	#define Green          		0xDEFB //RGB(0xDC,0xDC,0xDC)
+	#define Green2              0x31A6 //RGB(0x36,0x36,0x36)
+	#define Cyan           		0xE73C //RGB(0xE5,0xE5,0xE5)
+	#define Yellow         		0xF7BE //RGB(0xF7,0xF7,0xF7)
+	#define Orange				0xBDF7 //RGB(0xBC,0xBC,0xBC)
+	#define Cream				0xE73C //RGB(0xE7,0xE7,0xE7)
+	#define Grey1				0x8410 //RGB(0x80,0x80,0x80)
+	#define Grey2				0xC618 //RGB(0xC0,0xC0,0xC0)
+	#define Grey3				0xA555 //RGB(0xA6,0xA8,0xAD)
+	#define Grey4				0x4208 //RGB(0x40,0x40,0x40)
+	#define Grey5               0x630C //RGB(0x60,0x60,0x60)
+	#define	Grey6				0x7BCF //RGB(0x78,0x78,0x78)
+	#define Grey7				0x2104 //RGB(0x20,0x20,0x20)
+	#define	RX_Grey				0xBED5 //RGB(0xb8,0xdb,0xa8)
+	#define TX_Grey				0xED74 //RGB(0xe8,0xad,0xa0)
+	#define Brown				0x4A49 //RGB(0x4A,0x4A,0x4A)
+#elif defined(SEPIA_STYLE)
+	#define Grey           		0xD5AE //RGB(0xD6,0xB6,0x77)
+	#define Blue           		0x7B28 //RGB(0x7A,0x64,0x45)
+	#define Blue2          		0x5A46 //RGB(0x5C,0x4B,0x33)
+	#define Blue3               0x1061 //RGB(0x11,0x0E,0x0B)
+	#define Red            		0xA42B //RGB(0xA2,0x86,0x5D)
+	#define	Red2				0xC50E //RGB(0xC4,0xA2,0x73)
+	#define Red3				0xF651 //RGB(0xF3,0xCA,0x8F)
+	#define Red4				0x20C2 //RGB(0x21,0x1A,0x14)
+	#define Magenta        		0xB48C //RGB(0xB1,0x92,0x67)
+	#define Green          		0xFEB3 //RGB(0xFF,0xD7,0x9E)
+	#define Green2              0x41A4 //RGB(0x41,0x34,0x24)
+	#define Cyan           		0xFFF6 //RGB(0xFF,0xFF,0xB5)
+	#define Yellow         		0xFFDD //RGB(0xFF,0xF8,0xEC)
+	#define Orange				0xDDB0 //RGB(0xDC,0xB6,0x81)
+	#define Cream				0xFF37 //RGB(0xFF,0xE4,0xBC)
+	#define Grey1				0x93EA //RGB(0x96,0x7C,0x56)
+	#define Grey2				0xE5F0 //RGB(0xE0,0xBC,0x85)
+	#define Grey3				0xFEB2 //RGB(0xFF,0xD4,0x97)
+	#define Grey4				0x49E5 //RGB(0x4D,0x3E,0x2A)
+	#define Grey5               0x72E8 //RGB(0x72,0x5D,0x40)
+	#define	Grey6				0x8BAA //RGB(0x8D,0x74,0x50)
+	#define Grey7				0x20E2 //RGB(0x27,0x1F,0x17)
+	#define	RX_Grey				0xDDB0 //RGB(0xDB,0xB5,0x80)
+	#define TX_Grey				0xDDB0 //RGB(0xDB,0xB5,0x80)
+	#define Brown				0x5A46 //RGB(0x59,0x49,0x31)
+#else
+	#define Grey           		0xBDF5 //RGB(0xb8,0xbc,0xa8)	//=0xBDF5
+	#define Blue           		0x529F //RGB(0x50,0x50,0xFF)	// Brighter Blue	//Original - 0x001F =#0000FF
+	#define Blue2          		0x051F  // =#00A0FF
+	#define Blue3               0x000A //RGB(0x00,0x00,0x50)
+	#define Red            		0xF9C7 //RGB(0xFF,0x38,0x38)	// Brighter (easier to see) Red	//Original 0xF800 =#FF0000
+	#define	Red2				0xFC10 //RGB(0xFF,0x80,0x80)	// Even "brighter" red (almost pink)
+	#define Red3				0xFE18 //RGB(0xFF,0xC0,0xC0)    // A sort of pink-ish, pale red
+	#define Red4				0x4000 //RGB(0x40,0x00,0x00)
+	#define Magenta        		0xF99F //RGB(0xFF,0x30,0xFF)	// Brighter Magenta	//Original 0xF81F =#FF00FF
+	#define Green          		0x07E0  // =#00FF00
+	#define Green2              0x0200 //RGB(0x00,0x40,0x00)
+	#define Cyan           		0x7FFF
+	#define Yellow         		0xFFE4 //RGB(0xFF,0xFF,0x20)	// "Yellower" and brighter	//Original - 0xFFE0 =#FFFF00
+	#define Orange				0xFD44 //RGB(0xFF,0xA8,0x20)	//"Orange-er" and brighter	//Original - RGB(0xF6,0xA0,0x1A)
+	#define Cream				0xEF3A //RGB(0xED,0xE7,0xD7)
+	#define Grey1				0x8410 //RGB(0x80,0x80,0x80)
+	#define Grey2				0xC618 //RGB(0xC0,0xC0,0xC0)
+	#define Grey3				0xA555 //RGB(0xA6,0xA8,0xAD)
+	#define Grey4				0x4208 //RGB(0x40,0x40,0x40)
+	#define Grey5               0x630C //RGB(0x60,0x60,0x60)
+	#define	Grey6				0x7BCF //RGB(0x78,0x78,0x78)
+    #define Grey7               0x2104 //RGB(0x20,0x20,0x20)
+	#define	RX_Grey				0xBED5 //RGB(0xb8,0xdb,0xa8)	// slightly green grey
+	#define TX_Grey				0xED74 //RGB(0xe8,0xad,0xa0)	// slightly red(ish) grey (more magenta, actually...)
+	#define Brown				0x6204 //RGB(0x65,0x43,0x21)
+#endif
 
 #define SMALL_FONT_WIDTH            8
 #define LARGE_FONT_WIDTH            16
@@ -80,6 +137,7 @@ typedef enum
     DISPLAY_RA8875_SPI,
     DISPLAY_RA8875_PARALLEL,
     DISPLAY_ILI9486_PARALLEL,
+	DISPLAY_ST7796_PARALLEL,
     DISPLAY_RPI_SPI,
     DISPLAY_HY32D_PARALLEL_SSD1289,
 
@@ -104,12 +162,12 @@ typedef struct
 {
     mchf_display_types_t display_type;
     const char* name;
-    uint16_t (*ReadDisplayId)(void);
+    uint16_t (*ReadDisplayId)();
     void (*SetActiveWindow) (uint16_t XLeft, uint16_t XRight, uint16_t YTop, uint16_t YBottom);
     void (*SetCursorA)( unsigned short Xpos, unsigned short Ypos );
-    void (*WriteRAM_Prepare) (void);
-    void (*WriteDataSpiStart_Prepare)(void);
-    void (*WriteIndexSpi_Prepare)(void);
+    void (*WriteRAM_Prepare) ();
+    void (*WriteDataSpiStart_Prepare)();
+    void (*WriteIndexSpi_Prepare)();
     void (*WriteReg)(unsigned short LCD_Reg, unsigned short LCD_RegValue);
     uint16_t (*ReadReg)( uint16_t LCD_Reg);
     void (*DrawStraightLine)(uint16_t x, uint16_t y, uint16_t Length, uint8_t Direction,uint16_t color);
@@ -134,9 +192,9 @@ typedef struct
     const RegisterValueSetInfo_t* reg_info;
     void (*SetActiveWindow) (uint16_t XLeft, uint16_t XRight, uint16_t YTop, uint16_t YBottom);
     void (*SetCursorA)( unsigned short Xpos, unsigned short Ypos );
-    void (*WriteRAM_Prepare) (void);
-    void (*WriteDataSpiStart_Prepare)(void);
-    void (*WriteIndexSpi_Prepare)(void);
+    void (*WriteRAM_Prepare) ();
+    void (*WriteDataSpiStart_Prepare)();
+    void (*WriteIndexSpi_Prepare)();
     void (*WriteReg)(unsigned short LCD_Reg, unsigned short LCD_RegValue);
     uint16_t (*ReadReg)( uint16_t LCD_Reg);
     void (*DrawStraightLine)(uint16_t x, uint16_t y, uint16_t Length, uint8_t Direction,uint16_t color);
@@ -150,9 +208,14 @@ const uhsdr_display_info_t* UiLcdHy28_DisplayInfoGet(mchf_display_types_t displa
 
 void 	UiLcdHy28_LcdClear(ushort Color);
 
-uint16_t UiLcdHy28_PrintText(uint16_t Xpos, uint16_t Ypos, const char *str,const uint32_t Color, const uint32_t bkColor, uchar font);
-uint16_t UiLcdHy28_PrintTextRight(uint16_t Xpos, uint16_t Ypos, const char *str,const uint32_t Color, const uint32_t bkColor, uchar font);
+//uint16_t UiLcdHy28_PrintText(uint16_t Xpos, uint16_t Ypos, const char *str,const uint32_t Color, const uint32_t bkColor, uchar font);
+uint16_t UiLcdHy28_PrintText(uint16_t Xpos, uint16_t Ypos, const char *str, uint32_t Color, uint32_t bkColor, uchar font);
+//uint16_t UiLcdHy28_PrintTextRight(uint16_t Xpos, uint16_t Ypos, const char *str,const uint32_t Color, const uint32_t bkColor, uchar font);
+uint16_t UiLcdHy28_PrintTextRight(uint16_t Xpos, uint16_t Ypos, const char *str, uint32_t Color, uint32_t bkColor, uchar font);
 uint16_t UiLcdHy28_PrintTextCentered(const uint16_t bbX,const uint16_t bbY,const uint16_t bbW,const char* txt,uint32_t clr_fg,uint32_t clr_bg,uint8_t font);
+
+//void UiLcdHy28_PrintTextVertLen(uint16_t XposStart, uint16_t YposStart, const char *str, const uint16_t len, const uint32_t clr_fg, const uint32_t clr_bg);
+void UiLcdHy28_PrintTextVertLen(uint16_t XposStart, uint16_t YposStart, const char *str, const uint16_t len, uint32_t clr_fg, uint32_t clr_bg);
 
 uint16_t UiLcdHy28_TextWidth(const char *str, uchar font);
 uint16_t UiLcdHy28_TextHeight(uint8_t font);

@@ -144,7 +144,7 @@ static uint32_t hmc1023_ll_read(uint32_t regaddr)
  *
  * @return true if HMC1023LP5E was detected by reading the correct id
  */
-static bool hmc1023_ll_presence()
+static bool hmc1023_ll_presence(void)
 {
     uint32_t value = hmc1023_ll_read(0);
     return (value == 0x114080);

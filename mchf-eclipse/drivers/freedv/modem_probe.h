@@ -54,8 +54,8 @@ static inline void modem_probe_init(char *modname,char *runname){
 /*
  * Dump traces to a file and clean up
  */
-static inline void modem_probe_close(){
-        modem_probe_close_int(void);
+static inline void modem_probe_close(void){
+        modem_probe_close_int();
 }
 
 /*
@@ -104,7 +104,7 @@ static inline void modem_probe_init(char *modname,char *runname){
         return;
 }
 
-static inline void modem_probe_close(){
+static inline void modem_probe_close(void){
         return;
 }
 

@@ -29,6 +29,12 @@ freq_adjust_point_t iq_adjust[IQ_FREQ_NUM+1] =
         AUDIO_M_IQ_ADJUST_INIT(21100000)
         AUDIO_M_IQ_ADJUST_INIT(28100000)
         AUDIO_M_IQ_ADJUST_INIT(29650000)
+        AUDIO_M_IQ_ADJUST_INIT(52000000)
+        AUDIO_M_IQ_ADJUST_INIT( 1900000)
+        AUDIO_M_IQ_ADJUST_INIT( 7100000)
+        AUDIO_M_IQ_ADJUST_INIT(10100000)
+        AUDIO_M_IQ_ADJUST_INIT(18100000)
+        AUDIO_M_IQ_ADJUST_INIT(24900000)
         // this must be last
         AUDIO_M_IQ_ADJUST_INIT(0)
 };
@@ -70,16 +76,43 @@ static int32_t AudioManagement_GetBalanceValFromStruct(freq_adjust_point_t* poin
 
 static uint32_t AudioManagement_GetNextValid(freq_adjust_point_t* points, uint32_t idx,  iq_adjust_params_t what)
 {
-    // uint32_t idx = 0;
-    while (points[idx].freq != 0)
-      {
-          int32_t val = AudioManagement_GetBalanceValFromStruct(&points[idx], what);
-          if (val != IQ_BALANCE_OFF)
-          {
-              break;
-          }
-          idx++;
-      }
+	if(!(ts.expflags2 & EXPFLAGS2_IMPROV_IQ_ADJ)) // regular I/Q adj.
+	{
+//		while (points[idx].freq != 0)
+		while (idx <= 5)
+		{
+			  int32_t val = AudioManagement_GetBalanceValFromStruct(&points[idx], what);
+			  if (val != IQ_BALANCE_OFF)
+			  {
+				  break;
+			  }
+			  idx++;
+		}
+	}
+	else // advance I/Q adj.
+	{
+		uint8_t iq_adv_adj_order[] = {6, 0, 7, 8, 1, 9, 2, 10, 3, 4, 5};
+		uint8_t i = 0;
+		while (i <= 10)
+		{
+			if(idx == iq_adv_adj_order[i])
+			{
+				break;
+			}
+			i++;
+		}
+		int32_t val;
+		while (i <= 10)
+		{
+			val = AudioManagement_GetBalanceValFromStruct(&points[(iq_adv_adj_order[i])], what);
+			if (val != IQ_BALANCE_OFF)
+			{
+				break;
+			}
+			i++;
+		}
+		idx = iq_adv_adj_order[i];
+	}
     return idx;
 }
 
@@ -92,54 +125,97 @@ static void AudioManagement_FindFreqRange(freq_adjust_point_t* points, uint32_t 
     uint32_t valid_points = 0;
     bool found_match = false;
 
-    // searching for the frist valid calibration point just higher than then frequency
-    while (points[idx].freq != 0)
+    if(!(ts.expflags2 & EXPFLAGS2_IMPROV_IQ_ADJ))
     {
-        valid_points++;
-        if (freq < points[idx].freq)
-        {
-            // we found one valid calibration point which is higher.
-            // now we need to see if there is a second point if possible.
-            // if the idx is not equal previous_idx, there was a valid lower frequency calibration point
-            // which is nice otherwise we try to find one more higher point
-            if (previous_idx == idx)
-            {
-                // we are lower than the lowest entry, now check if there is one more valid calibration point
-                idx = AudioManagement_GetNextValid(points, idx+1, what);
-                if (points[idx].freq == 0) // stop entry
-                {
-                    // no more valid points, too bad
-                    idx = previous_idx; // we keep both points identical then
-                }
-            }
-            found_match = true;
-            break;
-        }
-        before_previous_idx = previous_idx;
-        previous_idx = idx;
-        idx = AudioManagement_GetNextValid(points, idx+1, what);
+    // searching for the frist valid calibration point just higher than this frequency
+//		while (points[idx].freq != 0)
+    	while (idx <= 5)
+		{
+			valid_points++;
+			if (freq < points[idx].freq)
+			{
+				// we found one valid calibration point which is higher.
+				// now we need to see if there is a second point if possible.
+				// if the idx is not equal previous_idx, there was a valid lower frequency calibration point
+				// which is nice otherwise we try to find one more higher point
+				if (previous_idx == idx)
+				{
+					// we are lower than the lowest entry, now check if there is one more valid calibration point
+					idx = AudioManagement_GetNextValid(points, idx+1, what);
+//					if (points[idx].freq == 0) // stop entry
+					if (idx == 5) // stop entry
+					{
+						// no more valid points, too bad
+						idx = previous_idx; // we keep both points identical then
+					}
+				}
+				found_match = true;
+				break;
+			}
+			before_previous_idx = previous_idx;
+			previous_idx = idx;
+			idx = AudioManagement_GetNextValid(points, idx+1, what);
+		}
+    }
+    else // Advanced I/Q just. We assume that advanced alignment is only needed by advanced users. We work on all alignment points.
+    {
+    	uint8_t iq_adv_adj_order[] = {6, 0, 7, 8, 1, 9, 2, 10, 3, 4, 5};
+    	uint8_t i;
+    	uint8_t previous_i = 0;
+
+    	if(freq <= points[(iq_adv_adj_order[0])].freq)
+    	{
+    		i = previous_i = 0;
+    	}
+    	else if(freq >= points[(iq_adv_adj_order[10])].freq)
+    	{
+    		i = previous_i = 10;
+    	}
+    	else
+    	{
+    		i = 1;
+			while (i <= 9)
+			{
+				if(freq == points[(iq_adv_adj_order[i])].freq)
+				{
+					previous_i = i;
+					break;
+				}
+				else if(freq < points[(iq_adv_adj_order[i])].freq)
+				{
+					previous_i = (i - 1);
+					break;
+				}
+				i++;
+			}
+    	}
+		previous_idx = iq_adv_adj_order[previous_i];
+		idx = iq_adv_adj_order[i];
     }
 
-    if (found_match == false)
+    if(!(ts.expflags2 & EXPFLAGS2_IMPROV_IQ_ADJ))
     {
-        if (valid_points > 1)
-        {
-            // we had two or more valid points, but all are below or equal the frequency
-            // just use the last two valid points, idx is not a valid point but the stop entry
-            idx = previous_idx;
-            previous_idx = before_previous_idx;
-        }
-        else
-        {
-            // if we had not a single valid calibration point, too bad
-            // idx is same as previous_idx and both point to the last "stop" entry
-            // nothing to be done now, but we handle it like the next case, makes no difference
+		if (found_match == false)
+		{
+			if (valid_points > 1)
+			{
+				// we had two or more valid points, but all are below or equal the frequency
+				// just use the last two valid points, idx is not a valid point but the stop entry
+				idx = previous_idx;
+				previous_idx = before_previous_idx;
+			}
+			else
+			{
+				// if we had not a single valid calibration point, too bad
+				// idx is same as previous_idx and both point to the last "stop" entry
+				// nothing to be done now, but we handle it like the next case, makes no difference
 
-            // we had only one valid point, and that must be in previous_idx
-            // no problem, we use it for all frequencies
-            idx = previous_idx;
-        }
-    }
+				// we had only one valid point, and that must be in previous_idx
+				// no problem, we use it for all frequencies
+				idx = previous_idx;
+			}
+		}
+	}
 
     *adj_high_ptr = AudioManagement_GetBalanceValFromStruct(&points[idx], what);
     *adj_low_ptr = AudioManagement_GetBalanceValFromStruct(&points[previous_idx], what);

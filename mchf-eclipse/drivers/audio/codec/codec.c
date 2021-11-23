@@ -21,6 +21,7 @@
 
 #include "uhsdr_hw_i2c.h"
 #include "codec.h"
+#include "uhsdr_mcu.h"
 
 // I2C addresses
 #define W8731_ADDR_0                    0x1A        // CS = 0, MODE to GND
@@ -242,6 +243,40 @@ static uint32_t Codec_ResetCodec(I2C_HandleTypeDef* hi2c, uint32_t AudioFreq, Co
 
 }
 
+#ifdef SDR_AMBER
+#ifndef UI_BRD_MCHF
+uint32_t Codec_Reset_CS4270_Codec()
+{
+    uint32_t retval = HAL_OK;
+//    uint32_t AudioFreq = ts.samp_rate;
+//    CodecSampleWidth_t word_size = IQ_WORD_SIZE;
+
+    GPIO_ResetBits(BAND3_PIO, BAND3); // this port is using for CS4270 codec RESET in TRX Amber
+    non_os_delay(); // we can't use HAL_Delay here
+    GPIO_SetBits(BAND3_PIO, BAND3);
+
+    retval = Board_AmberCS4270_Write(0x02, 0x01); // total codec powerdown
+    if(retval != HAL_OK)
+    {
+        return retval;
+    }
+    non_os_delay();
+    retval = Board_AmberCS4270_Write(0x02, 0x00); // total codec powerup
+
+    if(retval == HAL_OK)
+    {
+//        Board_AmberCS4270_Write(0x02, 0x02); // DAC powerdown, we need RESET just on RX
+        Board_AmberCS4270_Write(0x03, 0x00); // slave, divide 1
+        Board_AmberCS4270_Write(0x04, 0x09); // I2S for DAC & ADC
+        Board_AmberCS4270_Write(0x05, 0x80); // DACs single volume
+        Board_AmberCS4270_Write(0x06, 0x00); // Automute off
+        Board_AmberCS4270_Write(0x07, 0x00); // DACs max volume
+    }
+    return retval;
+}
+#endif
+#endif
+
 /**
  * @brief initializes codec
  * @param AudioFreq sample rate in Hertz
@@ -254,9 +289,11 @@ uint32_t Codec_Reset(uint32_t AudioFreq)
 #ifdef UI_BRD_MCHF
     retval = Codec_ResetCodec(CODEC_I2C, AudioFreq, IQ_WORD_SIZE);
 #else
+    ts.codecWM8731_Audio_present = false;
     retval = Codec_ResetCodec(CODEC_ANA_I2C, AudioFreq, AUDIO_WORD_SIZE);
     if (retval == 0)
     {
+        ts.codecWM8731_Audio_present = true;
         mchf_codecs[1].present = true;
         retval = Codec_ResetCodec(CODEC_IQ_I2C, AudioFreq, IQ_WORD_SIZE);
     }
@@ -274,19 +311,41 @@ uint32_t Codec_Reset(uint32_t AudioFreq)
 
 
     }
+
+#if defined(SDR_AMBER) && defined(UI_BRD_OVI40)
+    else
+    {
+        ts.codecCS4270_present = Codec_Reset_CS4270_Codec() == HAL_OK;
+        if(ts.codecCS4270_present)
+        {
+            AudioPA_Enable(true);
+        }
+    }
+#endif
     return retval;
 }
 
 /**
  * @brief Call this if the twin peaks happen, this restarts the I2S audio stream and it may fix the issue
  */
-void Codec_RestartI2S()
+void Codec_RestartI2S(void)
 {
+#if !defined(UI_BRD_MCHF) && defined(SDR_AMBER)
+    if(ts.codecCS4270_present)
+    {
+        Codec_Reset_CS4270_Codec();
+    }
+    else
+    {
+#endif
     // Reg 09: Active Control
     Codec_WriteRegister(CODEC_IQ_I2C, W8731_ACTIVE_CNTR,0x0000);
     non_os_delay(); // we can't use HAL_Delay here, since our audio interrupt has higher priority which stops the ticks.
     // Reg 09: Active Control
     Codec_WriteRegister(CODEC_IQ_I2C, W8731_ACTIVE_CNTR,0x0001);
+#if !defined(UI_BRD_MCHF) && defined(SDR_AMBER)
+    }
+#endif
 }
 
 /**
@@ -323,7 +382,7 @@ void Codec_SwitchMicTxRxMode(uint8_t txrx_mode)
     }
 }
 
-static bool is_microphone_active()
+static bool is_microphone_active(void)
 {
 	return ts.tx_audio_source == TX_AUDIO_MIC && (ts.dmod_mode != DEMOD_CW && is_demod_rtty() == false && is_demod_psk() == false);
 }
@@ -580,7 +639,54 @@ void Codec_LineInGainAdj(uint8_t gain)
  */
 void Codec_IQInGainAdj(uint8_t gain)
 {
+#ifdef SDR_AMBER
+    if(ts.codecCS4270_present) // simulation of level control at the ADC input, which is absent in the CS4270 codec
+    {
+        float32_t gain_t;
+        switch(gain)
+        {
+        case 0:  gain_t = 0.0188; break; // -34.5 dB
+        case 1:  gain_t = 0.0224; break; // -33.0 dB
+        case 2:  gain_t = 0.0266; break; // -31.5 dB
+        case 3:  gain_t = 0.0316; break; // -30.0 dB
+        case 4:  gain_t = 0.0376; break; // -28.5 dB
+        case 5:  gain_t = 0.0447; break; // -27.0 dB
+        case 6:  gain_t = 0.0531; break; // -25.5 dB
+        case 7:  gain_t = 0.0631; break; // -24.0 dB
+        case 8:  gain_t = 0.0750; break; // -22.5 dB
+        case 9:  gain_t = 0.0891; break; // -21.0 dB
+        case 10: gain_t = 0.1060; break; // -19.5 dB
+        case 11: gain_t = 0.1260; break; // -18.0 dB
+        case 12: gain_t = 0.1500; break; // -16.5 dB
+        case 13: gain_t = 0.1780; break; // -15.0 dB
+        case 14: gain_t = 0.2110; break; // -13.5 dB
+        case 15: gain_t = 0.2510; break; // -12.0 dB
+        case 16: gain_t = 0.2990; break; // -10.5 dB
+        case 17: gain_t = 0.3550; break; //  -9.0 dB
+        case 18: gain_t = 0.4220; break; //  -7.5 dB
+        case 19: gain_t = 0.5010; break; //  -6.0 dB
+        case 20: gain_t = 0.5960; break; //  -4.5 dB
+        case 21: gain_t = 0.7080; break; //  -3.0 dB
+        case 22: gain_t = 0.8410; break; //  -1.5 dB
+        case 23: gain_t = 1.0000; break; //     0 dB
+        case 24: gain_t = 1.1900; break; //   1.5 dB
+        case 25: gain_t = 1.4100; break; //   3.0 dB
+        case 26: gain_t = 1.6800; break; //   4.5 dB
+        case 27: gain_t = 2.0000; break; //   6.0 dB
+        case 28: gain_t = 2.3700; break; //   7.5 dB
+        case 29: gain_t = 2.8200; break; //   9.0 dB
+        case 30: gain_t = 3.3500; break; //  10.5 dB
+        case 31: gain_t = 4.0000; break; //  12.0 dB
+        }
+        ts.rf_gain_codecCS4270 = gain_t;
+    }
+    else
+    {
+#endif
     Codec_InGainAdj(CODEC_IQ_I2C, gain);
+#ifdef SDR_AMBER
+    }
+#endif
 }
 
 /**
@@ -590,7 +696,7 @@ void Codec_IQInGainAdj(uint8_t gain)
  * otherwise deadlocks may happen
  * @return true if it is safe to call codec functions in an interrupt
  */
-bool Codec_ReadyForIrqCall()
+bool Codec_ReadyForIrqCall(void)
 {
     return (CODEC_ANA_I2C->Lock == HAL_UNLOCKED) && (CODEC_IQ_I2C->Lock == HAL_UNLOCKED);
 }

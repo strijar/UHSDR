@@ -21,11 +21,11 @@
 // -------------------------------------------------------------------------------------
 // Local Oscillator
 // ------------------
-static void OscDummy_Init();
+static void OscDummy_Init(void);
 
 const OscillatorInterface_t* osc;
 
-static bool OscDummy_IsPresent()
+static bool OscDummy_IsPresent(void)
 {
 	return false;
 }
@@ -38,11 +38,11 @@ static Oscillator_ResultCodes_t OscDummy_PrepareNextFrequency(ulong freq, int te
 {
 	return OSC_OK;
 }
-static Oscillator_ResultCodes_t OscDummy_ChangeToNextFrequency()
+static Oscillator_ResultCodes_t OscDummy_ChangeToNextFrequency(void)
 {
 	return OSC_OK;
 }
-static bool              OscDummy_IsNextStepLarge()
+static bool              OscDummy_IsNextStepLarge(void)
 {
 	return false;
 }
@@ -52,17 +52,17 @@ static bool              OscDummy_IsNextStepLarge()
  * otherwise deadlocks may happen
  * @return true if it is safe to call oscillator functions in an interrupt
  */
-static bool              OscDummy_ReadyForIrqCall()
+static bool              OscDummy_ReadyForIrqCall(void)
 {
     return true;
 }
 
-static uint32_t OscDummy_getMinFrequency()
+static uint32_t OscDummy_getMinFrequency(void)
 {
     return 1; // 1 Hz
 }
 
-static uint32_t OscDummy_getMaxFrequency()
+static uint32_t OscDummy_getMaxFrequency(void)
 {
     return UINT32_MAX-1;
 }

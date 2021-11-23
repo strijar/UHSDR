@@ -33,7 +33,6 @@
 #endif
 */
 
-
 typedef struct
 {
     const int16_t SCOPE_GRID_VERT_COUNT;
@@ -75,7 +74,8 @@ void UiSpectrum_CalculateLayout(const bool is_big, const UiArea_t* full_ptr, con
 
     slayout.graticule.x = slayout.draw.x;
     slayout.graticule.w = slayout.draw.w;
-    slayout.graticule.h = 16;
+//    slayout.graticule.h = 16;
+    slayout.graticule.h = 13;
 
     slayout.scope.x = slayout.draw.x;
     slayout.scope.y = slayout.title.y + slayout.title.h;
@@ -236,12 +236,12 @@ static const scope_scaling_info_t scope_scaling_factors[SCOPE_SCALE_NUM+1] =
         { DB_SCALING_S3,            "(3S/div)   " },
 };
 
-static void     UiSpectrum_DrawFrequencyBar();
-static void		UiSpectrum_CalculateDBm();
+static void     UiSpectrum_DrawFrequencyBar(void);
+static void		UiSpectrum_CalculateDBm(void);
 
 // FIXME: This is partially application logic and should be moved to UI and/or radio management
 // instead of monitoring change, changes should trigger update of spectrum configuration (from pull to push)
-static void UiSpectrum_UpdateSpectrumPixelParameters()
+static void UiSpectrum_UpdateSpectrumPixelParameters(void)
 {
     static uint16_t old_magnify = 0xFF;
     static bool old_lsb = false;
@@ -284,7 +284,12 @@ static void UiSpectrum_UpdateSpectrumPixelParameters()
         old_digital_mode = ts.digital_mode;
         old_rtty_shift = rtty_ctrl_config.shift_idx;
 
-        float32_t tx_vfo_offset = ((float32_t)(((int32_t)RadioManagement_GetTXDialFrequency() - (int32_t)RadioManagement_GetRXDialFrequency())))/sd.hz_per_pixel;
+//      float32_t tx_vfo_offset = ((float32_t)(((int32_t)RadioManagement_GetTXDialFrequency() - (int32_t)RadioManagement_GetRXDialFrequency())))/sd.hz_per_pixel;
+        float32_t tx_vfo_offset = 0;
+        if(!is_splitmode())
+        {
+            tx_vfo_offset = ((float32_t)(((int32_t)RadioManagement_GetTXDialFrequency() - (int32_t)RadioManagement_GetRXDialFrequency())))/sd.hz_per_pixel;
+        }
 
         // FIXME: DOES NOT WORK PROPERLY IN SPLIT MODE
         sd.marker_num_prev = sd.marker_num;
@@ -305,18 +310,24 @@ static void UiSpectrum_UpdateSpectrumPixelParameters()
             	// 1500 +/- 625Hz
                 mode_marker[0] = 875;
                 mode_marker[1] = 2125;
-                sd.marker_num = 2;
+//                sd.marker_num = 2;
+                mode_marker[2] = 0;
+                sd.marker_num = 3;
                 break;
 #endif
             case DigitalMode_RTTY:
                 mode_marker[0] = 915; // Mark Frequency
                 mode_marker[1] = mode_marker[0] + rtty_shifts[rtty_ctrl_config.shift_idx].value;
-                sd.marker_num = 2;
+//                sd.marker_num = 2;
+                mode_marker[2] = 0;
+                sd.marker_num = 3;
                 break;
             case DigitalMode_BPSK:
                 mode_marker[0] = PSK_OFFSET - psk_speeds[psk_ctrl_config.speed_idx].value / 2;
                 mode_marker[1] = PSK_OFFSET + psk_speeds[psk_ctrl_config.speed_idx].value / 2;
-                sd.marker_num = 2;
+//                sd.marker_num = 2;
+                mode_marker[2] = 0;
+                sd.marker_num = 3;
             	break;
             default:
                 mode_marker[0] = 0;
@@ -342,7 +353,8 @@ static void UiSpectrum_UpdateSpectrumPixelParameters()
         for (uint16_t idx = sd.marker_num; idx < SPECTRUM_MAX_MARKER; idx++)
         {
         	sd.marker_offset[idx] = 0;
-        	sd.marker_pos[idx] = slayout.scope.w; // this is an invalid position out of screen
+//        	sd.marker_pos[idx] = slayout.scope.w; // this is an invalid position out of screen
+            sd.marker_pos[idx] = slayout.scope.w * 2; // this is an invalid position out of screen
         }
 
         force_update = false;
@@ -553,7 +565,7 @@ static void UiSpectrum_ScopeStandard_UpdateVerticalDataLine(uint16_t x, uint16_t
     }
 }
 
-static void UiSpectrum_CreateDrawArea()
+static void UiSpectrum_CreateDrawArea(void)
 {
 	//Since we have now highlighted spectrum, the grid is to be drawn in UiSpectrum_DrawScope().
 	//Here we only calculate positions of grid and write it to appropriate arrays
@@ -594,6 +606,17 @@ static void UiSpectrum_CreateDrawArea()
 
     if(slayout.title.h != 0)		//don't draw text bar if there is no space allocated for it
     {
+//		UiLcdHy28_PrintText(292,118,"   ",Blue,Black,0);
+#ifndef SDR_AMBER_480_320
+	#ifndef OVI40_MOD_480_320
+        UiLcdHy28_PrintText(292,118 + (!ts.show_wide_spectrum?0:7),"   ",Blue,Black,0);
+	#else
+        UiLcdHy28_PrintText(452,107 + (!ts.show_wide_spectrum?0:7),"   ",Blue,Black,0);
+	#endif
+#else
+        UiLcdHy28_PrintText(452,107 + (!ts.show_wide_spectrum?0:7),"   ",Blue,Black,0);
+#endif
+
     	// Draw top band = grey box in which text is printed
     	for(int i = 0; i < 16; i++)
     	{
@@ -611,8 +634,24 @@ static void UiSpectrum_CreateDrawArea()
     			slayout.title.w,
 				bartext,
 				White,
-				RGB((COL_SPECTRUM_GRAD*2),(COL_SPECTRUM_GRAD*2),(COL_SPECTRUM_GRAD*2)),
+//				RGB((COL_SPECTRUM_GRAD*2),(COL_SPECTRUM_GRAD*2),(COL_SPECTRUM_GRAD*2)),
+				RGB(64,64,64),
 				0);
+    }
+    else
+    {
+        char fwmltext[3];
+        sprintf(fwmltext,"x%u ", (1<<sd.magnify));
+//		UiLcdHy28_PrintText(292,118,fwmltext,Blue,Black,0);
+#ifndef SDR_AMBER_480_320
+	#ifndef OVI40_MOD_480_320
+        UiLcdHy28_PrintText(292,118 + (!ts.show_wide_spectrum?0:6),fwmltext,Blue,Black,0);
+	#else
+        UiLcdHy28_PrintText(452,107 + (!ts.show_wide_spectrum?0:6),fwmltext,Blue,Black,0);
+	#endif
+#else
+        UiLcdHy28_PrintText(452,107 + (!ts.show_wide_spectrum?0:6),fwmltext,Blue,Black,0);
+#endif
     }
 
     // Horizontal grid lines
@@ -668,7 +707,15 @@ static void UiSpectrum_CreateDrawArea()
 
 void UiSpectrum_Clear()
 {
-    UiLcdHy28_DrawFullRect(slayout.full.x, slayout.full.y, slayout.full.h, slayout.full.w, Black);	// Clear screen under spectrum scope by drawing a single, black block (faster with SPI!)
+#ifndef SDR_AMBER_480_320
+	#ifndef OVI40_MOD_480_320
+    UiLcdHy28_DrawFullRect(slayout.full.x, slayout.full.y + (ts.show_wide_spectrum?1:0), slayout.full.h - (ts.show_wide_spectrum?1:0), slayout.full.w + (ts.show_wide_spectrum?1:0), Black);	// Clear screen under spectrum scope by drawing a single, black block (faster with SPI!)
+	#else
+    UiLcdHy28_DrawFullRect(slayout.full.x, slayout.full.y + 1, slayout.full.h - 1, slayout.full.w, Black);
+	#endif
+#else
+    UiLcdHy28_DrawFullRect(slayout.full.x, slayout.full.y + 1, slayout.full.h - 1, slayout.full.w, Black);
+#endif
     ts.VirtualKeysShown_flag=false;	//if virtual keypad was shown, switch it off
 }
 
@@ -774,9 +821,11 @@ static void    UiSpectrum_DrawScope(uint16_t *old_pos, float32_t *fft_new)
     			sd.marker_line_pos_prev[idx]=65535;
     		}
     	}
-
-
     }
+
+    //Correction of the SSB carrier upper marker disappearing bug when changing modulation
+    sd.marker_line_pos_prev[2]=65535;
+
     sd.old_left_filter_border_pos=left_filter_border_pos;
     sd.old_right_filter_border_pos=right_filter_border_pos;
 
@@ -952,7 +1001,7 @@ static void    UiSpectrum_DrawScope(uint16_t *old_pos, float32_t *fft_new)
 /**
  * @brief init data strctures for both "Scope Display" and "Waterfall" Display
  */
-static void UiSpectrum_InitSpectrumDisplayData()
+static void UiSpectrum_InitSpectrumDisplayData(void)
 {
 	//init colour of markers
 	UiMenu_MapColors(ts.spectrum_centre_line_colour,NULL, &sd.scope_centre_grid_colour_active);
@@ -968,9 +1017,12 @@ static void UiSpectrum_InitSpectrumDisplayData()
     {
 
     case RESOLUTION_320_240:
-    	sd.spec_len = 256;
-    	sd.fft_iq_len = 512;
-    	sd.cfft_instance = &arm_cfft_sR_f32_len256;
+//    	sd.spec_len = 256;
+//    	sd.fft_iq_len = 512;
+//    	sd.cfft_instance = &arm_cfft_sR_f32_len256;
+    	sd.spec_len = 512;
+    	sd.fft_iq_len = 1024;
+    	sd.cfft_instance = &arm_cfft_sR_f32_len512;
     	break;
     case RESOLUTION_480_320:
     	sd.spec_len = 512;
@@ -1096,7 +1148,7 @@ void UiSpectrum_WaterfallClearData()
 }
 
 
-static void UiSpectrum_DrawWaterfall()
+static void UiSpectrum_DrawWaterfall(void)
 {
     sd.wfall_line %= sd.wfall_size; // make sure that the circular buffer is clipped to the size of the display area
 
@@ -1347,11 +1399,12 @@ static void UiSpectrum_ScaleFFT2SpectrumWidth(float32_t samples[], uint16_t from
  * should not be called directly, go through UiSpectrum_Redraw which implements a rate limiter
  * it relies on the audio driver implementing the first stage of data collection.
  */
-static void UiSpectrum_RedrawSpectrum()
+static void UiSpectrum_RedrawSpectrum(void)
 {
 	bool is_RedrawActive=(ts.menu_mode == false)					//if this flag is false we do only dBm calculation (for S-meter and tune helper)
 						&& (sd.enabled == true)
 						&& (ts.mem_disp == false)
+						&& (ts.xvtr_disp == false)
 						&& (ts.SpectrumResize_flag == false)
 						&& (ts.VirtualKeysShown_flag ==false);
 
@@ -1561,11 +1614,31 @@ void UiSpectrum_Init()
 #endif
     }
   */
-    UiSpectrum_CalculateLayout(ts.spectrum_size == SPECTRUM_BIG, &ts.Layout->SpectrumWindow, ts.Layout->SpectrumWindowPadding);
+//    UiSpectrum_CalculateLayout(ts.spectrum_size == SPECTRUM_BIG, &ts.Layout->SpectrumWindow, ts.Layout->SpectrumWindowPadding);
+//    if(!ts.show_wide_spectrum)
+//    {
+        UiSpectrum_CalculateLayout(ts.spectrum_size == SPECTRUM_BIG, &ts.Layout->SpectrumWindow, ts.Layout->SpectrumWindowPadding);
+//    }
+//    else
+//    {
+//        const UiArea_t widearea_320_240 = { .x = 2, .y = 128, .w = 316, .h = 94 };
+//        UiSpectrum_CalculateLayout(ts.spectrum_size == SPECTRUM_BIG, &widearea_320_240, ts.Layout->SpectrumWindowPadding);
+//    }
     UiSpectrum_InitSpectrumDisplayData();
     UiSpectrum_Clear();         // clear display under spectrum scope
     UiSpectrum_CreateDrawArea();
     UiSpectrum_DisplayFilterBW();	// Update on-screen indicator of filter bandwidth
+    if(ts.show_wide_spectrum && ts.spectrum_size == SPECTRUM_BIG)
+    {
+        UiLcdHy28_DrawStraightLine(0, 136, 320, LCD_DIR_HORIZONTAL, sd.scope_grid_colour_active);
+    }
+    //Test
+#ifdef SDR_AMBER_480_320
+    if(ts.spectrum_size == SPECTRUM_BIG)
+    {
+        UiLcdHy28_DrawStraightLine(0, 123, 480, LCD_DIR_HORIZONTAL, sd.scope_grid_colour_active);
+    }
+#endif
 }
 /**
  * @brief Calculate parameters for display filter bar. This function is used also for spectrum BW highlight.
@@ -2031,8 +2104,16 @@ static void UiSpectrum_CalculateDBm()
 
         if (RadioManagement_UsesBothSidebands(ts.dmod_mode) == true)
         {
-            bw_UPPER = uf_freq;
-            bw_LOWER = -uf_freq;
+            if((ts.expflags1 & EXPFLAGS1_SMETER_AM_NOT_LO) && (ts.dmod_mode == DEMOD_AM))
+            {
+                bw_UPPER = uf_freq; // Calculate USB
+                bw_LOWER = 300; // 300 Hz
+            }
+            else
+            {
+                bw_UPPER = uf_freq;
+                bw_LOWER = -uf_freq;
+            }
         }
         else if (RadioManagement_LSBActive(ts.dmod_mode) == true)
         {

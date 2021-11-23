@@ -68,7 +68,7 @@ typedef enum
 } Tcxo_Mode_t;
 
 
-inline Tcxo_Mode_t RadioManagement_TcxoGetMode()
+inline Tcxo_Mode_t RadioManagement_TcxoGetMode(void)
 {
     return (df.temp_enabled & TCXO_MODE_MASK);
 }
@@ -77,7 +77,7 @@ inline void RadioManagement_TcxoSetMode(Tcxo_Mode_t mode)
     df.temp_enabled = (df.temp_enabled & ~TCXO_MODE_MASK) | (mode & TCXO_MODE_MASK) ;
 }
 
-inline bool RadioManagement_TcxoIsEnabled()
+inline bool RadioManagement_TcxoIsEnabled(void)
 {
     return (RadioManagement_TcxoGetMode())!= TCXO_OFF;
 }
@@ -87,7 +87,7 @@ inline void RadioManagement_TcxoSetUnit(uint8_t unit)
     df.temp_enabled = (df.temp_enabled & ~TCXO_UNIT_MASK) | (unit & TCXO_UNIT_MASK);
 }
 
-inline bool RadioManagement_TcxoIsFahrenheit()
+inline bool RadioManagement_TcxoIsFahrenheit(void)
 {
     return (df.temp_enabled & TCXO_UNIT_MASK) == TCXO_UNIT_F;
 }
@@ -167,6 +167,7 @@ typedef enum
     COUPLING_40M,
     COUPLING_20M,
     COUPLING_15M,
+    COUPLING_10M,
     COUPLING_6M,
     COUPLING_2M,
     COUPLING_70CM,
@@ -315,7 +316,7 @@ extern const cw_mode_map_entry_t cw_mode_map[];
 // SWR/Power meter
 extern SWRMeter                    swrm;
 
-inline bool RadioManagement_IsTxDisabled()
+inline bool RadioManagement_IsTxDisabled(void)
 {
     return (ts.tx_disable > 0);
 }
@@ -367,39 +368,42 @@ int32_t  RadioManagement_GetCWDialOffset(void);
 bool     RadioManagement_Transverter_IsEnabled(void);
 uint64_t RadioManagement_Transverter_GetFreq(const uint32_t dial_freq, const uint8_t trx_mode);
 
-
 void RadioManagement_Request_TxOn(void);
 void RadioManagement_Request_TxOff(void);
 
 bool RadioManagement_SwitchTxRx_Possible(void);
 bool RadioManagement_IsTxAtZeroIF(uint8_t dmod_mode, uint8_t digital_mode);
+bool RadioManagement_CBFullPwrEnabled(void);
+#ifdef SDR_AMBER
+void RadioManagement_Set_PA_Bandcode(uint32_t freq);
+#endif
 
-inline void RadioManagement_ToggleVfoMem()
+inline void RadioManagement_ToggleVfoMem(void)
 {
     ts.vfo_mem_flag = ! ts.vfo_mem_flag;
 }
 
-inline bool is_demod_rtty()
+inline bool is_demod_rtty(void)
 {
 	return ts.dmod_mode == DEMOD_DIGI && ts.digital_mode == DigitalMode_RTTY;
 }
 
-inline bool is_demod_psk()
+inline bool is_demod_psk(void)
 {
 	return ts.dmod_mode == DEMOD_DIGI && ts.digital_mode == DigitalMode_BPSK;
 }
 
-inline void RadioManagement_TxRxSwitching_Disable()
+inline void RadioManagement_TxRxSwitching_Disable(void)
 {
     ts.txrx_switching_enabled = false;
 }
 
-inline void RadioManagement_TxRxSwitching_Enable()
+inline void RadioManagement_TxRxSwitching_Enable(void)
 {
     ts.txrx_switching_enabled = true;
 }
 
-inline bool RadioManagement_TxRxSwitching_IsEnabled()
+inline bool RadioManagement_TxRxSwitching_IsEnabled(void)
 {
     return ts.txrx_switching_enabled;
 }

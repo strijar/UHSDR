@@ -369,6 +369,7 @@ static void Si5351a_SetPPM(float32_t ppm)
 }
 
 static Oscillator_ResultCodes_t Si5351a_PrepareNextFrequency(uint32_t freq, int temp_factor)
+#ifndef R928_PLUS // true M0NKA
 {
     UNUSED(temp_factor);
 
@@ -386,8 +387,15 @@ static Oscillator_ResultCodes_t Si5351a_PrepareNextFrequency(uint32_t freq, int 
 	}
 	return Si5351a_CalculateConfig(freq, &si5351a_state.next, &si5351a_state.current) == true?OSC_OK:OSC_TUNE_IMPOSSIBLE;
 }
+#else // R928+ etc
+{
+si5351a_state.next.phasedOutput = freq > SI5351_MIN_FREQ_PHASE90;
+freq *= 4;
+return Si5351a_CalculateConfig(freq, &si5351a_state.next, &si5351a_state.current) == true?OSC_OK:OSC_TUNE_IMPOSSIBLE;
+}
+#endif
 
-static Oscillator_ResultCodes_t Si5351a_ChangeToNextFrequency()
+static Oscillator_ResultCodes_t Si5351a_ChangeToNextFrequency(void)
 {
 	Oscillator_ResultCodes_t retval = OSC_COMM_ERROR;
 	if (Si5351a_ApplyConfig(&si5351a_state.next) == true)
@@ -398,7 +406,7 @@ static Oscillator_ResultCodes_t Si5351a_ChangeToNextFrequency()
 	return retval;
 }
 
-static bool              Si5351a_IsNextStepLarge()
+static bool              Si5351a_IsNextStepLarge(void)
 {
 	return false;
 }
@@ -418,12 +426,12 @@ bool Si5351a_ReadyForIrqCall()
 // FIXME: The limits assume a 4x johnson counter, not the
 // also working internal QSD generation
 
-static uint32_t Si5351a_getMinFrequency()
+static uint32_t Si5351a_getMinFrequency(void)
 {
     return SI5351_MIN_PLL / (SI5351_MAX_DIVIDER / 4);
 }
 
-static uint32_t Si5351a_getMaxFrequency()
+static uint32_t Si5351a_getMaxFrequency(void)
 {
     // this is an experimental value
     // outside the spec sheet but still

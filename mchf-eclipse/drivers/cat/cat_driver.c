@@ -100,7 +100,7 @@ __IO uint8_t cat_buffer[CAT_BUFFER_SIZE];
 __IO int32_t cat_head = 0;
 __IO int32_t cat_tail = 0;
 
-static uint8_t CatDriver_InterfaceBufferHasData()
+static uint8_t CatDriver_InterfaceBufferHasData(void)
 {
     int32_t len = cat_head - cat_tail;
     return len < 0?len+CAT_BUFFER_SIZE:len;
@@ -139,7 +139,7 @@ int CatDriver_InterfaceBufferAddData(uint8_t c)
     return ret;
 }
 
-static void cat_buffer_reset()
+static void cat_buffer_reset(void)
 {
     cat_tail = cat_head;
 }
@@ -810,19 +810,22 @@ bool CatDriver_BlockAck()
 
     while(CatDriver_InterfaceBufferHasData())
     {
+//        uint8_t c;
+//        CatDriver_InterfaceBufferGetData(&c,1);
+//        if (c == CLONE_CMD_ACK)
         uint8_t c = 0;
         if (CatDriver_InterfaceBufferGetData(&c,1))
         {
+//            retval = true;
             retval =  c == CLONE_CMD_ACK;
             break;
         }
-    } 
-
+    }
     return retval;
 }
 
 
-static void CatDriver_HandleCloneOut()
+static void CatDriver_HandleCloneOut(void)
 {
     static uint16_t blockIdx = 0;
     static uint16_t blockRpt = 0;
@@ -896,7 +899,7 @@ static void CatDriver_HandleCloneOut()
 
 }
 
-static void CatDriver_HandleCloneIn()
+static void CatDriver_HandleCloneIn(void)
 {
     static uint16_t blockIdx = 0;
     static uint16_t blockRpt = 0;
@@ -1008,7 +1011,7 @@ bool CatDriver_CloneInStart()
 }
 
 
-static void CatDriver_HandleCommands()
+static void CatDriver_HandleCommands(void)
 {
     uint8_t bc = 0;
     uint8_t resp[32];
@@ -1286,8 +1289,10 @@ static void CatDriver_HandleCommands()
         {
             uint8_t tx_state = limit_4bits(roundf(swrm.fwd_pwr));
             tx_state |= is_splitmode() ? 0x20 : 0x00;
+//            tx_state |= ts.txrx_mode == TRX_MODE_TX ? 0x00 : 0x80;
             tx_state |= swrm.vswr_dampened > 3.0 ? 0x40 : 0x00;
 
+//            resp[0]= ts.txrx_mode == TRX_MODE_TX ? tx_state : 0x80;
             // the only correct response when in rx mode is 0xff, confirmed
             // with a real FT-817
             resp[0]= ts.txrx_mode == TRX_MODE_TX ? tx_state : 0xff;

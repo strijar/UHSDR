@@ -367,7 +367,7 @@ static void AudioNr_RunNoiseReduction(float32_t* inputsamples, float32_t* output
     }
 
     //    if((ts.dsp_active & DSP_NR_ENABLE) || (ts.dsp_active & DSP_NOTCH_ENABLE))
-    if(is_dsp_nr())
+    if(is_dsp_nr() && !is_dsp_anr())
     {
 		profileTimedEventStart(ProfileTP8);
 
@@ -1899,11 +1899,11 @@ void spectral_noise_reduction_3 (float* in_buffer)
     // for 12KS and 128'er FFT we are doing well with the above values
     // This table shows the tinc values in ms for the calculation of the coefficients ax and ap
     //
-    // 	   FFT Size:  |	128		256
-    //    		______|________________________
+    //   	   FFT Size:  |	128		    256
+    //      		______|________________________
     // Samplerate:  12KS  | 5.333		10.666
-    //		      |
-    //		 6KS  |10.666		21.333
+    //      		      |
+    //      		 6KS  |10.666		21.333
 
 
     /*if (nr_params.fft_256_enable && nr_params.NR_decimation_enable)
@@ -2303,16 +2303,12 @@ const float32_t NR_test_sinus_samp[128] = {
 								      //necessary to watch for impulses as close to the frame boundaries as possible
 
 #ifdef debug_alternate_NR  // generate test frames to test the noise blanker function
-    // using the NR-setting (0..55) to select the test frame
+    // using the RIT (0..55) to select the test frame
     // 00 = noise blanker active on orig. audio; threshold factor=3
     // 01 = frame of vocal "a" undistorted
     // 02 .. 05 = frame of vocal "a" with different impulse distortion levels
     // 06 .. 09 = frame of vocal "a" with different impulse distortion levels
     //            noise blanker operating!!
-    //************
-    // 01..09 are now using the original received audio and applying a rythmic "click" distortion
-    // 06..09 is detecting and removing the click by restoring the predicted audio!!!
-    //************
     // 5 / 9 is the biggest "click" and it is slightly noticeable in the restored audio (9)
     // 10 = noise blanker active on orig. audio threshold factor=3
     // 11  = sinusoidal signal undistorted
@@ -2321,12 +2317,12 @@ const float32_t NR_test_sinus_samp[128] = {
     //            noise blanker operating!!
     // 20 ..50   noise blanker active on orig. audio; threshold factor varying between 3 and 0.26
 
-    nr_setting = (int)ts.dsp_nr_strength;
+    nr_setting = (int)ts.rit_value;
     //*********************************from here just debug impulse / signal generation
     if ((nr_setting > 0) && (nr_setting < 10)) // we use the vocal "a" frame
     {
-        //for (int i=0; i<128;i++)          // not using vocal "a" but the original signal
-        //    insamp[i]=NR_test_samp[i];
+        for (int i=0; i<128;i++)          // not using vocal "a" but the original signal
+            {insamp[i]=NR_test_samp[i];}
 
         if ((frame_count > 19) && (nr_setting > 1))    // insert a distorting pulse
         {
@@ -2508,7 +2504,7 @@ const float32_t NR_test_sinus_samp[128] = {
 
 #ifdef debug_alternate_NR
         // in debug mode do the restoration only in some cases
-        if (((ts.dsp_nr_strength > 0) && (ts.dsp_nr_strength < 6))||((ts.dsp_nr_strength > 10) && (ts.dsp_nr_strength < 16)))
+        if (((ts.rit_value > 0) && (ts.rit_value < 6))||((ts.rit_value > 10) && (ts.rit_value < 16)))
         {
             // just let the distortion pass at setting 1...5 and 11...15
             //    arm_add_f32(&Rfw[order],&Rbw[0],&insamp[impulse_positions[j]-PL],impulse_length);

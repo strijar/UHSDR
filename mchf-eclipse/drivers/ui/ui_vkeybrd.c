@@ -146,7 +146,7 @@ static void UiVk_GetButtonRgn(uint8_t Key, UiArea_t *bp)
 /**
  * @brief Draws Virtual keypad
  */
-static void UiVk_DrawVKeypad()
+static void UiVk_DrawVKeypad(void)
 {
 	const VKeypad* VKpad=ts.VirtualKeyPad;
 	int row, col, keycnt=0, Warning=0;
@@ -212,7 +212,7 @@ bool UiVk_Process_VirtualKeypad(bool is_long_press)
  * @param X_enlarge Keyboard background enlarge in pixels (real X size is enlarged by this value multiplied by 2)
  * @param Y_enlarge Keyboard background enlarge in pixels (real Y size is enlarged by this value multiplied by 2)
  */
-static void UiVk_DrawBackGround()
+static void UiVk_DrawBackGround(void)
 {
 	UiArea_t Ka;//drawing the background
 	UiVk_GetKeybArea(&Ka);
@@ -244,18 +244,53 @@ void UiVk_Redraw()
 //DSP box VKeypad=================================================================
 uint32_t prev_dsp_functions_active;	//used for virtual DSP keys redraw detections
 //this array is needed because different bit definitions are used for ts.dsp.mode and ts.dsp.active, so we cannot simply pass the CallBackShort parameter
-const uint32_t dsp_functions[]={0, DSP_NR_ENABLE, DSP_NOTCH_ENABLE, DSP_NOTCH_ENABLE|DSP_NR_ENABLE, DSP_MNOTCH_ENABLE, DSP_MPEAK_ENABLE};
+const uint32_t dsp_functions[]={0, DSP_NR_ENABLE, DSP_ANR_ENABLE, DSP_NOTCH_ENABLE, DSP_NOTCH_ENABLE|DSP_NR_ENABLE, DSP_MNOTCH_ENABLE, DSP_MPEAK_ENABLE};
+
+
 
 static void UiVk_DSPVKeyCallBackShort(uint8_t KeyNum, uint32_t param)
 {
     uint8_t new_dsp_mode = ts.dsp.mode;
-	if(((ts.dsp.mode_mask&(1<<KeyNum))!=0) || (KeyNum==0))
+//	if(((ts.dsp.mode_mask&(1<<KeyNum))!=0) || (KeyNum==0))
+    if(param != 255)
 	{
 		new_dsp_mode=param;
 	}
 
 	// try to enable the selected dsp mode
 	UiDriver_UpdateDSPmode(new_dsp_mode);
+}
+
+static void UiVk_ModeVKeyCallBackShort(uint8_t KeyNum, uint32_t param)
+{
+    // change mode
+    if(ts.txrx_mode!=TRX_MODE_RX) { return; }
+
+    if (ts.expflags2 & EXPFLAGS2_TEMP_MEM_BW_MOD_BAND) // enabled temp. remember BW on mode & band
+    {
+        UiDriver_StoreBwData();
+    }
+
+#ifndef USE_FREEDV
+    if(KeyNum==7) { return; }
+#endif
+    bool SBisLSB = (df.tune_new <= 10000000 && RadioManagement_GetBand(df.tune_new)->band_mode != BAND_MODE_60);
+    ts.dvmode = false;
+    if(param == ModeVK_SSB) { ts.dmod_mode = !SBisLSB? DEMOD_USB: DEMOD_LSB; }
+    else if(param==ModeVK_AM) { ts.dmod_mode = DEMOD_AM; }
+    else if(param==ModeVK_SAM) { ts.dmod_mode = DEMOD_SAM; ads.sam_sideband = SAM_SIDEBAND_BOTH; }
+    else if(param==ModeVK_CW) { ts.dmod_mode = DEMOD_CW; ts.cw_lsb = RadioManagement_CalculateCWSidebandMode(); }
+    else if(param==ModeVK_FM) { ts.dmod_mode = DEMOD_FM;  ts.flags2 = ts.flags2 & ~FLAGS2_FM_MODE_DEVIATION_5KHZ; }
+    else if(param==ModeVK_RTTY) { ts.dmod_mode = DEMOD_DIGI; ts.digi_lsb = SBisLSB; ts.digital_mode = DigitalMode_RTTY; ts.dvmode = true; }
+    else if(param==ModeVK_BPSK) { ts.dmod_mode = DEMOD_DIGI; ts.digi_lsb = SBisLSB; ts.digital_mode = DigitalMode_BPSK; ts.dvmode = true; }
+#ifdef USE_FREEDV
+    else if(param==ModeVK_FDV) { ts.dmod_mode = DEMOD_DIGI; ts.digi_lsb = SBisLSB; ts.digital_mode = DigitalMode_FreeDV; ts.dvmode = true; }
+#endif
+    ts.filter_path = AudioFilter_GetFilterModeFromDemodMode(ts.dmod_mode);
+    RadioManagement_SetDemodMode(ts.dmod_mode);
+    UiDriver_UpdateDisplayAfterParamChange();
+    ts.VirtualKeysShown_flag=false;
+    UiSpectrum_Init();
 }
 
 static void UiVk_DSPVKeyCallBackLong(uint8_t KeyNum, uint32_t param)
@@ -268,6 +303,13 @@ static void UiVk_DSPVKeyCallBackLong(uint8_t KeyNum, uint32_t param)
 	// one we just disabled
 	UiDriver_UpdateDSPmode(ts.dsp.mode);
 }
+
+//static void UiVk_ModeVKeyCallBackLong(uint8_t KeyNum, uint32_t param)
+//{
+//    // inverse sideband
+//    UiAction_ChangeDemodModeToAlternativeMode();
+//    UiDriver_UpdateDisplayAfterParamChange();
+//}
 
 static uint8_t UiVk_DSPVKeyCallBackWarning(uint8_t KeyNum, uint32_t param)
 {
@@ -283,7 +325,8 @@ static uint8_t UiVk_DSPVKeyInitTypeDraw(uint8_t KeyNum, uint32_t param)
 {
 	uint8_t Keystate=Vbtn_State_Normal;
 	uint32_t dsp_functions_active =UiDriver_GetActiveDSPFunctions();
-	if(((ts.dsp.mode_mask&(1<<KeyNum))==0) && (KeyNum>0))
+//	if(((ts.dsp.mode_mask&(1<<KeyNum))==0) && (KeyNum>0))
+    if(param==255) //(((ts.dsp.mode_mask&(1<<KeyNum))==0) && (KeyNum>0)))
 	{
 		Keystate=Vbtn_State_Disabled;
 	}
@@ -295,22 +338,62 @@ static uint8_t UiVk_DSPVKeyInitTypeDraw(uint8_t KeyNum, uint32_t param)
 	return Keystate;
 }
 
+static uint8_t UiVk_ModeVKeyInitTypeDraw(uint8_t KeyNum, uint32_t param)
+{
+    uint8_t Keystate = Vbtn_State_Normal;
+    uint8_t mode_t;
+    if(ts.dmod_mode == DEMOD_USB || ts.dmod_mode == DEMOD_LSB) { mode_t = ModeVK_SSB; }
+    else if(ts.dmod_mode == DEMOD_AM) { mode_t = ModeVK_AM; }
+    else if(ts.dmod_mode == DEMOD_SAM) { mode_t = ModeVK_SAM; }
+    else if(ts.dmod_mode == DEMOD_CW) { mode_t = ModeVK_CW; }
+    else if(ts.dmod_mode == DEMOD_FM) { mode_t = ModeVK_FM; }
+    else if(ts.dmod_mode == DEMOD_DIGI && ts.digital_mode == DigitalMode_RTTY) { mode_t = ModeVK_RTTY; }
+    else if(ts.dmod_mode == DEMOD_DIGI && ts.digital_mode == DigitalMode_BPSK) { mode_t = ModeVK_BPSK; }
+#ifdef USE_FREEDV
+    else if(ts.dmod_mode == DEMOD_DIGI && ts.digital_mode == DigitalMode_FreeDV) { mode_t = ModeVK_FDV; }
+#endif
+    if(param == mode_t)
+    {
+        Keystate = Vbtn_State_Pressed;
+    }
+    return Keystate;
+}
+
 #define col_Keys_DSP_pr RGB(0xff,0xff,0xff)		//text color when pressed
 #define col_Keys_DSP_npr Black		//text color when in normal state
 
 const VKey Keys_DSP[]={
 		{.ShortFnc=UiVk_DSPVKeyCallBackShort, .ShortPar=DSP_SWITCH_OFF, .KeyText="DSP\nOFF", .TextColor=Black, .PressedTextColor=RGB(0,0xff,0xff)},
 		{.ShortFnc=UiVk_DSPVKeyCallBackShort, .ShortPar=DSP_SWITCH_NR, .LongFnc=UiVk_DSPVKeyCallBackLong,.KeyText="NR", .TextColor=col_Keys_DSP_npr, .PressedTextColor=col_Keys_DSP_pr},
+        {.ShortFnc=UiVk_DSPVKeyCallBackShort, .ShortPar=DSP_SWITCH_ANR, .LongFnc=UiVk_DSPVKeyCallBackLong,.KeyText="ANR", .TextColor=col_Keys_DSP_npr, .PressedTextColor=col_Keys_DSP_pr},
 		{.ShortFnc=UiVk_DSPVKeyCallBackShort, .ShortPar=DSP_SWITCH_NOTCH, .LongFnc=UiVk_DSPVKeyCallBackLong,.KeyText="AUTO\nNOTCH", .TextColor=col_Keys_DSP_npr, .PressedTextColor=col_Keys_DSP_pr},
 		{.ShortFnc=UiVk_DSPVKeyCallBackShort, .ShortPar=DSP_SWITCH_NR_AND_NOTCH,.KeyWarning=UiVk_DSPVKeyCallBackWarning, .LongFnc=UiVk_DSPVKeyCallBackLong,.KeyText="NR\n+NOTCH", .TextColor=col_Keys_DSP_npr, .PressedTextColor=col_Keys_DSP_pr},
 		{.ShortFnc=UiVk_DSPVKeyCallBackShort, .ShortPar=DSP_SWITCH_NOTCH_MANUAL, .LongFnc=UiVk_DSPVKeyCallBackLong,.KeyText="MAN\nNOTCH", .TextColor=col_Keys_DSP_npr, .PressedTextColor=col_Keys_DSP_pr},
-		{.ShortFnc=UiVk_DSPVKeyCallBackShort, .ShortPar=DSP_SWITCH_PEAK_FILTER, .LongFnc=UiVk_DSPVKeyCallBackLong,.KeyText="PEAK", .TextColor=col_Keys_DSP_npr, .PressedTextColor=col_Keys_DSP_pr}
+		{.ShortFnc=UiVk_DSPVKeyCallBackShort, .ShortPar=DSP_SWITCH_PEAK_FILTER, .LongFnc=UiVk_DSPVKeyCallBackLong,.KeyText="PEAK", .TextColor=col_Keys_DSP_npr, .PressedTextColor=col_Keys_DSP_pr},
+        {.ShortFnc=UiVk_DSPVKeyCallBackShort, .ShortPar=255, .KeyText="NOP", .TextColor=Grey1, .PressedTextColor=col_Keys_DSP_pr}
+};
+
+const VKey Keys_MODE[]={
+        {.ShortFnc=UiVk_ModeVKeyCallBackShort, .ShortPar=ModeVK_SSB, .LongFnc=UiVk_ModeVKeyCallBackShort, .KeyText="SSB",   .TextColor=col_Keys_DSP_npr, .PressedTextColor=col_Keys_DSP_pr},
+        {.ShortFnc=UiVk_ModeVKeyCallBackShort, .ShortPar=ModeVK_CW,  .LongFnc=UiVk_ModeVKeyCallBackShort, .KeyText="CW",    .TextColor=col_Keys_DSP_npr, .PressedTextColor=col_Keys_DSP_pr},
+        {.ShortFnc=UiVk_ModeVKeyCallBackShort, .ShortPar=ModeVK_AM,  .LongFnc=UiVk_ModeVKeyCallBackShort, .KeyText="AM",    .TextColor=col_Keys_DSP_npr, .PressedTextColor=col_Keys_DSP_pr},
+        {.ShortFnc=UiVk_ModeVKeyCallBackShort, .ShortPar=ModeVK_SAM, .LongFnc=UiVk_ModeVKeyCallBackShort, .KeyText="SAM",   .TextColor=col_Keys_DSP_npr, .PressedTextColor=col_Keys_DSP_pr},
+        {.ShortFnc=UiVk_ModeVKeyCallBackShort, .ShortPar=ModeVK_FM,  .LongFnc=UiVk_ModeVKeyCallBackShort, .KeyText="FM",    .TextColor=col_Keys_DSP_npr, .PressedTextColor=col_Keys_DSP_pr},
+        {.ShortFnc=UiVk_ModeVKeyCallBackShort, .ShortPar=ModeVK_RTTY,.LongFnc=UiVk_ModeVKeyCallBackShort, .KeyText="RTTY",  .TextColor=col_Keys_DSP_npr, .PressedTextColor=col_Keys_DSP_pr},
+        {.ShortFnc=UiVk_ModeVKeyCallBackShort, .ShortPar=ModeVK_BPSK,.LongFnc=UiVk_ModeVKeyCallBackShort, .KeyText="BPSK",  .TextColor=col_Keys_DSP_npr, .PressedTextColor=col_Keys_DSP_pr},
+#ifdef USE_FREEDV
+        {.ShortFnc=UiVk_ModeVKeyCallBackShort, .ShortPar=ModeVK_FDV, .LongFnc=UiVk_ModeVKeyCallBackShort, .KeyText="FreeDV",.TextColor=col_Keys_DSP_npr, .PressedTextColor=col_Keys_DSP_pr}
+#else
+        {.ShortFnc=UiVk_ModeVKeyCallBackShort, .ShortPar=ModeVK_FDV, .LongFnc=UiVk_ModeVKeyCallBackShort, .KeyText="NOP",.TextColor=Grey4, .PressedTextColor=col_Keys_DSP_pr}
+#endif
 };
 
 const VKeypad Keypad_DSP480x320={
-	.NumberOfKeys=6,
+//  .NumberOfKeys=6,
+    .NumberOfKeys=8,
 	.Rows=2,
-	.Columns=3,
+//  .Columns=3,
+    .Columns=4,
 	.Keys=Keys_DSP,
 	.KeyWidth=60,
 	.KeyHeight=40,
@@ -322,9 +405,11 @@ const VKeypad Keypad_DSP480x320={
 };
 
 const VKeypad Keypad_DSP320x240={
-	.NumberOfKeys=6,
+//	.NumberOfKeys=6,
+    .NumberOfKeys=8,
 	.Rows=2,
-	.Columns=3,
+//	.Columns=3,
+    .Columns=4,
 	.Keys=Keys_DSP,
 	.KeyWidth=52,
 	.KeyHeight=32,
@@ -333,6 +418,34 @@ const VKeypad Keypad_DSP320x240={
 	.Backgr_Hnlarge=4,
 	.VKeyStateCallBack=UiVk_DSPVKeyInitTypeDraw,
 	.RedrawFunct=UiVk_RedrawDSPVirtualKeys
+};
+
+const VKeypad Keypad_MODE480x320={
+    .NumberOfKeys=8,
+    .Rows=2,
+    .Columns=4,
+    .Keys=Keys_MODE,
+    .KeyWidth=52,
+    .KeyHeight=32,
+    .KeySpacing=4,
+    .Backgr_Wnlarge=4,
+    .Backgr_Hnlarge=4,
+    .VKeyStateCallBack=UiVk_ModeVKeyInitTypeDraw,
+    .RedrawFunct=UiVk_RedrawModeVirtualKeys
+};
+
+const VKeypad Keypad_MODE320x240={
+    .NumberOfKeys=8,
+    .Rows=2,
+    .Columns=4,
+    .Keys=Keys_MODE,
+    .KeyWidth=52,
+    .KeyHeight=32,
+    .KeySpacing=4,
+    .Backgr_Wnlarge=4,
+    .Backgr_Hnlarge=4,
+    .VKeyStateCallBack=UiVk_ModeVKeyInitTypeDraw,
+    .RedrawFunct=UiVk_RedrawModeVirtualKeys
 };
 
 void UiVk_RedrawDSPVirtualKeys()
@@ -346,6 +459,14 @@ void UiVk_RedrawDSPVirtualKeys()
 			UiVk_DrawVKeypad();
 		}
 	}
+}
+
+void UiVk_RedrawModeVirtualKeys()
+{
+    if(ts.VirtualKeysShown_flag)
+    {
+        UiVk_DrawVKeypad();
+    }
 }
 
 void UiVk_DSPVirtualKeys()
@@ -366,10 +487,31 @@ void UiVk_DSPVirtualKeys()
 		UiSpectrum_Clear();
 		ts.VirtualKeysShown_flag=true;	//always after UiSpectrum_Clear, because it is cleared there
 		UiVk_DrawBackGround();
-		UiVk_RedrawDSPVirtualKeys();
+		UiVk_RedrawModeVirtualKeys();
 	}
 }
 //DSP box VKeypad END=================================================================
+
+void UiVk_ModeVirtualKeys()
+{
+    if(ts.VirtualKeysShown_flag && ((ts.VirtualKeyPad==&Keypad_MODE320x240) || (ts.VirtualKeyPad==&Keypad_MODE480x320)))
+    {
+        ts.VirtualKeysShown_flag=false;
+        UiSpectrum_Init();
+    }
+    else
+    {
+        if(disp_resolution==RESOLUTION_480_320)
+            { ts.VirtualKeyPad=&Keypad_MODE480x320; }
+        else
+            { ts.VirtualKeyPad=&Keypad_MODE320x240; }
+
+        UiSpectrum_Clear();
+        ts.VirtualKeysShown_flag=true;
+        UiVk_DrawBackGround();
+        UiVk_RedrawModeVirtualKeys();
+    }
+}
 
 //Band selection VKeypad==============================================================
 uint8_t prev_BndSel;
@@ -386,6 +528,8 @@ static void UiVk_BndSelVKeyCallBackShort(uint8_t KeyNum, uint32_t param)
 			UiDriver_SelectBandMemory(get_active_vfo(), param);
 		}
 	}
+    ts.VirtualKeysShown_flag=false;
+    UiSpectrum_Init();
 }
 
 static uint8_t UiVk_BndSelVKeyInitTypeDraw(uint8_t KeyNum, uint32_t param)
@@ -439,6 +583,8 @@ const VKeypad Keypad_BndSel480x320={
 	.RedrawFunct=UiVk_RedrawBndSelVirtualKeys
 };
 
+#define EscChar 0x1b
+
 const VKey Keys_BndSel320x240[]={
 		{.ShortFnc=UiVk_BndSelVKeyCallBackShort, .ShortPar=16, .KeyText="160m", .TextColor=col_Keys_BndSel_npr, .PressedTextColor=col_Keys_BndSel_pr},
 		{.ShortFnc=UiVk_BndSelVKeyCallBackShort, .ShortPar=0, .KeyText="80m", .TextColor=col_Keys_BndSel_npr, .PressedTextColor=col_Keys_BndSel_pr},
@@ -449,15 +595,20 @@ const VKey Keys_BndSel320x240[]={
 		{.ShortFnc=UiVk_BndSelVKeyCallBackShort, .ShortPar=5, .KeyText="17m", .TextColor=col_Keys_BndSel_npr, .PressedTextColor=col_Keys_BndSel_pr},
 		{.ShortFnc=UiVk_BndSelVKeyCallBackShort, .ShortPar=6, .KeyText="15m", .TextColor=col_Keys_BndSel_npr, .PressedTextColor=col_Keys_BndSel_pr},
 		{.ShortFnc=UiVk_BndSelVKeyCallBackShort, .ShortPar=7, .KeyText="12m", .TextColor=col_Keys_BndSel_npr, .PressedTextColor=col_Keys_BndSel_pr},
-		{.ShortFnc=UiVk_BndSelVKeyCallBackShort, .ShortPar=8, .KeyText="10m", .TextColor=col_Keys_BndSel_npr, .PressedTextColor=col_Keys_BndSel_pr}
+		{.ShortFnc=UiVk_BndSelVKeyCallBackShort, .ShortPar=8, .KeyText="10m", .TextColor=col_Keys_BndSel_npr, .PressedTextColor=col_Keys_BndSel_pr},
+        {.ShortFnc=UiVk_BndSelVKeyCallBackShort, .ShortPar=9, .KeyText="6m", .TextColor=col_Keys_BndSel_npr, .PressedTextColor=col_Keys_BndSel_pr},
+        {.ShortFnc=UiVk_BndSelVKeyCallBackShort, .ShortPar=EscChar, .KeyText="NOP", .TextColor=col_Keys_BndSel_npr, .PressedTextColor=col_Keys_BndSel_pr}
 };
 
 const VKeypad Keypad_BndSel320x240={
-	.NumberOfKeys=10,
+//	.NumberOfKeys=10,
+    .NumberOfKeys=12,
 	.Rows=2,
-	.Columns=5,
+//	.Columns=5,
+    .Columns=6,
 	.Keys=Keys_BndSel320x240,
-	.KeyWidth=45,
+//	.KeyWidth=45,
+	.KeyWidth=38,
 	.KeyHeight=32,
 	.KeySpacing=4,
 	.Backgr_Wnlarge=4,
@@ -503,6 +654,7 @@ void UiVk_BndSelVirtualKeys()
 }
 
 //Band selection direct frequency enter keypad========================================
+//#define UiVk_MaxFreqText 11
 #define UiVk_MaxFreqText 12
 char UiVk_FreqEditText[UiVk_MaxFreqText];
 uint8_t UiVk_FreqEditTextCntr=0;
@@ -511,25 +663,50 @@ uint8_t UiVk_BandChangeEN=0;
 uint8_t UiVk_EnableFrequencySet=0;
 #define UiVk_InfoWindowWidth 120
 #define BackSpaceChar 8
-#define EscChar 0x1b
+//#define EscChar 0x1b
 
-static void UiVk_FSetNumKeyUpdate()
+static void UiVk_FSetNumKeyUpdate(void)
 {
 	UiArea_t KeybArea;
 	UiVk_GetKeybArea(&KeybArea);
 
+//	char txtEdit[14];
+//	char txt[14];
+//	int i, n=0, t=0;
+//
+//	for(i=UiVk_FreqEditTextCntr;i>0;i--)
+//	{
+//		txtEdit[t++]=UiVk_FreqEditText[i-1];
+//
+//		n++;
+//		if((n==3) && (i>1))
+//		{
+//			txtEdit[t++]='.';
+//			n=0;
+//		}
+//	}
+//	t--;
+//	n=0;
+//	for(;t>=0;t--)
+//	{
+//		txt[n++]=txtEdit[t];
+//	}
+//	txt[n]=0;
 	char txt[4];
 	int i, n=0, t;
 
 	char txtInfo[16]="               ";
+//	uint32_t freq=atoi(UiVk_FreqEditText);
 	uint64_t freq=atol(UiVk_FreqEditText);
-	uint32_t textColor=RGB(0xff,0xff,0xff);
+//	uint32_t textColor=RGB(0xff,0xff,0xff);
+	uint32_t textColor=RGB(0xff,0x00,0x00);
 	UiVk_EnableFrequencySet=1;
 	if(UiVk_BandChangeEN==0)
 	{
 		if( RadioManagement_FreqIsInBand(ts.band,freq) == false)
 		{
-			textColor=RGB(0xff,0xff,0x00);
+//			textColor=RGB(0xff,0xff,0x00);
+			textColor=RGB(0x00,0x00,0xff);
 			UiVk_EnableFrequencySet=0;		//disable frequency setting because out of current band is not allowed
 			sprintf(txtInfo,"Out of range");
 		}
@@ -539,6 +716,12 @@ static void UiVk_FSetNumKeyUpdate()
 #else
 	uint8_t FSet_font=1;
 #endif
+
+	if(disp_resolution==RESOLUTION_320_240)
+	{
+		FSet_font=0;
+	}
+
 	uint16_t txtPosX=KeybArea.x+KeybArea.w-4;
 	const uint8_t font_width = UiLcdHy28_TextWidth("0",FSet_font);
 
@@ -567,14 +750,24 @@ static void UiVk_FSetNumKeyUpdate()
 	    txtPosX-=UiLcdHy28_TextWidth(txt,FSet_font)+font_width/2;
 	}
 
-	UiLcdHy28_PrintText(KeybArea.x+4,KeybArea.y+4,txtInfo,RGB(0xff,0xff,0x00),Col_BtnForeCol,4);
+//	UiLcdHy28_PrintTextRight(KeybArea.x+KeybArea.w-4,KeybArea.y+4,txt,textColor,Col_BtnForeCol,FSet_font);
+//	UiLcdHy28_PrintText(KeybArea.x+4,KeybArea.y+4,txtInfo,RGB(0xff,0xff,0x00),Col_BtnForeCol,4);
+	UiLcdHy28_PrintText(KeybArea.x+4,KeybArea.y+4,txtInfo,RGB(0x00,0x00,0xff),Col_BtnForeCol,4);
 }
 
-static void UiVk_FSetEraseFreqArea()
+static void UiVk_FSetEraseFreqArea(void)
 {
 	UiArea_t KeybArea;
 	UiVk_GetKeybArea(&KeybArea);
-	UiLcdHy28_DrawFullRect(KeybArea.x+2+UiVk_InfoWindowWidth,KeybArea.y+4,28,KeybArea.w-UiVk_InfoWindowWidth-4,Col_BtnForeCol);
+//	UiLcdHy28_DrawFullRect(KeybArea.x+2+UiVk_InfoWindowWidth,KeybArea.y+4,28,KeybArea.w-UiVk_InfoWindowWidth-4,Col_BtnForeCol);
+	if(disp_resolution==RESOLUTION_320_240)
+	{
+		UiLcdHy28_DrawFullRect(KeybArea.x+2+UiVk_InfoWindowWidth,KeybArea.y+4,18,KeybArea.w-UiVk_InfoWindowWidth-4,Col_BtnForeCol);
+	}
+	else
+	{
+		UiLcdHy28_DrawFullRect(KeybArea.x+2+UiVk_InfoWindowWidth,KeybArea.y+4,28,KeybArea.w-UiVk_InfoWindowWidth-4,Col_BtnForeCol);
+	}
 }
 
 static void UiVk_FSetNumKeyVKeyCallBackLong(uint8_t KeyNum, uint32_t param)
@@ -634,6 +827,7 @@ static void UiVk_FSetNumKeyVKeyCallBackShort(uint8_t KeyNum, uint32_t param)
 	case 0x0d:
 		if(UiVk_EnableFrequencySet)
 		{
+//			uint32_t freq=atoi(UiVk_FreqEditText);
 			uint64_t freq=atol(UiVk_FreqEditText);
 
 			uint8_t band_scan=ts.band->band_mode;
@@ -683,29 +877,45 @@ static uint8_t UiVk_BndFreqSetVKeyInitTypeDraw(uint8_t KeyNum, uint32_t param)
 	return Keystate;
 }
 
-#ifdef USE_8bit_FONT
-#define UiVk_FSetNumFont 5
-#else
-#define UiVk_FSetNumFont 1
-#endif
-#define UiVk_FSetNumCol (RGB(0xff,0xff,0xff))
+//#ifdef USE_8bit_FONT
+//#define UiVk_FSetNumFont 5
+//#else
+//#define UiVk_FSetNumFont 1
+//#endif
 
-const VKey Keys_BndFreqSet[]={
+#if defined(UI_BRD_OVI40)
+    #ifndef OVI40_DISP_320_240
+	    #define UiVk_FSetNumFont 5
+    #else
+        #define UiVk_FSetNumFont 0
+    #endif
+#else
+	#define UiVk_FSetNumFont 0
+#endif
+
+//#define UiVk_FSetNumCol (RGB(0xff,0xff,0xff))
+#define UiVk_FSetNumCol (RGB(0x00,0x00,0x00))
+
+static const VKey Keys_BndFreqSet[]={
 		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar=0x31, .KeyText="1", .TextColor=UiVk_FSetNumCol, .PressedTextColor=col_Keys_BndSel_pr, .KeyFont=UiVk_FSetNumFont},
 		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar=0x32, .KeyText="2", .TextColor=UiVk_FSetNumCol, .PressedTextColor=col_Keys_BndSel_pr, .KeyFont=UiVk_FSetNumFont},
 		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar=0x33, .KeyText="3", .TextColor=UiVk_FSetNumCol, .PressedTextColor=col_Keys_BndSel_pr, .KeyFont=UiVk_FSetNumFont},
-		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar='B', .KeyText="BAND\nchange", .TextColor=0, .PressedTextColor=RGB(0xff,0xff,0x00)},
-		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar=BackSpaceChar, .LongFnc=UiVk_FSetNumKeyVKeyCallBackLong,.LongPar=BackSpaceChar,.KeyText=">>", .TextColor=UiVk_FSetNumCol, .PressedTextColor=col_Keys_BndSel_pr},
+//		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar='B', .KeyText="BAND\nchange", .TextColor=0, .PressedTextColor=RGB(0xff,0xff,0x00)},
+		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar='B', .KeyText="BAND<>", .TextColor=0, .PressedTextColor=RGB(0xff,0xff,0x00)},
+//		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar=BackSpaceChar, .LongFnc=UiVk_FSetNumKeyVKeyCallBackLong,.LongPar=BackSpaceChar,.KeyText=">>", .TextColor=UiVk_FSetNumCol, .PressedTextColor=col_Keys_BndSel_pr},
+		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar=BackSpaceChar, .LongFnc=UiVk_FSetNumKeyVKeyCallBackLong,.LongPar=BackSpaceChar,.KeyText="<-", .TextColor=UiVk_FSetNumCol, .PressedTextColor=col_Keys_BndSel_pr},
 		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar=0x34, .KeyText="4", .TextColor=UiVk_FSetNumCol, .PressedTextColor=col_Keys_BndSel_pr, .KeyFont=UiVk_FSetNumFont},
 		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar=0x35, .KeyText="5", .TextColor=UiVk_FSetNumCol, .PressedTextColor=col_Keys_BndSel_pr, .KeyFont=UiVk_FSetNumFont},
 		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar=0x36, .KeyText="6", .TextColor=UiVk_FSetNumCol, .PressedTextColor=col_Keys_BndSel_pr, .KeyFont=UiVk_FSetNumFont},
 		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar=1000, .KeyText="000", .TextColor=UiVk_FSetNumCol, .PressedTextColor=col_Keys_BndSel_pr},
-		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar=EscChar, .KeyText="CLOSE", .TextColor=RGB(0xff,0xe0,0x00), .PressedTextColor=col_Keys_BndSel_pr},
+//		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar=EscChar, .KeyText="CLOSE", .TextColor=RGB(0xff,0xe0,0x00), .PressedTextColor=col_Keys_BndSel_pr},
+		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar=EscChar, .KeyText="EXIT", .TextColor=RGB(0xff,0xe0,0x00), .PressedTextColor=col_Keys_BndSel_pr},
 		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar=0x37, .KeyText="7", .TextColor=UiVk_FSetNumCol, .PressedTextColor=col_Keys_BndSel_pr, .KeyFont=UiVk_FSetNumFont},
 		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar=0x38, .KeyText="8", .TextColor=UiVk_FSetNumCol, .PressedTextColor=col_Keys_BndSel_pr, .KeyFont=UiVk_FSetNumFont},
 		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar=0x39, .KeyText="9", .TextColor=UiVk_FSetNumCol, .PressedTextColor=col_Keys_BndSel_pr, .KeyFont=UiVk_FSetNumFont},
 		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar=0x30, .KeyText="0", .TextColor=UiVk_FSetNumCol, .PressedTextColor=col_Keys_BndSel_pr, .KeyFont=UiVk_FSetNumFont},
-		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar=0x0d, .KeyText="OK", .TextColor=RGB(0xc0,0xff,0xc0), .PressedTextColor=col_Keys_BndSel_pr},
+//		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar=0x0d, .KeyText="OK", .TextColor=RGB(0xc0,0xff,0xc0), .PressedTextColor=col_Keys_BndSel_pr},
+		{.ShortFnc=UiVk_FSetNumKeyVKeyCallBackShort, .ShortPar=0x0d, .KeyText="OK", .TextColor=RGB(0x00,0x00,0x00), .PressedTextColor=col_Keys_BndSel_pr},
 };
 
 const VKeypad Keypad_BndFreqSet480x320={
@@ -723,6 +933,21 @@ const VKeypad Keypad_BndFreqSet480x320={
 	.RedrawFunct=UiVk_RedrawBndFreqSetVirtualKeys
 };
 
+const VKeypad Keypad_BndFreqSet320x240={
+	.NumberOfKeys=15,
+	.Rows=3,
+	.Columns=5,
+	.Keys=Keys_BndFreqSet,
+	.KeyWidth=48,//60,
+	.KeyHeight=16,//36,
+	.KeySpacing=2,//8,
+	.Backgr_Wnlarge=4,
+	.Backgr_Hnlarge=4,
+	.VKeyStateCallBack=UiVk_BndFreqSetVKeyInitTypeDraw,
+	.YtopMargin=22,//38,
+	.RedrawFunct=UiVk_RedrawBndFreqSetVirtualKeys
+};
+
 void UiVk_RedrawBndFreqSetVirtualKeys()
 {
 	if(ts.VirtualKeysShown_flag)
@@ -735,15 +960,24 @@ void UiVk_RedrawBndFreqSetVirtualKeys()
 
 void UiVk_BndFreqSetVirtualKeys()
 {
-	if(ts.VirtualKeysShown_flag && (ts.VirtualKeyPad==&Keypad_BndFreqSet480x320))
+//	if(ts.VirtualKeysShown_flag && (ts.VirtualKeyPad==&Keypad_BndFreqSet480x320))
+	if(ts.VirtualKeysShown_flag && (ts.VirtualKeyPad==&Keypad_BndFreqSet480x320 || ts.VirtualKeyPad==&Keypad_BndFreqSet320x240))
 	{
 		ts.VirtualKeysShown_flag=false;
 		UiSpectrum_Init();
 	}
 	else
 	{
+//		if(disp_resolution==RESOLUTION_480_320)
+//			ts.VirtualKeyPad=&Keypad_BndFreqSet480x320;
 		if(disp_resolution==RESOLUTION_480_320)
+		{
 			ts.VirtualKeyPad=&Keypad_BndFreqSet480x320;
+		}
+		else if(disp_resolution==RESOLUTION_320_240)
+		{
+			ts.VirtualKeyPad=&Keypad_BndFreqSet320x240;
+		}
 
 		UiVk_FreqEditTextCntr=0;
 

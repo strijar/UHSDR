@@ -212,7 +212,137 @@ const arm_iir_lattice_instance_f32 IIR_TX_SOPRANO =
     }
 };
 
+//
+// Filter designed 2020.05.03 by Y.Korenev UB8JDC using MatLAB fdatools
+//
+// NOTE:
+//  - IIR, structure is Lattice Autoregressive Moving-Average (ARMA)
+//  - 48 KSPS Sample Rate
+//  - 10th order Elliptic bandpass filter
+//  - Fstop1,2: 100, 6000 Hz
+//  - Single-precision floating-point
+//  - Coefficients importing in reverse order!
+//
+#define IIR_TX_eSSB_numStages 10
+const arm_iir_lattice_instance_f32 IIR_TX_eSSB_6k =
+{
+    .numStages = IIR_TX_eSSB_numStages,
+    .pkCoeffs  = (float*) (const float[])
+    {
+         0.488251596689224,
+        -0.822531878948212,
+         0.892727732658386,
+        -0.927212417125702,
+         0.841283917427063,
+        -0.972716450691223,
+         0.999650061130524,
+        -0.999866247177124,
+         0.999989390373230,
+        -0.999913930892944
+    },
+    .pvCoeffs = (float*) (const float[])
+    {
+        -0.005639570765197,
+        -0.022809743881226,
+        -0.047501564025879,
+        -0.052696328610182,
+        -0.026684369891882,
+        -0.003642551833764,
+         0.002113675698638,
+         3.030856169061735e-05,
+        -3.875512533113579e-08,
+        -9.339896633875355e-10,
+         8.066186607535997e-13
+    }
+};
 
+//
+// Filter designed 2020.06.22 by Y.Korenev UB8JDC using MatLAB fdatools
+//
+// NOTE:
+//  - IIR, structure is Lattice Autoregressive Moving-Average (ARMA)
+//  - 48 KSPS Sample Rate
+//  - 10th order Elliptic bandpass filter
+//  - Fstop1,2: 100, 5000 Hz
+//  - Single-precision floating-point
+//  - Coefficients importing in reverse order!
+//
+const arm_iir_lattice_instance_f32 IIR_TX_eSSB_5k =
+{
+    .numStages = IIR_TX_eSSB_numStages,
+    .pkCoeffs  = (float*) (const float[])
+    {
+         0.551112115383148,
+        -0.873203039169312,
+         0.926355421543121,
+        -0.946738958358765,
+         0.894358754158020,
+        -0.980076730251312,
+         0.999654591083527,
+        -0.999865353107452,
+         0.999989390373230,
+        -0.999913752079010
+
+    },
+    .pvCoeffs = (float*) (const float[])
+    {
+        -0.003816125448793,
+        -0.013906096108258,
+        -0.026235999539495,
+        -0.027811434119940,
+        -0.013894244097173,
+        -0.003450543386862,
+         8.077293168753386e-04,
+         1.270828852284467e-05,
+        -1.620846745709059e-08,
+        -3.871837017666024e-10,
+         3.327377436079804e-13
+    }
+};
+
+//
+// Filter designed 2020.06.22 by Y.Korenev UB8JDC using MatLAB fdatools
+//
+// NOTE:
+//  - IIR, structure is Lattice Autoregressive Moving-Average (ARMA)
+//  - 48 KSPS Sample Rate
+//  - 10th order Elliptic bandpass filter
+//  - Fstop1,2: 100, 4000 Hz
+//  - Single-precision floating-point
+//  - Coefficients importing in reverse order!
+//
+const arm_iir_lattice_instance_f32 IIR_TX_eSSB_4k =
+{
+    .numStages = IIR_TX_eSSB_numStages,
+    .pkCoeffs  = (float*) (const float[])
+    {
+         0.622196376323700,
+        -0.917002677917481,
+         0.953354060649872,
+        -0.964468061923981,
+         0.935390412807465,
+        -0.985710978507996,
+         0.999658346176148,
+        -0.999864161014557,
+         0.999989271163940,
+        -0.999913632869721
+
+    },
+    .pvCoeffs = (float*) (const float[])
+    {
+        -0.002526052994654,
+        -0.008019731380045,
+        -0.012725095264614,
+        -0.012484691105783,
+        -0.005546068772674,
+        -0.001818265416659,
+         2.339449711143971e-04,
+         4.331307536631357e-06,
+        -5.518487888878099e-09,
+        -1.312840391953785e-10,
+         1.149562216251621e-13
+    }
+};
 
 /*
 

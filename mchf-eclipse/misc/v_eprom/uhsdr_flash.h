@@ -49,7 +49,7 @@
 #endif
 
 
-uint16_t Flash_Init();
+uint16_t Flash_Init(void);
 uint16_t Flash_ReadVariable(uint16_t addr, uint16_t* value);
 uint16_t Flash_WriteVariable(uint16_t addr, uint16_t value);
 uint16_t Flash_UpdateVariable(uint16_t addr, uint16_t value);

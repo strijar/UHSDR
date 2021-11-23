@@ -88,8 +88,8 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
     { ConfigEntry_Int32_16, EEPROM_AGC_WDSP_TAU_DECAY_4,&agc_wdsp_conf.tau_decay[4], 50,100,5000}, // NO INT DEFAULT PROBLEM
     { ConfigEntry_Int32_16, EEPROM_AGC_WDSP_TAU_HANG_DECAY,&agc_wdsp_conf.tau_hang_decay, 500,100,5000}, // NO INT DEFAULT PROBLEM
     { ConfigEntry_Int32_16, EEPROM_MIC_BOOST,&ts.tx_mic_boost, MIC_BOOST_DEFAULT,MIC_BOOST_MIN,MIC_BOOST_MAX},
-    { ConfigEntry_UInt8, EEPROM_MIC_GAIN,&ts.tx_gain[TX_AUDIO_MIC], MIC_GAIN_DEFAULT,MIC_GAIN_MIN,MIC_GAIN_MAX},
-    { ConfigEntry_UInt8, EEPROM_LINE_GAIN,&ts.tx_gain[TX_AUDIO_LINEIN_L], LINE_GAIN_DEFAULT,LINE_GAIN_MIN,LINE_GAIN_MAX},
+    { ConfigEntry_UInt8, EEPROM_MIC_GAIN,&ts.tx_gain[TX_AUDIO_MIC],MIC_GAIN_DEFAULT,MIC_GAIN_MIN,MIC_GAIN_MAX},
+    { ConfigEntry_UInt8, EEPROM_LINE_GAIN,&ts.tx_gain[TX_AUDIO_LINEIN_L],LINE_GAIN_DEFAULT,LINE_GAIN_MIN,LINE_GAIN_MAX},
     { ConfigEntry_UInt32_16, EEPROM_SIDETONE_FREQ,&ts.cw_sidetone_freq,CW_SIDETONE_FREQ_DEFAULT,CW_SIDETONE_FREQ_MIN,CW_SIDETONE_FREQ_MAX},
     { ConfigEntry_UInt8, EEPROM_SPECTRUM_FILTER,&ts.spectrum_filter,SPECTRUM_FILTER_DEFAULT,SPECTRUM_FILTER_MIN,SPECTRUM_FILTER_MAX},
 #ifdef OBSOLETE_AGC
@@ -97,6 +97,8 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
 #endif
     { ConfigEntry_UInt8, EEPROM_METER_COLOUR_UP,&ts.meter_colour_up,SPEC_BLUE, 0, SPEC_MAX_COLOUR},
     { ConfigEntry_UInt8, EEPROM_METER_COLOUR_DOWN,&ts.meter_colour_down,SPEC_CYAN, 0, SPEC_MAX_COLOUR},
+    { ConfigEntry_UInt8, EEPROM_BOX_COLOUR,&ts.box_colour,SPEC_BLUE, 0, SPEC_MAX_COLOUR},
+    { ConfigEntry_UInt8, EEPROM_TXTLINE_COLOUR,&ts.txtline_colour,SPEC_YELLOW, 0, SPEC_MAX_COLOUR},
     { ConfigEntry_UInt8, EEPROM_SPECTRUM_TRACE_COLOUR,&ts.scope_trace_colour,SPEC_COLOUR_TRACE_DEFAULT, 0, SPEC_MAX_COLOUR},
     { ConfigEntry_UInt8, EEPROM_SPECTRUM_GRID_COLOUR,&ts.scope_grid_colour,SPEC_COLOUR_GRID_DEFAULT, 0, SPEC_MAX_COLOUR},
     { ConfigEntry_UInt8, EEPROM_SPECTRUM_CENTRE_LINE_COLOUR,&ts.spectrum_centre_line_colour,SPEC_COLOUR_GRID_DEFAULT, 0, SPEC_MAX_COLOUR},
@@ -120,6 +122,12 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
     UI_C_TX_IQ_ADJ(15M)
     UI_C_TX_IQ_ADJ(10M)
     UI_C_TX_IQ_ADJ(10M_UP)
+    UI_C_TX_IQ_ADJ(6M)
+    UI_C_TX_IQ_ADJ(160M)
+    UI_C_TX_IQ_ADJ(40M)
+    UI_C_TX_IQ_ADJ(30M)
+    UI_C_TX_IQ_ADJ(17M)
+    UI_C_TX_IQ_ADJ(12M)
 
 #define UI_C_RX_IQ_ADJ(bandName) \
     { ConfigEntry_Int32_16 | Calib_Val, EEPROM_RX_IQ_##bandName##_GAIN_BALANCE,&iq_adjust[IQ_##bandName].adj.rx.gain,IQ_BALANCE_OFF, MIN_IQ_GAIN_BALANCE, MAX_IQ_GAIN_BALANCE}, \
@@ -129,6 +137,7 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
     UI_C_RX_IQ_ADJ(10M)
 
     { ConfigEntry_UInt8 | Calib_Val, EEPROM_SENSOR_NULL,&swrm.sensor_null,SENSOR_NULL_DEFAULT,SENSOR_NULL_MIN,SENSOR_NULL_MAX},
+//    { ConfigEntry_UInt8, EEPROM_XVERTER_DISP,&ts.xverter_mode,0,0,XVERTER_MULT_MAX},
     { ConfigEntry_UInt32_16, EEPROM_XVERTER_DISP,&ts.xverter_mode,0,0,XVERTER_MULT_MAX},
     { ConfigEntry_UInt8, EEPROM_SPECTRUM_MAGNIFY,&sd.magnify,MAGNIFY_DEFAULT,MAGNIFY_MIN,MAGNIFY_MAX},
     // { ConfigEntry_UInt8, EEPROM_WIDE_FILT_CW_DISABLE,&ts.filter_cw_wide_disable,1,0,1},
@@ -178,6 +187,7 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
     { ConfigEntry_UInt8 | Calib_Val, EEPROM_DETECTOR_COUPLING_COEFF_40M,&swrm.coupling_calc[COUPLING_40M],SWR_COUPLING_DEFAULT,SWR_COUPLING_MIN,SWR_COUPLING_MAX},
     { ConfigEntry_UInt8 | Calib_Val, EEPROM_DETECTOR_COUPLING_COEFF_20M,&swrm.coupling_calc[COUPLING_20M],SWR_COUPLING_DEFAULT,SWR_COUPLING_MIN,SWR_COUPLING_MAX},
     { ConfigEntry_UInt8 | Calib_Val, EEPROM_DETECTOR_COUPLING_COEFF_15M,&swrm.coupling_calc[COUPLING_15M],SWR_COUPLING_DEFAULT,SWR_COUPLING_MIN,SWR_COUPLING_MAX},
+    { ConfigEntry_UInt8 | Calib_Val, EEPROM_DETECTOR_COUPLING_COEFF_10M,&swrm.coupling_calc[COUPLING_10M],SWR_COUPLING_DEFAULT,SWR_COUPLING_MIN,SWR_COUPLING_MAX},
     { ConfigEntry_UInt8 | Calib_Val, EEPROM_DETECTOR_COUPLING_COEFF_6M,&swrm.coupling_calc[COUPLING_6M],SWR_COUPLING_DEFAULT,SWR_COUPLING_MIN,SWR_COUPLING_MAX},
     { ConfigEntry_UInt32_16 | Calib_Val, EEPROM_VOLTMETER_CALIBRATE,&ts.voltmeter_calibrate,POWER_VOLTMETER_CALIBRATE_DEFAULT,POWER_VOLTMETER_CALIBRATE_MIN,POWER_VOLTMETER_CALIBRATE_MAX},
     { ConfigEntry_UInt8 | Calib_Val, EEPROM_LOW_POWER_CONFIG,&ts.low_power_config,LOW_POWER_CONFIG_DEFAULT,LOW_POWER_CONFIG_MIN,LOW_POWER_CONFIG_MAX},
@@ -208,7 +218,7 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
     { ConfigEntry_UInt8, EEPROM_DIGI_MODE_CONF,&ts.digital_mode,DigitalMode_None,0,DigitalMode_Num_Modes-1},
 	{ ConfigEntry_Int32_16, EEPROM_BASS_GAIN,&ts.dsp.bass_gain,2,-20,20}, // INT DEFAULT PROBLEM,see above
     { ConfigEntry_Int32_16, EEPROM_TREBLE_GAIN,&ts.dsp.treble_gain,0,-20,20},  // MINOR INT DEFAULT PROBLEM,see above
-    { ConfigEntry_UInt8, EEPROM_TX_FILTER,&ts.tx_filter,0,0,TX_FILTER_BASS},
+    { ConfigEntry_UInt8, EEPROM_TX_FILTER,&ts.tx_filter,0,0,TX_FILTER_ESSB_6k},
 	{ ConfigEntry_Int32_16, EEPROM_TX_BASS_GAIN,&ts.dsp.tx_bass_gain,4,-20,6}, // INT DEFAULT PROBLEM,see above
     { ConfigEntry_Int32_16, EEPROM_TX_TREBLE_GAIN,&ts.dsp.tx_treble_gain,4,-20,6}, // INT DEFAULT PROBLEM,see above
     { ConfigEntry_Int32_16, EEPROM_SAM_PLL_LOCKING_RANGE,&ads.pll_fmax_int,2500,50,8000}, // NO INT DEFAULT PROBLEM
@@ -220,6 +230,7 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
     { ConfigEntry_UInt8, EEPROM_LINEOUT_GAIN,&ts.lineout_gain,LINEOUT_GAIN_DEFAULT,LINEOUT_GAIN_MIN,LINEOUT_GAIN_MAX},
     { ConfigEntry_Int16 | Calib_Val, EEPROM_RTC_CALIB,&ts.rtc_calib,RTC_CALIB_PPM_DEFAULT, RTC_CALIB_PPM_MIN, RTC_CALIB_PPM_MAX},
     { ConfigEntry_UInt8, EEPROM_CW_DECODER_ENABLE,&ts.cw_decoder_enable,1,0,1},
+    { ConfigEntry_UInt8, EEPROM_PEAK_IND_TUNE,&ts.peak_ind_tune,3,0,24},
 	{ ConfigEntry_UInt16, EEPROM_Scope_Graticule_Ypos,&ts.graticulePowerupYpos,0,0,480},
 	{ ConfigEntry_UInt8, EEPROM_Freq_Display_Font,&ts.FreqDisplayFont,0,0,1},
 
@@ -272,11 +283,54 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
 	{ ConfigEntry_Int32_16, EEPROM_CW_DECODER_THRESH,&cw_decoder_config.thresh,CW_DECODER_THRESH_DEFAULT,CW_DECODER_THRESH_MIN,CW_DECODER_THRESH_MAX}, // NO INT DEFAULT PROBLEM
 	{ ConfigEntry_Int32_16, EEPROM_CW_DECODER_BLOCKSIZE,&cw_decoder_config.blocksize,CW_DECODER_BLOCKSIZE_DEFAULT,CW_DECODER_BLOCKSIZE_MIN,CW_DECODER_BLOCKSIZE_MAX}, // NO INT DEFAULT PROBLEM
 	{ ConfigEntry_UInt8x2, EEPROM_SMETER_ALPHAS,&sm.config.alphaCombined,CONFIG_UINT8x2_COMBINE(SMETER_ALPHA_ATTACK_DEFAULT, SMETER_ALPHA_DECAY_DEFAULT), CONFIG_UINT8x2_COMBINE(SMETER_ALPHA_MIN, SMETER_ALPHA_MIN), CONFIG_UINT8x2_COMBINE(SMETER_ALPHA_MAX,SMETER_ALPHA_MAX) },
-    { ConfigEntry_UInt8, EEPROM_VSWR_PROTECTION_THRESHOLD,&ts.vswr_protection_threshold,1,1,10},
+    { ConfigEntry_UInt8, EEPROM_VSWR_PROTECTION_THRESHOLD,&ts.debug_vswr_protection_threshold,1,1,10},
 	{ ConfigEntry_UInt16, EEPROM_EXPFLAGS1,&ts.expflags1,EXPFLAGS1_CONFIG_DEFAULT,0,0xffff},
+	{ ConfigEntry_UInt16, EEPROM_EXPFLAGS2,&ts.expflags2,EXPFLAGS2_CONFIG_DEFAULT,0,0xffff},
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR0_0,&ts.cal_lo_tx_supr0[0], 2048, 0, 4096},
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR0_1,&ts.cal_lo_tx_supr0[1], 2048, 0, 4096},
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR0_2,&ts.cal_lo_tx_supr0[2], 2048, 0, 4096},
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR0_3,&ts.cal_lo_tx_supr0[3], 2048, 0, 4096},
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR0_4,&ts.cal_lo_tx_supr0[4], 2048, 0, 4096},
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR0_5,&ts.cal_lo_tx_supr0[5], 2048, 0, 4096},
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR0_6,&ts.cal_lo_tx_supr0[6], 2048, 0, 4096},
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR0_7,&ts.cal_lo_tx_supr0[7], 2048, 0, 4096},
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR0_8,&ts.cal_lo_tx_supr0[8], 2048, 0, 4096},
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR0_9,&ts.cal_lo_tx_supr0[9], 2048, 0, 4096},
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR0_10,&ts.cal_lo_tx_supr0[10], 2048, 0, 4096}, //160m
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR0_11,&ts.cal_lo_tx_supr0[11], 2048, 0, 4096}, //CB26Mc
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR0_12,&ts.cal_lo_tx_supr0[12], 2048, 0, 4096}, //CB27Mc
+	{ ConfigEntry_Int16, EEPROM_LO_TX_SUPR0_13,&ts.cal_lo_tx_supr0[13], 2048, 0, 4096}, //Wild zone
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR0_14,&ts.cal_lo_tx_supr0[14], 2048, 0, 4096}, //28Mc_Up
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR1_0,&ts.cal_lo_tx_supr1[0], 2048, 0, 4096},
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR1_1,&ts.cal_lo_tx_supr1[1], 2048, 0, 4096},
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR1_2,&ts.cal_lo_tx_supr1[2], 2048, 0, 4096},
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR1_3,&ts.cal_lo_tx_supr1[3], 2048, 0, 4096},
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR1_4,&ts.cal_lo_tx_supr1[4], 2048, 0, 4096},
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR1_5,&ts.cal_lo_tx_supr1[5], 2048, 0, 4096},
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR1_6,&ts.cal_lo_tx_supr1[6], 2048, 0, 4096},
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR1_7,&ts.cal_lo_tx_supr1[7], 2048, 0, 4096},
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR1_8,&ts.cal_lo_tx_supr1[8], 2048, 0, 4096},
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR1_9,&ts.cal_lo_tx_supr1[9], 2048, 0, 4096},
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR1_10,&ts.cal_lo_tx_supr1[10], 2048, 0, 4096}, //160m
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR1_11,&ts.cal_lo_tx_supr1[11], 2048, 0, 4096}, //CB26Mc
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR1_12,&ts.cal_lo_tx_supr1[12], 2048, 0, 4096}, //CB27Mc
+    { ConfigEntry_Int16, EEPROM_LO_TX_SUPR1_13,&ts.cal_lo_tx_supr1[13], 2048, 0, 4096}, //Wild zone
+	{ ConfigEntry_Int16, EEPROM_LO_TX_SUPR1_14,&ts.cal_lo_tx_supr1[14], 2048, 0, 4096}, //28Mc_Up
+    { ConfigEntry_UInt8, EEPROM_CW_SMOOTH,&ts.cw_smooth,1, 0, 3},
+	{ ConfigEntry_UInt8, EEPROM_PWR_SCALE_GEN,&ts.power_scale_gen,100, 3, 200},
+	{ ConfigEntry_UInt8, EEPROM_PWR_SCALE_GEN_FULL,&ts.power_scale_gen_full,100, 3, 250},
+#ifdef SDR_AMBER
+	{ ConfigEntry_UInt8, EEPROM_AMBER_BANDCODE,&ts.amber_pa_bandcode_mode,0, 0, 255},
+#else
+	{ ConfigEntry_UInt8, EEPROM_AMBER_BANDCODE,0,0, 0, 255},
+#endif
+	{ ConfigEntry_UInt8, EEPROM_ANR_N_TAPS,&ts.anr_n_taps,64, 1, 192},
+	{ ConfigEntry_UInt8, EEPROM_ANR_DELAY,&ts.anr_delay,16, 1, 64},
+	{ ConfigEntry_Int16, EEPROM_ANR_TWO_MU_INT,&ts.anr_two_mu_int, 100, 1, 10000},
+	{ ConfigEntry_Int16, EEPROM_ANR_GAMMA_INT,&ts.anr_gamma_int, 100, 1, 1000},
 	{ ConfigEntry_UInt16, EEPROM_CW_DECODER_FLAGS,&cw_decoder_config.flags,CW_DECODER_FLAGS_DEFAULT,0,0x7fff},
-    { ConfigEntry_UInt8, EEPROM_BAND_REGION, &bandinfo_idx, BAND_INFO_SET_DEFAULT, 0, 0x7f}, // we need to validate the range later as we cannot do it here due to C shortcomings
-	
+//	{ ConfigEntry_UInt8, EEPROM_BAND_REGION,&bandinfo_idx,0,0,0x7f},
+	{ ConfigEntry_UInt8, EEPROM_BAND_REGION, &bandinfo_idx, BAND_INFO_SET_DEFAULT, 0, 0x7f}, // we need to validate the range later as we cannot do it here due to C shortcomings
     // the entry below MUST be the last entry, and only at the last position Stop is allowed
     {
         ConfigEntry_Stop
@@ -610,7 +664,7 @@ static uint16_t UiWriteSettingEEPROM_UInt16_Array_2_Dim(uint16_t* array_ptr, con
 }
 #endif
 
-static uint16_t UiWriteSettingEEPROM_Filter()
+static uint16_t UiWriteSettingEEPROM_Filter(void)
 {
     uint16_t retval = HAL_OK;
 
@@ -791,6 +845,31 @@ static void __attribute__ ((noinline)) UiConfiguration_ReadConfigEntries(bool lo
     }
 }
 
+void UiConfiguration_UpdateMacroCap(void)
+{
+	for (int i = 0; i < KEYER_BUTTONS; i++)
+	{
+		if (*ts.keyer_mode.macro[i] != '\0')
+		{
+			// Make button label from start of the macro
+		    uint8_t* pmacro = (uint8_t *)ts.keyer_mode.macro[i];
+			int c = 0;
+			while(*pmacro != ' ' && *pmacro != '\0' && c < KEYER_CAP_LEN)
+			{
+			    char lc = *pmacro++;
+			    lc = lc >' ' ? lc : '_';
+//				ts.keyer_mode.cap[i][c++] = *pmacro++;
+			    ts.keyer_mode.cap[i][c++] = lc;
+			}
+			ts.keyer_mode.cap[i][c] = '\0';
+		}
+		else
+		{
+//			strcpy((char *) ts.keyer_mode.cap[i], "BTN");
+		    strcpy((char *) ts.keyer_mode.cap[i], "EMPTY");
+		}
+	}
+}
 /**
  * Calculate based on current firmware version and stored configuration values, which parameters were not present in the stored configuration and
  * do need to be initialized / reset to the default value.
@@ -800,7 +879,7 @@ static void __attribute__ ((noinline)) UiConfiguration_ReadConfigEntries(bool lo
  *
  * @return the lowest parameter number, which does not need to reset/initialized to its default value. -1 indicates all values to default, INT32_MAX none
  */
-static int32_t UiConfiguration_NeedsDefaultIndex()
+static int32_t UiConfiguration_NeedsDefaultIndex(void)
 {
     int32_t retval = INT32_MAX;
     uint16_t num_of_entries;
@@ -930,6 +1009,10 @@ void UiConfiguration_LoadEepromValues(bool load_freq_mode_defaults, bool load_ee
     UiReadSettingEEPROM_Filter(load_eeprom_defaults);
 
     ConfigStorage_CopySerial2Array(EEPROM_KEYER_MEMORY_ADDRESS, (uint8_t *)ts.keyer_mode.macro, sizeof(ts.keyer_mode.macro));
+    ConfigStorage_CopySerial2Array(EEPROM_MEMS_MEMORY_ADDRESS, (uint8_t *)mem_data, sizeof(mem_data));
+    ConfigStorage_CopySerial2Array(EEPROM_XVTR_MEMORY_ADDRESS, (uint8_t *)xvtr_data, sizeof(xvtr_data));
+
+    UiConfiguration_UpdateMacroCap();
 
     // post configuration loading actions below
     df.tuning_step  = tune_steps[df.selected_idx];
@@ -1021,6 +1104,7 @@ uint16_t UiConfiguration_SaveEepromValues(void)
         {
             retval = UiWriteSettingEEPROM_UInt32(EEPROM_XVERTER_OFFSET_HIGH,EEPROM_XVERTER_OFFSET_LOW,ts.xverter_offset);
         }
+
         if (retval == HAL_OK)
         {
             retval = UiWriteSettingEEPROM_UInt32(EEPROM_XVERTER_OFFSET_TX_HIGH,EEPROM_XVERTER_OFFSET_TX_LOW,ts.xverter_offset_tx);
@@ -1038,6 +1122,8 @@ uint16_t UiConfiguration_SaveEepromValues(void)
         }
 
         retval = ConfigStorage_CopyArray2Serial(EEPROM_KEYER_MEMORY_ADDRESS, (uint8_t *)ts.keyer_mode.macro, sizeof(ts.keyer_mode.macro));
+        retval = ConfigStorage_CopyArray2Serial(EEPROM_MEMS_MEMORY_ADDRESS, (uint8_t *)mem_data, sizeof(mem_data));
+        retval = ConfigStorage_CopyArray2Serial(EEPROM_XVTR_MEMORY_ADDRESS, (uint8_t *)xvtr_data, sizeof(xvtr_data));
 
     }
     return retval;

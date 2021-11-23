@@ -63,6 +63,9 @@ enum MENU_INFO_ITEM
     INFO_HWLICENCE,
     INFO_CODEC,
     INFO_CODEC_TWINPEAKS,
+    INFO_AMBER_IO8,
+    INFO_AMBER_IO4,
+    INFO_AMBER_DAC_PWR_TX,
 };
 
 const char* UiMenu_GetSystemInfo(uint32_t* m_clr_ptr, int info_item);
@@ -95,3 +98,4 @@ const char* UiMenu_GetSystemInfo(uint32_t* m_clr_ptr, int info_item);
 */
 
 #endif //__UI_MENU_H
+

@@ -90,7 +90,7 @@ void FreeDV_Squelch_Update(freedv_conf_t* freedv_conf_p)
     freedv_set_snr_squelch_thresh(f_FREEDV, FreeDV_Get_Squelch_SNR(&freedv_conf));
 }
 
-static void FreeDv_DisplayBer()
+static void FreeDv_DisplayBer(void)
 {
     int ber = 0;
     char ber_string[12];
@@ -103,7 +103,7 @@ static void FreeDv_DisplayBer()
 
 }
 
-static void FreeDv_DisplaySnr()
+static void FreeDv_DisplaySnr(void)
 {
     static float SNR = 1;
     float SNR_est;
@@ -142,8 +142,8 @@ void FreeDv_DisplayClear()
 {
 //    UiLcdHy28_PrintText(ts.Layout->FREEDV_SNR.x, ts.Layout->FREEDV_SNR.y,"            ",Yellow,Black,ts.Layout->FREEDV_FONT);
 //   UiLcdHy28_PrintText(ts.Layout->FREEDV_BER.x, ts.Layout->FREEDV_BER.y,"            ",Yellow,Black,ts.Layout->FREEDV_FONT);
-    UiLcdHy28_PrintText(ts.Layout->FREEDV_SNR.x, ts.Layout->FREEDV_SNR.y,"         ",Yellow,Black,ts.Layout->FREEDV_FONT);		//SNR=00
-    UiLcdHy28_PrintText(ts.Layout->FREEDV_BER.x, ts.Layout->FREEDV_BER.y,"         ",Yellow,Black,ts.Layout->FREEDV_FONT);		//BER=0.000	(max 9 chars)
+    UiLcdHy28_PrintText(ts.Layout->FREEDV_SNR.x, ts.Layout->FREEDV_SNR.y,"      ",Yellow,Black,ts.Layout->FREEDV_FONT);		//SNR=00
+    UiLcdHy28_PrintText(ts.Layout->FREEDV_BER.x, ts.Layout->FREEDV_BER.y,"           ",Yellow,Black,ts.Layout->FREEDV_FONT);		//BER=0.000	(max 9 chars)
     UiDriver_TextMsgClear();
 }
 

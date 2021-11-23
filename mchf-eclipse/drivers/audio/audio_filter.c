@@ -47,8 +47,10 @@ enum
 const FilterDescriptor FilterInfo[AUDIO_FILTER_NUM] =
 {
     // 	id ,	name	 ,  width
-    {  AUDIO_300HZ,  "300Hz",   300},
-    {  AUDIO_500HZ,  "500Hz",   500},
+	{  AUDIO_100HZ,  "100Hz",  100},
+	{  AUDIO_200HZ,  "200Hz",  200},
+    {  AUDIO_300HZ,  "300Hz",  300},
+    {  AUDIO_500HZ,  "500Hz",  500},
     {  AUDIO_1P4KHZ, "1.4k",  1400},
     {  AUDIO_1P6KHZ, "1.6k",  1600},
     {  AUDIO_1P8KHZ, "1.8k",  1800},
@@ -602,7 +604,7 @@ const FilterPathDescriptor FilterPathInfo[AUDIO_FILTER_PATH_NUM] =
         RX_DECIMATION_RATE_12KHZ, &IIR_2k1_LPF,
         &FirRxInterpolate, NULL, 1050
     },
-
+//70
     {
         AUDIO_2P3KHZ, "AM/SAM", FILTER_MASK_AMSAM, 1, IQ_RX_NUM_TAPS, iq_rx_am_2k3_coeffs, iq_rx_am_2k3_coeffs, &FirRxDecimate,
         RX_DECIMATION_RATE_12KHZ, &IIR_2k3_LPF,
@@ -662,7 +664,7 @@ const FilterPathDescriptor FilterPathInfo[AUDIO_FILTER_PATH_NUM] =
         RX_DECIMATION_RATE_12KHZ, &IIR_4k2_LPF,
         &FirRxInterpolate_4_5k, &IIR_aa_5k, 2100
     },
-
+//80
     {
         AUDIO_4P4KHZ, "AM/SAM", FILTER_MASK_AMSAM, 1, IQ_RX_NUM_TAPS, iq_rx_am_4k5_coeffs, iq_rx_am_4k5_coeffs, &FirRxDecimateMinLPF,
         RX_DECIMATION_RATE_12KHZ, &IIR_4k4_LPF,
@@ -705,7 +707,134 @@ const FilterPathDescriptor FilterPathInfo[AUDIO_FILTER_PATH_NUM] =
         &FirRxInterpolate_4_10k, &IIR_aa_10k, 5000
     },
 
+//###################################################################################################################################
+// Additional CW filters by UB8JDC:
+//###################################################################################################################################
 
+	// 10 filters for 100Hz bandwidth
+
+	{
+		AUDIO_100HZ, "500Hz", FILTER_MASK_SSBCW, 1, IQ_RX_NUM_TAPS_HI, i_rx_new_coeffs, q_rx_new_coeffs, FIR_RX_DECIMATE_PTR,
+		RX_DECIMATION_RATE_12KHZ, &IIR_100hz_500,
+		&FirRxInterpolate, NULL, 500
+	},
+
+	{
+		AUDIO_100HZ, "550Hz", FILTER_MASK_SSBCW, 2, IQ_RX_NUM_TAPS_HI, i_rx_new_coeffs, q_rx_new_coeffs, FIR_RX_DECIMATE_PTR,
+		RX_DECIMATION_RATE_12KHZ, &IIR_100hz_550,
+		&FirRxInterpolate, NULL, 550
+	},
+
+	{
+		AUDIO_100HZ, "600Hz", FILTER_MASK_SSBCW, 3, IQ_RX_NUM_TAPS_HI, i_rx_new_coeffs, q_rx_new_coeffs, FIR_RX_DECIMATE_PTR,
+		RX_DECIMATION_RATE_12KHZ, &IIR_100hz_600,
+		&FirRxInterpolate, NULL, 600
+	},
+//90
+	{
+		AUDIO_100HZ, "650Hz", FILTER_MASK_SSBCW, 4, IQ_RX_NUM_TAPS_HI, i_rx_new_coeffs, q_rx_new_coeffs, FIR_RX_DECIMATE_PTR,
+		RX_DECIMATION_RATE_12KHZ, &IIR_100hz_650,
+		&FirRxInterpolate, NULL, 650
+	},
+
+	{
+		AUDIO_100HZ, "700Hz", FILTER_MASK_SSBCW, 5, IQ_RX_NUM_TAPS_HI, i_rx_new_coeffs, q_rx_new_coeffs, FIR_RX_DECIMATE_PTR,
+		RX_DECIMATION_RATE_12KHZ, &IIR_100hz_700,
+		&FirRxInterpolate, NULL, 700
+	},
+
+	{
+		AUDIO_100HZ, "750Hz", FILTER_MASK_SSBCW, 6, IQ_RX_NUM_TAPS_HI, i_rx_new_coeffs, q_rx_new_coeffs, FIR_RX_DECIMATE_PTR,
+		RX_DECIMATION_RATE_12KHZ, &IIR_100hz_750,
+		&FirRxInterpolate, NULL, 750
+	},
+
+	{
+		AUDIO_100HZ, "800Hz", FILTER_MASK_SSBCW, 7, IQ_RX_NUM_TAPS_HI, i_rx_new_coeffs, q_rx_new_coeffs, FIR_RX_DECIMATE_PTR,
+		RX_DECIMATION_RATE_12KHZ, &IIR_100hz_800,
+		&FirRxInterpolate, NULL, 800
+	},
+
+	{
+		AUDIO_100HZ, "850Hz", FILTER_MASK_SSBCW, 8, IQ_RX_NUM_TAPS_HI, i_rx_new_coeffs, q_rx_new_coeffs, FIR_RX_DECIMATE_PTR,
+		RX_DECIMATION_RATE_12KHZ, &IIR_100hz_850,
+		&FirRxInterpolate, NULL, 850
+	},
+
+	{
+		AUDIO_100HZ, "900Hz", FILTER_MASK_SSBCW, 9, IQ_RX_NUM_TAPS_HI, i_rx_new_coeffs, q_rx_new_coeffs, FIR_RX_DECIMATE_PTR,
+		RX_DECIMATION_RATE_12KHZ, &IIR_100hz_900,
+		&FirRxInterpolate, NULL, 900
+	},
+
+	{
+		AUDIO_100HZ, "950Hz", FILTER_MASK_SSBCW, 10, IQ_RX_NUM_TAPS_HI, i_rx_new_coeffs, q_rx_new_coeffs, FIR_RX_DECIMATE_PTR,
+		RX_DECIMATION_RATE_12KHZ, &IIR_100hz_950,
+		&FirRxInterpolate, NULL, 950
+	},
+
+	// 10 filters for 200Hz bandwidth
+
+	{
+		AUDIO_200HZ, "500Hz", FILTER_MASK_SSBCW, 1, IQ_RX_NUM_TAPS_HI, i_rx_new_coeffs, q_rx_new_coeffs, FIR_RX_DECIMATE_PTR,
+		RX_DECIMATION_RATE_12KHZ, &IIR_200hz_500,
+		&FirRxInterpolate, NULL, 500
+	},
+
+	{
+		AUDIO_200HZ, "550Hz", FILTER_MASK_SSBCW, 2, IQ_RX_NUM_TAPS_HI, i_rx_new_coeffs, q_rx_new_coeffs, FIR_RX_DECIMATE_PTR,
+		RX_DECIMATION_RATE_12KHZ, &IIR_200hz_550,
+		&FirRxInterpolate, NULL, 550
+	},
+
+	{
+		AUDIO_200HZ, "600Hz", FILTER_MASK_SSBCW, 3, IQ_RX_NUM_TAPS_HI, i_rx_new_coeffs, q_rx_new_coeffs, FIR_RX_DECIMATE_PTR,
+		RX_DECIMATION_RATE_12KHZ, &IIR_200hz_600,
+		&FirRxInterpolate, NULL, 600
+	},
+//100
+	{
+		AUDIO_200HZ, "650Hz", FILTER_MASK_SSBCW, 4, IQ_RX_NUM_TAPS_HI, i_rx_new_coeffs, q_rx_new_coeffs, FIR_RX_DECIMATE_PTR,
+		RX_DECIMATION_RATE_12KHZ, &IIR_200hz_650,
+		&FirRxInterpolate, NULL, 650
+	},
+
+	{
+		AUDIO_200HZ, "700Hz", FILTER_MASK_SSBCW, 5, IQ_RX_NUM_TAPS_HI, i_rx_new_coeffs, q_rx_new_coeffs, FIR_RX_DECIMATE_PTR,
+		RX_DECIMATION_RATE_12KHZ, &IIR_200hz_700,
+		&FirRxInterpolate, NULL, 700
+	},
+
+	{
+		AUDIO_200HZ, "750Hz", FILTER_MASK_SSBCW, 6, IQ_RX_NUM_TAPS_HI, i_rx_new_coeffs, q_rx_new_coeffs, FIR_RX_DECIMATE_PTR,
+		RX_DECIMATION_RATE_12KHZ, &IIR_200hz_750,
+		&FirRxInterpolate, NULL, 750
+	},
+
+	{
+		AUDIO_200HZ, "800Hz", FILTER_MASK_SSBCW, 7, IQ_RX_NUM_TAPS_HI, i_rx_new_coeffs, q_rx_new_coeffs, FIR_RX_DECIMATE_PTR,
+		RX_DECIMATION_RATE_12KHZ, &IIR_200hz_800,
+		&FirRxInterpolate, NULL, 800
+	},
+
+	{
+		AUDIO_200HZ, "850Hz", FILTER_MASK_SSBCW, 8, IQ_RX_NUM_TAPS_HI, i_rx_new_coeffs, q_rx_new_coeffs, FIR_RX_DECIMATE_PTR,
+		RX_DECIMATION_RATE_12KHZ, &IIR_200hz_850,
+		&FirRxInterpolate, NULL, 850
+	},
+
+	{
+		AUDIO_200HZ, "900Hz", FILTER_MASK_SSBCW, 9, IQ_RX_NUM_TAPS_HI, i_rx_new_coeffs, q_rx_new_coeffs, FIR_RX_DECIMATE_PTR,
+		RX_DECIMATION_RATE_12KHZ, &IIR_200hz_900,
+		&FirRxInterpolate, NULL, 900
+	},
+
+	{
+		AUDIO_200HZ, "950Hz", FILTER_MASK_SSBCW, 10, IQ_RX_NUM_TAPS_HI, i_rx_new_coeffs, q_rx_new_coeffs, FIR_RX_DECIMATE_PTR,
+		RX_DECIMATION_RATE_12KHZ, &IIR_200hz_950,
+		&FirRxInterpolate, NULL, 950
+	},
+//107
 /*
 //###################################################################################################################################
 // AM filters: designed for an IIR lowpass stopband frequency that is approx. 1.8 times higher than the FIR bandwidth
@@ -1237,10 +1366,11 @@ void AudioFilter_SetTxHilbertFIR(void)
     // phase adjustment is now done in audio_driver.c audio_tx_processor
 
     IQ_FilterDescriptor iq_tx_filter =
-            (ts.tx_filter == TX_FILTER_BASS ||
+            (ts.tx_filter == TX_FILTER_BASS || ts.tx_filter == TX_FILTER_TENOR ||
             		//             ts.tx_filter == TX_FILTER_WIDE_TREBLE) ? iq_tx_wide:iq_tx_narrow;
             		// FIXME: dirty trial: always use the "wide" 201 tap Hilbert filter
-             ts.tx_filter == TX_FILTER_SOPRANO) ? iq_tx_wide:iq_tx_wide;
+//                  ts.tx_filter == TX_FILTER_SOPRANO)  ? iq_tx_wide: iq_tx_wide;
+                    ts.tx_filter == TX_FILTER_SOPRANO)  ? iq_tx_wide: (ts.tx_filter == TX_FILTER_ESSB_4k ? iq_tx_essb_4k : (ts.tx_filter == TX_FILTER_ESSB_5k ? iq_tx_essb_5k : iq_tx_essb_6k));
 
 
     const uint32_t tx_iq_num_taps = iq_tx_filter.num_taps;

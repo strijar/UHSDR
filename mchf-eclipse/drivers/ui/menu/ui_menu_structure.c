@@ -3,6 +3,7 @@
 #include "uhsdr_hmc1023.h"
 #include "radio_management.h"
 #include "soft_tcxo.h"
+#include "ui_driver.h"
 /*
  * How to create a new menu entry in an existing menu:
  * - Copy an existing entry of MENU_KIND and paste at the desired position
@@ -77,6 +78,10 @@ const MenuDescriptor baseGroup[] =
     { MENU_BASE, MENU_ITEM, MENU_FM_DET_SUBAUDIBLE_TONE, NULL, "FM Sub Tone Det", UiMenuDesc("Enable detection of CTCSS tones during FM receive. RX is muted unless tone is detected.") },
     { MENU_BASE, MENU_ITEM, MENU_FM_TONE_BURST_MODE, NULL, "FM Tone Burst", UiMenuDesc("Enabled sending of short tone at beginning of each FM transmission. Used to open repeaters. Available frequencies are 1750 Hz and 2135 Hz.") },
     { MENU_BASE, MENU_ITEM, MENU_FM_DEV_MODE, NULL, "FM Deviation", UiMenuDesc("Select between normal and narrow deviation (5 and 2.5kHz) for FM RX/TX") },
+#ifdef USE_FREEDV
+	{ MENU_BASE, MENU_ITEM, MENU_DEBUG_FREEDV_MODE, NULL, "FreeDV Mode", UiMenuDesc("Change active FreeDV mode. Please note, you have to reboot to activate new mode") },
+    { MENU_BASE, MENU_ITEM, MENU_DEBUG_FREEDV_SQL_THRESHOLD, NULL, "FreeDV Squelch threshold", UiMenuDesc("If not OFF, FreeDV will squelch if detected SNR is below set value.") },
+#endif
 //    { MENU_BASE, MENU_ITEM, MENU_RF_GAIN_ADJ, NULL, "RF Gain", UiMenuDesc("RF Receive Gain. This setting is also accessible via Encoder 2, RFG.") }, // also via knob
 //    { MENU_BASE, MENU_ITEM, MENU_AGC_WDSP_SWITCH, NULL, "AGC Mode Switch", UiMenuDesc("You can choose between two different AGC systems here: ´Standard AGC´ and ´WDSP AGC´.") },
 //    { MENU_BASE, MENU_ITEM, MENU_AGC_MODE, NULL, "AGC STD Mode", UiMenuDesc("Standard AGC: Automatic Gain Control Mode setting. You may select preconfigured settings (SLOW,MED,FAST), define settings yourself (CUSTOM) or use MANUAL (no AGC, use RFG to control gain") },
@@ -91,23 +96,23 @@ const MenuDescriptor baseGroup[] =
     { MENU_BASE, MENU_ITEM, MENU_AGC_WDSP_TAU_HANG_DECAY, NULL, "AGC WDSP Hang Decay", UiMenuDesc("Time constant for the Hang AGC decay (speed of recovery of the AGC gain after hang time has expired) in milliseconds.") },
     { MENU_BASE, MENU_ITEM, MENU_CODEC_GAIN_MODE, NULL, "RX Codec Gain", UiMenuDesc("Sets the Codec IQ signal gain. Higher values represent higher gain. If set to AUTO the mcHF controls the gain so that the best dynamic range is used.") },
     { MENU_BASE, MENU_ITEM, MENU_RX_FREQ_CONV, NULL, "RX/TX Freq Xlate", UiMenuDesc("Controls offset of the receiver IQ signal base frequency from the dial frequency. Use of +/-12Khz is recommended. Switching it to OFF is not recommended as it disables certain features.") },
-    { MENU_BASE, MENU_ITEM, MENU_MIC_TYPE, NULL, "Mic Type", UiMenuDesc("Microphone type. Electret or Dynamic. ELECTRET is recommended. Selecting DYNAMIC when an Electret mic is present will likely cause terrible audio distortion") },
-    { MENU_BASE, MENU_ITEM, MENU_MIC_GAIN, NULL, "Mic Input Gain", UiMenuDesc("Microphone gain. Also changeable via Encoder 3 if Microphone is selected as Input") },
-    { MENU_BASE, MENU_ITEM, MENU_LINE_GAIN, NULL, "Line Input Gain", UiMenuDesc("LineIn gain. Also changeable via Encoder 3 if LineIn Left (L>L) or LineIn Right (L>R) is selected as Input") },
-    { MENU_BASE, MENU_ITEM, MENU_TX_COMPRESSION_LEVEL, NULL, "TX Audio Compress", UiMenuDesc("Control the TX audio compressor. Higher values give more compression. Set to CUSTOM for user defined compression parameters. See below. Also changeable via Encoder 1 (CMP).") },
-    { MENU_BASE, MENU_ITEM, MENU_ALC_RELEASE, NULL, "TX ALC Release Time", UiMenuDesc("If Audio Compressor Config is set to CUSTOM, sets the value of the Audio Compressor Release time. Otherwise shows predefined value of selected compression level.") },
-    { MENU_BASE, MENU_ITEM, MENU_ALC_POSTFILT_GAIN, NULL, "TX ALC Input Gain", UiMenuDesc("If Audio Compressor Config is set to CUSTOM, sets the value of the ALC Input Gain. Otherwise shows predefined value of selected compression level.") },
-    { MENU_BASE, MENU_ITEM, MENU_NOISE_BLANKER_SETTING, NULL, "RX NB Setting", UiMenuDesc("Set the Noise Blanker strength. Higher values mean more agressive blanking. Also changeable using Encoder 2 if Noise Blanker is active.") },
-    { MENU_BASE, MENU_ITEM, MENU_DSP_NR_STRENGTH, NULL, "DSP NR Strength", UiMenuDesc("Set the Noise Reduction Strength. Higher values mean more agressive noise reduction but also higher CPU load. Use with extreme care. Also changeable using Encoder 2 if DSP is active.") }, // via knob
-    { MENU_BASE, MENU_ITEM, MENU_TCXO_MODE, NULL, "TCXO Off/On/Stop", UiMenuDesc("The software TCXO can be turned ON (set frequency is adjusted so that generated frequency matches the wanted frequency); OFF (no correction or measurement done); or STOP (no correction but measurement).") },
-    { MENU_BASE, MENU_ITEM, MENU_TCXO_C_F, &lo.sensor_present, "TCXO Temp. (C/F)", UiMenuDesc("Show the measure TCXO temperature in Celsius or Fahrenheit.") },
-#ifdef USE_CONFIGSTORAGE_FLASH
-    { MENU_BASE, MENU_ITEM, MENU_BACKUP_CONFIG, NULL, "Backup Config", UiMenuDesc("Backup your I2C Configuration to flash. If you don't have suitable I2C EEPROM installed this function is not available.") },
-#endif
-    { MENU_BASE, MENU_ITEM, MENU_LOW_POWER_SHUTDOWN, NULL, "Low Voltage Shutdown", UiMenuDesc("Shutdown automatically when supply voltage is below threshold for 60 seconds (only in RX).") },
-#ifdef USE_CONFIGSTORAGE_FLASH
-    { MENU_BASE, MENU_ITEM, MENU_RESTORE_CONFIG, NULL, "Restore Config", UiMenuDesc("Restore your I2C Configuration from flash. If you don't have suitable I2C EEPROM installed this function is not available.") },
-#endif
+//    { MENU_BASE, MENU_ITEM, MENU_MIC_TYPE, NULL, "Mic Type", UiMenuDesc("Microphone type. Electret or Dynamic. ELECTRET is recommended. Selecting DYNAMIC when an Electret mic is present will likely cause terrible audio distortion") },
+//	  { MENU_BASE, MENU_ITEM, MENU_MIC_GAIN, NULL, "Mic Input Gain", UiMenuDesc("Microphone gain. Also changeable via Encoder 3 if Microphone is selected as Input") },
+//    { MENU_BASE, MENU_ITEM, MENU_LINE_GAIN, NULL, "Line Input Gain", UiMenuDesc("LineIn gain. Also changeable via Encoder 3 if LineIn Left (L>L) or LineIn Right (L>R) is selected as Input") },
+//    { MENU_BASE, MENU_ITEM, MENU_TX_COMPRESSION_LEVEL, NULL, "TX Audio Compress", UiMenuDesc("Control the TX audio compressor. Higher values give more compression. Set to CUSTOM for user defined compression parameters. See below. Also changeable via Encoder 1 (CMP).") },
+//    { MENU_BASE, MENU_ITEM, MENU_ALC_RELEASE, NULL, "TX ALC Release Time", UiMenuDesc("If Audio Compressor Config is set to CUSTOM, sets the value of the Audio Compressor Release time. Otherwise shows predefined value of selected compression level.") },
+//    { MENU_BASE, MENU_ITEM, MENU_ALC_POSTFILT_GAIN, NULL, "TX ALC Input Gain", UiMenuDesc("If Audio Compressor Config is set to CUSTOM, sets the value of the ALC Input Gain. Otherwise shows predefined value of selected compression level.") },
+//    { MENU_BASE, MENU_ITEM, MENU_NOISE_BLANKER_SETTING, NULL, "RX NB Setting", UiMenuDesc("Set the Noise Blanker strength. Higher values mean more agressive blanking. Also changeable using Encoder 2 if Noise Blanker is active.") },
+//    { MENU_BASE, MENU_ITEM, MENU_DSP_NR_STRENGTH, NULL, "DSP NR Strength", UiMenuDesc("Set the Noise Reduction Strength. Higher values mean more agressive noise reduction but also higher CPU load. Use with extreme care. Also changeable using Encoder 2 if DSP is active.") }, // via knob
+//    { MENU_BASE, MENU_ITEM, MENU_TCXO_MODE, NULL, "TCXO Off/On/Stop", UiMenuDesc("The software TCXO can be turned ON (set frequency is adjusted so that generated frequency matches the wanted frequency); OFF (no correction or measurement done); or STOP (no correction but measurement).") },
+//    { MENU_BASE, MENU_ITEM, MENU_TCXO_C_F, &lo.sensor_present, "TCXO Temp. (C/F)", UiMenuDesc("Show the measure TCXO temperature in Celsius or Fahrenheit.") },
+//#ifdef USE_CONFIGSTORAGE_FLASH
+//    { MENU_BASE, MENU_ITEM, MENU_BACKUP_CONFIG, NULL, "Backup Config", UiMenuDesc("Backup your I2C Configuration to flash. If you don't have suitable I2C EEPROM installed this function is not available.") },
+//#endif
+//    { MENU_BASE, MENU_ITEM, MENU_LOW_POWER_SHUTDOWN, NULL, "Low Voltage Shutdown", UiMenuDesc("Shutdown automatically when supply voltage is below threshold for 60 seconds (only in RX).") },
+//#ifdef USE_CONFIGSTORAGE_FLASH
+//    { MENU_BASE, MENU_ITEM, MENU_RESTORE_CONFIG, NULL, "Restore Config", UiMenuDesc("Restore your I2C Configuration from flash. If you don't have suitable I2C EEPROM installed this function is not available.") },
+//#endif
     { MENU_BASE, MENU_STOP, 0, NULL, NULL, UiMenuDesc("") }
 };
 
@@ -115,10 +120,18 @@ const MenuDescriptor confGroup[] =
 {
 
     // Unused in firmware: { MENU_CONF, MENU_ITEM, CONFIG_FREQ_LIMIT_RELAX,"231","Freq. Limit Disable", UiMenuDesc(":soon:") },
-    { MENU_CONF, MENU_ITEM, CONFIG_BANDEF_SELECT, NULL, "Band Definition", UiMenuDesc("Select which band definition to use for ham bands (Original UHSDR or IARU Region 1 - 3") },
+#ifdef USE_CONFIGSTORAGE_FLASH
+    { MENU_CONF, MENU_ITEM, MENU_BACKUP_CONFIG, NULL, "Backup Config", UiMenuDesc("Backup your I2C Configuration to flash. If you don't have suitable I2C EEPROM installed this function is not available.") },
+    { MENU_CONF, MENU_ITEM, MENU_RESTORE_CONFIG, NULL, "Restore Config", UiMenuDesc("Restore your I2C Configuration from flash. If you don't have suitable I2C EEPROM installed this function is not available.") },
+    // Reset I2C Config EEPROM to empty state
+    { MENU_CONF, MENU_ITEM, CONFIG_RESET_SER_EEPROM, NULL, "Rst Conf EEPROM", UiMenuDesc("Clear the EEPROM so that at next start all stored configuration data is reset to the values stored in Flash (see Backup/Restore).") },
+    { MENU_CONF, MENU_ITEM, CONFIG_RESET_SER_EEPROM_SIGNATURE, NULL, "RstEEPROM&KeepConf", UiMenuDesc("Clear the EEPROMi signature but keep all config values. This is mainly for debugging purposes).") },
+#endif
+	{ MENU_CONF, MENU_ITEM, CONFIG_BANDEF_SELECT, NULL, "Band Definition", UiMenuDesc("Select which band definition to use for ham bands (Original UHSDR or IARU Region 1 - 3") },
     { MENU_CONF, MENU_ITEM, CONFIG_FREQ_MEM_LIMIT_RELAX, NULL, "Save Out-Of-Band Freq.", UiMenuDesc("Select ON to save and restore frequencies which do not fit into the band during configuration saving (Power-Off or long press on Menu button)") },
     { MENU_CONF, MENU_ITEM, CONFIG_TX_OUT_ENABLE, NULL, "TX on Out-Of-Band Freq.", UiMenuDesc("Permit low power transmission even if the frequency is out of the official ham bands. DO NOT USE WITH CONNECTED ANTENNA! Use a dummy load!") },
-    { MENU_CONF, MENU_ITEM, CONFIG_TX_DISABLE, NULL, "Transmit Disable", UiMenuDesc("Disable all transmissions unconditionally. In CW you will be able to hear a sidetone but no transmission is made.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_TX_DISABLE, NULL, "Transmit Disable", UiMenuDesc("Disable all transmissions unconditionally. In CW you will be able to hear a sidetone but no transmission is made.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_VSWR_PROTECTION_THRESHOLD, NULL, "VSWR Protect.threshold", UiMenuDesc("If not OFF, on TX/tune the bias of PA will be down to 0 etc when exceeding the specified value of VSWR") },
     { MENU_CONF, MENU_ITEM, CONFIG_AUDIO_MAIN_SCREEN_MENU_SWITCH, NULL, "Menu SW on TX disable", UiMenuDesc("Control if the screen automatically adapts Encoder value focus when switching between RX and TX.") },
 
     { MENU_CONF, MENU_ITEM, CONFIG_MUTE_LINE_OUT_TX, NULL, "TX Mute LineOut", UiMenuDesc("During transmission with frequency translation off, line out will carry one of the two signal channels. Good for CW but not very useful otherwise. You may switch this signal off here.") },
@@ -138,6 +151,7 @@ const MenuDescriptor confGroup[] =
 
     // Transverter Configuration
     { MENU_CONF, MENU_ITEM, CONFIG_XVTR_OFFSET_MULT, NULL, "XVTR Offs/Mult", UiMenuDesc("When connecting to a transverter, set this to 1 and set the XVERTER Offset to the LO Frequency of it. The mcHF frequency is multiplied by this factor before the offset is added, so anything but 1 will result in each Hz in the mcHF being displayed as 2 to 10 Hz change on display.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_XVTR_FREQUENCY_OFFSET, NULL, "XVTR Offset", UiMenuDesc("When transverter mode is enabled, this value is added to the mcHF frequency after being multiplied with the XVTR Offs/Mult. Use Step+ to set a good step width, much less turns with the dial knob if it is set to 1Mhz") },
     { MENU_CONF, MENU_ITEM, CONFIG_XVTR_FREQUENCY_OFFSET, NULL, "XVTR Offs. RX", UiMenuDesc("When transverter mode is enabled, this value is added to the mcHF frequency after being multiplied with the XVTR Offs/Mult. Use Step+ to set a good step width, much less turns with the dial knob if it is set to 1Mhz") },
     // { MENU_CONF, MENU_ITEM, CONFIG_XVTR_OFFSET_MULT, NULL, "XVTR Offs/Mult", UiMenuDesc("When connecting to a transverter, set this to 1 and set the XVERTER Offset to the LO Frequency of it. The mcHF frequency is multiplied by this factor before the offset is added, so anything but 1 will result in each Hz in the mcHF being displayed as 2 to 10 Hz change on display.") },
     { MENU_CONF, MENU_ITEM, CONFIG_XVTR_FREQUENCY_OFFSET_TX, NULL, "XVTR Offs. TX", UiMenuDesc("When transverter mode is enabled, this value is added to the displayed mcHF TX frequency after being multiplied with the XVTR Offs/Mult. Setting it to 0 uses RX offset for TX. Use Step+ to set a good step width, much less turns with the dial knob if it is set to 1Mhz") },
@@ -145,21 +159,27 @@ const MenuDescriptor confGroup[] =
     // Button Handling Setup
     { MENU_CONF, MENU_ITEM, CONFIG_STEP_SIZE_BUTTON_SWAP, NULL, "Step Button Swap", UiMenuDesc("If ON, Step- behaves like Step+ and vice versa.") },
     { MENU_CONF, MENU_ITEM, CONFIG_BAND_BUTTON_SWAP, NULL, "Band+/- Button Swap", UiMenuDesc("If ON, Band- behaves like Band+ and vice versa.") },
+    { MENU_CONF, MENU_ITEM, CONFIG_BANDCH_JUMP_SWAP, NULL, "Band+/- BndCh/Jump Swap", UiMenuDesc("If ON, LongAction of Band+/- is band change, ShortAction is jump by freq on panorama width.") },
+    { MENU_CONF, MENU_ITEM, CONFIG_ENC1_REVERSE, NULL, "Encoder 1 Reverse", UiMenuDesc("If ON, encoder 1 are reversed.") },
+    { MENU_CONF, MENU_ITEM, CONFIG_ENC2_REVERSE, NULL, "Encoder 2 Reverse", UiMenuDesc("If ON, encoder 2 are reversed.") },
+    { MENU_CONF, MENU_ITEM, CONFIG_ENC3_REVERSE, NULL, "Encoder 3 Reverse", UiMenuDesc("If ON, encoder 3 are reversed.") },
+    { MENU_CONF, MENU_ITEM, CONFIG_ENC4_REVERSE, NULL, "Encoder 4 Reverse", UiMenuDesc("If ON, encoder 4 are reversed.") },
 
-    // RTC Setup and Settings
-    { MENU_CONF, MENU_ITEM, CONFIG_RTC_START, &ts.vbat_present,"RTC Start", UiMenuDesc("Start using the RTC and use the modified button layout. Will reboot your mcHF. Please use only if you completed the RTC mod otherwise you will need to disconnect battery and power and reboot to get a working mcHF. This menu is only visible if Backup RAM (VBat) was detected.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_RTC_HOUR, &ts.rtc_present,"RTC Hour", UiMenuDesc("Sets the Real Time Clock Hour. Needs HW Modifications.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_RTC_MIN, &ts.rtc_present,"RTC Min", UiMenuDesc("Sets the Real Time Clock Minutes. Needs HW Modifications.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_RTC_SEC, &ts.rtc_present,"RTC Seconds", UiMenuDesc("Sets the Real Time Clock Seconds. Needs HW Modifications.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_RTC_RESET, &ts.vbat_present,"RTC Reset", UiMenuDesc("Full Reset of STM32 RTC. Can be used to simulate first start with RTC mod completed") },
-    { MENU_CONF, MENU_ITEM, CONFIG_RTC_CALIB, &ts.rtc_present,"RTC Calibration", UiMenuDesc("Sets the Real Time Clock Frequency calibration value in ppm. 1s/day deviation equals 11.57 ppm deviation") },
+//    // RTC Setup and Settings
+//    { MENU_CONF, MENU_ITEM, CONFIG_RTC_START, &ts.vbat_present,"RTC Start", UiMenuDesc("Start using the RTC and use the modified button layout. Will reboot your mcHF. Please use only if you completed the RTC mod otherwise you will need to disconnect battery and power and reboot to get a working mcHF. This menu is only visible if Backup RAM (VBat) was detected.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_RTC_HOUR, &ts.rtc_present,"RTC Hour", UiMenuDesc("Sets the Real Time Clock Hour. Needs HW Modifications.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_RTC_MIN, &ts.rtc_present,"RTC Min", UiMenuDesc("Sets the Real Time Clock Minutes. Needs HW Modifications.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_RTC_SEC, &ts.rtc_present,"RTC Seconds", UiMenuDesc("Sets the Real Time Clock Seconds. Needs HW Modifications.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_RTC_RESET, &ts.vbat_present,"RTC Reset", UiMenuDesc("Full Reset of STM32 RTC. Can be used to simulate first start with RTC mod completed") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_RTC_CALIB, &ts.rtc_present,"RTC Calibration", UiMenuDesc("Sets the Real Time Clock Frequency calibration value in ppm. 1s/day deviation equals 11.57 ppm deviation") },
 
     // mcHF Setup Calibration (Initial Setup, never to be changed unless HW changes)
 
     { MENU_CONF, MENU_ITEM, CONFIG_VOLTMETER_CALIBRATION, NULL, "Voltmeter Cal.", UiMenuDesc("Adjusts the displayed value of the voltmeter.") },
     { MENU_CONF, MENU_ITEM, CONFIG_LOW_POWER_THRESHOLD, NULL, "Low Voltage Threshold", UiMenuDesc("Voltage threshold for voltage warning colors and auto shutdown.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_FREQUENCY_CALIBRATE, NULL, "Freq. Calibrate", UiMenuDesc("Adjust the frequency correction of the local oscillator. Measure TX frequency and adjust until both match. Or use receive a know reference signal and zero-beat it and then adjust. More information in the Wiki.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_FWD_REV_PWR_DISP, NULL, "Pwr. Display mW", UiMenuDesc("Shows the forward and reverse power values in mW, can be used to calibrate the SWR meter.") },
+    { MENU_CONF, MENU_ITEM, MENU_LOW_POWER_SHUTDOWN, NULL, "Low Voltage Shutdown", UiMenuDesc("Shutdown automatically when supply voltage is below threshold for 60 seconds (only in RX).") },
+	{ MENU_CONF, MENU_ITEM, CONFIG_FREQUENCY_CALIBRATE, NULL, "Freq. Calibrate", UiMenuDesc("Adjust the frequency correction of the local oscillator. Measure TX frequency and adjust until both match. Or use receive a know reference signal and zero-beat it and then adjust. More information in the Wiki.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_FWD_REV_PWR_DISP, NULL, "Pwr. Display mW", UiMenuDesc("Shows the forward and reverse power values in mW, can be used to calibrate the SWR meter.") },
     { MENU_CONF, MENU_ITEM, CONFIG_RF_FWD_PWR_NULL, NULL, "Pwr. Det. Null", UiMenuDesc(" Set the forward and reverse power sensors ADC zero power offset. This setting is enabled ONLY when Disp. Pwr (mW), is enabled. Needs SWR meter hardware modification to work. See Wiki Adjustment and Calibration.") },
     { MENU_CONF, MENU_ITEM, CONFIG_FWD_REV_SENSE_SWAP, NULL, "SWR/PWR Meter FWD/REV Swap", UiMenuDesc("Exchange the assignment of the Power/SWR FWD and REV measurement ADC. Use if your power meter does not show anything during TX.") },
 
@@ -170,41 +190,44 @@ const MenuDescriptor confGroup[] =
 #endif
 
     { MENU_CONF, MENU_ITEM, CONFIG_IQ_AUTO_CORRECTION, NULL, "RX IQ Auto Correction", UiMenuDesc("Receive IQ phase and amplitude imbalance can be automatically adjusted by the mcHF. Switch ON/OFF here. If OFF, it takes the following menu values for compensating the imbalance. The automatic algorithm achieves up to 60dB mirror rejection. See Wiki Adjustments and Calibration.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_80M_RX_IQ_GAIN_BAL, &ts.display_rx_iq, "RX IQ Balance (80m)", UiMenuDesc("IQ Balance Adjust for all receive if frequency translation is NOT OFF. Requires USB/LSB/CW mode to be changeable.See Wiki Adjustments and Calibration.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_80M_RX_IQ_PHASE_BAL, &ts.display_rx_iq, "RX IQ Phase   (80m)", UiMenuDesc("IQ Phase Adjust for all receive if frequency translation is NOT OFF. Requires USB/LSB/CW mode to be changeable.See Wiki Adjustments and Calibration.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_10M_RX_IQ_GAIN_BAL, &ts.display_rx_iq, "RX IQ Balance (10m)", UiMenuDesc("IQ Balance Adjust for all receive if frequency translation is NOT OFF. Requires USB/LSB/CW mode to be changeable.See Wiki Adjustments and Calibration.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_10M_RX_IQ_PHASE_BAL, &ts.display_rx_iq, "RX IQ Phase   (10m)", UiMenuDesc("IQ Phase Adjust for all receive if frequency translation is NOT OFF. Requires USB/LSB/CW mode to be changeable. See Wiki Adjustments and Calibration.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_80M_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (80m)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Requires USB or LSB mode to be changeable. See Wiki Adjustments and Calibration.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_80M_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (80m)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Requires USB or LSB mode to be changeable. See Wiki Adjustments and Calibration.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_10M_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (10m)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Requires USB or LSB mode to be changeable. See Wiki Adjustments and Calibration.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_10M_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (10m)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Requires USB or LSB mode to be changeable. See Wiki Adjustments and Calibration.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_80M_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (80m,CW)", UiMenuDesc("IQ Balance Adjust for CW transmissions (and all transmission if frequency translation is OFF). See Wiki Adjustments and Calibration.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_80M_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (80m,CW)", UiMenuDesc("IQ Phase Adjust for CW transmissions (and all transmission if frequency translation is OFF).See Wiki Adjustments and Calibration.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_10M_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (10m,CW)", UiMenuDesc("IQ Balance Adjust for CW transmissions (and all transmission if frequency translation is OFF).See Wiki Adjustments and Calibration.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_10M_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (10m,CW)", UiMenuDesc("IQ Phase Adjust for CW transmissions (and all transmission if frequency translation is OFF).See Wiki Adjustments and Calibration.") },
+	{ MENU_CONF, MENU_ITEM, CONFIG_80M_RX_IQ_GAIN_BAL, &ts.display_rx_iq, "RX IQ Balance (80m)", UiMenuDesc("IQ Balance Adjust for all receive if frequency translation is NOT OFF. Requires USB/LSB/CW mode to be changeable.See Wiki Adjustments and Calibration.") },
+	{ MENU_CONF, MENU_ITEM, CONFIG_80M_RX_IQ_PHASE_BAL, &ts.display_rx_iq, "RX IQ Phase   (80m)", UiMenuDesc("IQ Phase Adjust for all receive if frequency translation is NOT OFF. Requires USB/LSB/CW mode to be changeable.See Wiki Adjustments and Calibration.") },
+	{ MENU_CONF, MENU_ITEM, CONFIG_10M_RX_IQ_GAIN_BAL, &ts.display_rx_iq, "RX IQ Balance (10m)", UiMenuDesc("IQ Balance Adjust for all receive if frequency translation is NOT OFF. Requires USB/LSB/CW mode to be changeable.See Wiki Adjustments and Calibration.") },
+	{ MENU_CONF, MENU_ITEM, CONFIG_10M_RX_IQ_PHASE_BAL, &ts.display_rx_iq, "RX IQ Phase   (10m)", UiMenuDesc("IQ Phase Adjust for all receive if frequency translation is NOT OFF. Requires USB/LSB/CW mode to be changeable. See Wiki Adjustments and Calibration.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_80M_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (80m)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Requires USB or LSB mode to be changeable. See Wiki Adjustments and Calibration.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_80M_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (80m)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Requires USB or LSB mode to be changeable. See Wiki Adjustments and Calibration.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_20M_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (20m)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 14.100 MHz.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_20M_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (20m)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 14.100 MHz.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_15M_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (15m)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 21.100 MHz.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_15M_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (15m)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 21.100 MHz.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_10M_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (10m)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Requires USB or LSB mode to be changeable. See Wiki Adjustments and Calibration.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_10M_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (10m)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Requires USB or LSB mode to be changeable. See Wiki Adjustments and Calibration.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_10M_UP_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (10mUp)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 29.650 MHz.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_10M_UP_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (10mUp)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 29.650 MHz.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_80M_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (80m,CW)", UiMenuDesc("IQ Balance Adjust for CW transmissions (and all transmission if frequency translation is OFF). See Wiki Adjustments and Calibration.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_80M_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (80m,CW)", UiMenuDesc("IQ Phase Adjust for CW transmissions (and all transmission if frequency translation is OFF).See Wiki Adjustments and Calibration.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_20M_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (20m,CW)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is OFF. Calibrate on 14.100 MHz.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_20M_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (20m,CW)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is OFF. Calibrate on 14.100 MHz.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_15M_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (15m,CW)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is OFF. Calibrate on 21.100 MHz.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_15M_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (15m,CW)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is OFF. Calibrate on 21.100 MHz.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_10M_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (10m,CW)", UiMenuDesc("IQ Balance Adjust for CW transmissions (and all transmission if frequency translation is OFF).See Wiki Adjustments and Calibration.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_10M_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (10m,CW)", UiMenuDesc("IQ Phase Adjust for CW transmissions (and all transmission if frequency translation is OFF).See Wiki Adjustments and Calibration.") },
+//	{ MENU_CONF, MENU_ITEM, CONFIG_10M_UP_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (10mUp,CW)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is OFF. Calibrate on 29.650 MHz.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_10M_UP_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (10mUp,CW)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is OFF. Calibrate on 29.650 MHz.") },
 
-    { MENU_CONF, MENU_ITEM, CONFIG_20M_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (20m)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 14.100 MHz.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_20M_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (20m)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 14.100 MHz.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_15M_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (15m)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 21.100 MHz.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_15M_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (15m)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 21.100 MHz.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_10M_UP_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (10mUp)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 29.650 MHz.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_10M_UP_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (10mUp)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 29.650 MHz.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_20M_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (20m,CW)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is OFF. Calibrate on 14.100 MHz.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_20M_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (20m,CW)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is OFF. Calibrate on 14.100 MHz.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_15M_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (15m,CW)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is OFF. Calibrate on 21.100 MHz.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_15M_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (15m,CW)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is OFF. Calibrate on 21.100 MHz.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_10M_UP_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (10mUp,CW)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is OFF. Calibrate on 29.650 MHz.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_10M_UP_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (10mUp,CW)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is OFF. Calibrate on 29.650 MHz.") },
     // { MENU_CONF, MENU_ITEM, CONFIG_AM_RX_GAIN_BAL,"244","AM  RX IQ Bal.", UiMenuDesc(":soon:") },
     // { MENU_CONF, MENU_ITEM, CONFIG_AM_RX_PHASE_BAL,"244b","AM  RX IQ Phase", UiMenuDesc(":soon:") },
     // { MENU_CONF, MENU_ITEM, CONFIG_FM_RX_GAIN_BAL,"245","FM  RX IQ Bal.", UiMenuDesc(":soon:") },
     //{ MENU_CONF, MENU_ITEM, CONFIG_AM_TX_GAIN_BAL,"254","AM  TX IQ Bal.", UiMenuDesc(":soon:") },
     //{ MENU_CONF, MENU_ITEM, CONFIG_FM_TX_GAIN_BAL,"255","FM  TX IQ Bal.", UiMenuDesc(":soon:") },
+    { MENU_CONF, MENU_ITEM, MENU_NOISE_BLANKER_SETTING, NULL, "RX NB Setting", UiMenuDesc("Set the Noise Blanker strength. Higher values mean more agressive blanking. Also changeable using Encoder 2 if Noise Blanker is active.") },
+//    { MENU_CONF, MENU_ITEM, MENU_DSP_NR_STRENGTH, NULL, "DSP NR Strength", UiMenuDesc("Set the Noise Reduction Strength. Higher values mean more agressive noise reduction but also higher CPU load. Use with extreme care. Also changeable using Encoder 2 if DSP is active.") }, // via knob
+
 #ifdef OBSOLETE_NR
     // DSP Configuration, probably never touched
 	{ MENU_CONF, MENU_ITEM, CONFIG_DSP_NR_DECORRELATOR_BUFFER_LENGTH, NULL, "DSP NR BufLen", UiMenuDesc("DSP LMS noise reduction: length of the audio buffer that is used for simulation of a reference for the LMS algorithm. The longer the buffer, the better the performance, but this buffer length must always be larger than the number of taps in the FIR filter used. Thus, a larger buffer (and larger FIR filter) uses more MCU resources.") },
     { MENU_CONF, MENU_ITEM, CONFIG_DSP_NR_FFT_NUMTAPS, NULL, "DSP NR FIR NumTaps", UiMenuDesc("DSP LMS noise reduction: Number of taps in the DSP noise reduction FIR filter. The larger the number of taps in the filter, the better the performance, but the slower the performance of the filter and the mcHF.") },
-    { MENU_CONF, MENU_ITEM, CONFIG_DSP_NR_POST_AGC_SELECT, NULL, "DSP NR Post-AGC", UiMenuDesc("DSP LMS noise reduction: Perform the DSP LMS noise reduction BEFORE or AFTER the AGC. NO = before AGC, YES = after AGC.") },
+//    { MENU_CONF, MENU_ITEM, CONFIG_DSP_NR_POST_AGC_SELECT, NULL, "DSP NR Post-AGC", UiMenuDesc("DSP LMS noise reduction: Perform the DSP LMS noise reduction BEFORE or AFTER the AGC. NO = before AGC, YES = after AGC.") },
 	{ MENU_CONF, MENU_ITEM, CONFIG_DSP_NOTCH_CONVERGE_RATE, NULL, "DSP Notch ConvRate", UiMenuDesc("DSP LMS automatic notch filter: ") },
     { MENU_CONF, MENU_ITEM, CONFIG_DSP_NOTCH_DECORRELATOR_BUFFER_LENGTH, NULL, "DSP Notch BufLen", UiMenuDesc("DSP LMS automatic notch filter: length of the audio buffer that is used for simulation of a reference for the LMS algorithm. The longer the buffer, the better -and the slower- the performance, but this buffer length must always be larger than the number of taps in the FIR filter used. Thus, a larger buffer (and larger FIR filter) uses more MCU resources.") },
     { MENU_CONF, MENU_ITEM, CONFIG_DSP_NOTCH_FFT_NUMTAPS, NULL, "DSP Notch FIRNumTap", UiMenuDesc("DSP LMS automatic notch filter: Number of taps in the DSP automatic notch FIR filter. The larger the number of taps in the filter, the better the performance, but the slower the performance of the filter and the mcHF.") },
@@ -215,21 +238,38 @@ const MenuDescriptor confGroup[] =
     { MENU_CONF, MENU_ITEM, CONFIG_DSP_NOTCH_DECORRELATOR_BUFFER_LENGTH, NULL, "DSP Notch BufLen", UiMenuDesc("DSP LMS automatic notch filter: length of the audio buffer that is used for simulation of a reference for the LMS algorithm. The longer the buffer, the better -and the slower- the performance, but this buffer length must always be larger than the number of taps in the FIR filter used. Thus, a larger buffer (and larger FIR filter) uses more MCU resources.") },
     { MENU_CONF, MENU_ITEM, CONFIG_DSP_NOTCH_FFT_NUMTAPS, NULL, "DSP Notch FIRNumTap", UiMenuDesc("DSP LMS automatic notch filter: Number of taps in the DSP automatic notch FIR filter. The larger the number of taps in the filter, the better the performance, but the slower the performance of the filter and the mcHF.") },
 #endif
-//    { MENU_CONF, MENU_ITEM, CONFIG_SAM_PLL_TAUR, NULL, "SAM PLL tauR", UiMenuDesc(":soon:") },
+    { MENU_CONF, MENU_ITEM, MENU_DEBUG_NR_GAIN_SHOW, NULL,"NR Show gains", UiMenuDesc("Debugging: show gains of spectral noise reduction") },
+    { MENU_CONF, MENU_ITEM, MENU_DSP_NR_STRENGTH, NULL, "NR Strength", UiMenuDesc("Set the Noise Reduction Strength. Higher values mean more agressive noise reduction but also higher CPU load. Use with extreme care. Also changeable using Encoder 2 if DSP is active.") }, // via knob
+    { MENU_CONF, MENU_ITEM, MENU_DEBUG_NR_BETA, NULL,"NR beta", UiMenuDesc("time constant beta for spectral noise reduction, leave at 0.85") },
+	{ MENU_CONF, MENU_ITEM, MENU_DEBUG_NR_ASNR, NULL,"NR asnr", UiMenuDesc("Devel 2 NR: asnr") },
+	{ MENU_CONF, MENU_ITEM, MENU_DEBUG_NR_GAIN_SMOOTH_WIDTH, NULL,"NR smooth wd.", UiMenuDesc("Devel 2 NR: width of gain smoothing window") },
+	{ MENU_CONF, MENU_ITEM, MENU_DEBUG_NR_GAIN_SMOOTH_THRESHOLD, NULL,"NR smooth thr.", UiMenuDesc("Devel 2 NR: threhold for gain smoothing") },
+    { MENU_CONF, MENU_ITEM, MENU_DEBUG_NR_POST_AGC_SELECT, NULL, "ANR after AGC", UiMenuDesc("DSP LMS noise reduction: Perform the DSP LMS noise reduction BEFORE or AFTER the AGC. NO = before AGC, YES = after AGC.") },
+    { MENU_CONF, MENU_ITEM, MENU_DEBUG_ANR_TAPS, NULL,"ANR num taps", UiMenuDesc("Number of taps of leaky LMS noise reduction") },
+    { MENU_CONF, MENU_ITEM, MENU_DEBUG_ANR_DELAY, NULL,"ANR corr. delay", UiMenuDesc("Delay length of leaky LMS noise reduction") },
+    { MENU_CONF, MENU_ITEM, MENU_DEBUG_ANR_GAIN, NULL,"ANR gain", UiMenuDesc("Gain of leaky LMS noise reduction") },
+    { MENU_CONF, MENU_ITEM, MENU_DEBUG_ANR_LEAK, NULL,"ANR leak", UiMenuDesc("Leak of leaky LMS noise reduction") },
+	//    { MENU_CONF, MENU_ITEM, CONFIG_SAM_PLL_TAUR, NULL, "SAM PLL tauR", UiMenuDesc(":soon:") },
 //    { MENU_CONF, MENU_ITEM, CONFIG_SAM_PLL_TAUI, NULL, "SAM PLL tauI", UiMenuDesc(":soon:") },
 //    { MENU_CONF, MENU_ITEM, CONFIG_SAM_SIDEBAND, NULL, "SAM Sideband", UiMenuDesc(":soon:") },
 
-    // Reset I2C Config EEPROM to empty state
-    { MENU_CONF, MENU_ITEM, CONFIG_RESET_SER_EEPROM, NULL, "Rst Conf EEPROM", UiMenuDesc("Clear the EEPROM so that at next start all stored configuration data is reset to the values stored in Flash (see Backup/Restore).") },
+//    // Reset I2C Config EEPROM to empty state
+//    { MENU_CONF, MENU_ITEM, CONFIG_RESET_SER_EEPROM, NULL, "Rst Conf EEPROM", UiMenuDesc("Clear the EEPROM so that at next start all stored configuration data is reset to the values stored in Flash (see Backup/Restore).") },
 
     { MENU_CONF, MENU_STOP, 0, NULL , NULL, UiMenuDesc("") }
 };
 
 const MenuDescriptor displayGroup[] =
 {
-    { MENU_DISPLAY, MENU_ITEM, CONFIG_LCD_AUTO_OFF_MODE, NULL, "LCD Auto Blank", UiMenuDesc("After x seconds LCD turns dark and LCD data sections stop. So power consumption is decreased and RX hum is decreased, too. LCD operation starts when using any button or the touchscreen.") },
-    { MENU_DISPLAY, MENU_ITEM, CONFIG_FREQ_STEP_MARKER_LINE, NULL, "Step Size Marker", UiMenuDesc("If enabled, you'll see a line under the digit which is currently representing the selected tuning step size") },
-    { MENU_DISPLAY, MENU_ITEM, CONFIG_DISP_FILTER_BANDWIDTH, NULL, "Filter BW Display", UiMenuDesc("Colour of the horizontal Filter Bandwidth indicator bar.") },
+#ifndef SDR_AMBER_480_320
+	{ MENU_DISPLAY, MENU_ITEM, CONFIG_WIDE_SPEC_DEF, NULL, "320x240 Def.Wide Spectrum", UiMenuDesc("Wide mode of spectrum on screen 320x240 is default.") },
+# endif
+	{ MENU_DISPLAY, MENU_ITEM, CONFIG_LCD_AUTO_OFF_MODE, NULL, "LCD Auto Blank", UiMenuDesc("After x seconds LCD turns dark and LCD data sections stop. So power consumption is decreased and RX hum is decreased, too. LCD operation starts when using any button or the touchscreen.") },
+    { MENU_DISPLAY, MENU_ITEM, MENU_CW_DECODER_SNAP_ENABLE, NULL,"Show Tune Helper", UiMenuDesc("graphical tune helper: adjust frequency until yellow vertical line is in centre of green box --> right on CW carrier frequency") },
+	{ MENU_DISPLAY, MENU_ITEM, CONFIG_FREQ_STEP_MARKER_LINE, NULL, "Step Size Marker", UiMenuDesc("If enabled, you'll see a line under the digit which is currently representing the selected tuning step size") },
+    { MENU_DISPLAY, MENU_ITEM, MENU_NO_SHOW_BNDMEM, NULL, "Don't Show BndMem", UiMenuDesc("Don't show BndMemory.") },
+    { MENU_DISPLAY, MENU_ITEM, MENU_CLEAR_PAN_ON_TX, NULL, "Clear Panoram on TX", UiMenuDesc("Clear panoram on TX/TUNE") },
+	{ MENU_DISPLAY, MENU_ITEM, CONFIG_DISP_FILTER_BANDWIDTH, NULL, "Filter BW Display", UiMenuDesc("Colour of the horizontal Filter Bandwidth indicator bar.") },
     { MENU_DISPLAY, MENU_ITEM, MENU_SPECTRUM_SIZE, NULL, "Spectrum Size", UiMenuDesc("Change height of spectrum display") },
     { MENU_DISPLAY, MENU_ITEM, MENU_SPECTRUM_FILTER_STRENGTH, NULL, "Spectrum Filter", UiMenuDesc("Lowpass filter for the spectrum FFT. Low values: fast and nervous spectrum; High values: slow and calm spectrum.") },
     { MENU_DISPLAY, MENU_ITEM, MENU_SPECTRUM_FREQSCALE_COLOUR, NULL, "Spec FreqScale Colour", UiMenuDesc("Colour of the small frequency digits under the spectrum display.") },
@@ -252,10 +292,23 @@ const MenuDescriptor displayGroup[] =
     // { MENU_DISPLAY, MENU_ITEM, MENU_WFALL_NOSIG_ADJUST, NULL, "Wfall NoSig Adj.", UiMenuDesc("Set NO SIGNAL state for waterfall") },
     { MENU_DISPLAY, MENU_ITEM, MENU_METER_COLOUR_UP, NULL, "Upper Meter Colour", UiMenuDesc("Set the colour of the scale of combined S/Power-Meter") },
     { MENU_DISPLAY, MENU_ITEM, MENU_METER_COLOUR_DOWN, NULL, "Lower Meter Colour", UiMenuDesc("Set the colour of the scale of combined SWR/AUD/ALC-Meter") },
-    { MENU_DISPLAY, MENU_ITEM, MENU_DBM_DISPLAY, NULL, "dBm display", UiMenuDesc("RX signal power (measured within the filter bandwidth) can be displayed in dBm or normalized as dBm/Hz. This value is supposed to be quite accurate to +-3dB. Preferably use low spectrum display magnify settings. Accuracy is lower for very very weak and very very strong signals.")},
+    { MENU_DISPLAY, MENU_ITEM, MENU_BOX_COLOUR, NULL, "Boxes Colour", UiMenuDesc("Screen boxes colour") },
+    { MENU_DISPLAY, MENU_ITEM, MENU_TXTLINE_COLOUR, NULL, "Ticker Colour", UiMenuDesc("Ticker colour") },
+	{ MENU_DISPLAY, MENU_ITEM, MENU_DBM_DISPLAY, NULL, "dBm display", UiMenuDesc("RX signal power (measured within the filter bandwidth) can be displayed in dBm or normalized as dBm/Hz. This value is supposed to be quite accurate to +-3dB. Preferably use low spectrum display magnify settings. Accuracy is lower for very very weak and very very strong signals.")},
     { MENU_DISPLAY, MENU_ITEM, MENU_DBM_CALIBRATE, NULL, "dBm calibrate", UiMenuDesc("dBm display calibration. Just an offset (in dB) that is added to the internally calculated dBm or dBm/Hz value.")},
     { MENU_DISPLAY, MENU_ITEM, CONFIG_SMETER_ATTACK, NULL, "S-Meter Attack", UiMenuDesc("Attack controls how quickly the S-Meter reacts to rising signal levels, higher values represent quicker reaction") },
     { MENU_DISPLAY, MENU_ITEM, CONFIG_SMETER_DECAY, NULL, "S-Meter Decay", UiMenuDesc("Decay controls how quickly the S-Meter reacts to falling signal levels, higher values represent quicker reaction") },
+    { MENU_DISPLAY, MENU_ITEM, MENU_PEAK_IND_TUNE, NULL, "Peak Ind. Timer, ms", UiMenuDesc("Tune/OFF S/PWR meter peak indicator") },
+    { MENU_DISPLAY, MENU_ITEM, MENU_SMETER_AM_NOT_LO, NULL, "S-Meter NotLO in AM", UiMenuDesc("Don't calculate LO in AM mode") },
+	{ MENU_DISPLAY, MENU_ITEM, MENU_TCXO_MODE, NULL, "TCXO Off/On/Stop", UiMenuDesc("The software TCXO can be turned ON (set frequency is adjusted so that generated frequency matches the wanted frequency); OFF (no correction or measurement done); or STOP (no correction but measurement).") },
+    { MENU_DISPLAY, MENU_ITEM, MENU_TCXO_C_F, &lo.sensor_present, "TCXO Temp. (C/F)", UiMenuDesc("Show the measure TCXO temperature in Celsius or Fahrenheit.") },
+    // RTC Setup and Settings
+    { MENU_DISPLAY, MENU_ITEM, CONFIG_RTC_START, &ts.vbat_present,"RTC Start", UiMenuDesc("Start using the RTC and use the modified button layout. Will reboot your mcHF. Please use only if you completed the RTC mod otherwise you will need to disconnect battery and power and reboot to get a working mcHF. This menu is only visible if Backup RAM (VBat) was detected.") },
+    { MENU_DISPLAY, MENU_ITEM, CONFIG_RTC_HOUR, &ts.rtc_present,"RTC Hour", UiMenuDesc("Sets the Real Time Clock Hour. Needs HW Modifications.") },
+    { MENU_DISPLAY, MENU_ITEM, CONFIG_RTC_MIN, &ts.rtc_present,"RTC Min", UiMenuDesc("Sets the Real Time Clock Minutes. Needs HW Modifications.") },
+    { MENU_DISPLAY, MENU_ITEM, CONFIG_RTC_SEC, &ts.rtc_present,"RTC Seconds", UiMenuDesc("Sets the Real Time Clock Seconds. Needs HW Modifications.") },
+    { MENU_DISPLAY, MENU_ITEM, CONFIG_RTC_RESET, &ts.vbat_present,"RTC Reset", UiMenuDesc("Full Reset of STM32 RTC. Can be used to simulate first start with RTC mod completed") },
+    { MENU_DISPLAY, MENU_ITEM, CONFIG_RTC_CALIB, &ts.rtc_present,"RTC Calibration", UiMenuDesc("Sets the Real Time Clock Frequency calibration value in ppm. 1s/day deviation equals 11.57 ppm deviation") },
 #ifdef USE_8bit_FONT
 	{ MENU_DISPLAY, MENU_ITEM, MENU_FREQ_FONT, NULL, "Freq display font", UiMenuDesc("Font selection for frequency display. Allows selection of old/modern fonts")},
 #endif
@@ -269,6 +322,7 @@ const MenuDescriptor cwGroup[] =
     { MENU_CW, MENU_ITEM, MENU_KEYER_MODE, NULL, "CW Keyer Mode", UiMenuDesc("Select how the mcHF interprets the connected keyer signals. Supported modes: Iambic A and B Keyer (IAM A/B), Straight Key (STR_K), and Ultimatic Keyer (ULTIM)") },
     { MENU_CW, MENU_ITEM, MENU_KEYER_SPEED, NULL, "CW Keyer Speed", UiMenuDesc("Keyer Speed for the automatic keyer modes in WpM. Also changeable via Encoder 3 if in CW Mode.") },
     { MENU_CW, MENU_ITEM, MENU_KEYER_WEIGHT, NULL, "CW Keyer Weight", UiMenuDesc("Keyer Dit/Pause ratio for the automatic keyer modes. Higher values increase length of dit, decreases length of pause so that the total time is still according to the set WpM value.") },
+    { MENU_CW, MENU_ITEM, MENU_CW_SMOOTH, NULL, "CW Sign.Eg.Smooth, ms", UiMenuDesc("Smooth of CW signal edges.") },
     { MENU_CW, MENU_ITEM, MENU_SIDETONE_GAIN, NULL, "CW Sidetone Gain", UiMenuDesc("Audio volume for the monitor sidetone in CW TX. Also changeable via Encoder 1 if in CW Mode.") },
     { MENU_CW, MENU_ITEM, MENU_SIDETONE_FREQUENCY, NULL, "CW Side/Offset Freq", UiMenuDesc("Sidetone Frequency (also Offset frequency, see CW Freq. Offset below)") },
     { MENU_CW, MENU_ITEM, MENU_PADDLE_REVERSE, NULL, "CW Paddle Reverse", UiMenuDesc("Dit is Dah and Dah is Dit. Use if your keyer needs reverse meaning of the paddles.") },
@@ -277,14 +331,17 @@ const MenuDescriptor cwGroup[] =
     { MENU_CW, MENU_ITEM, MENU_CW_AUTO_MODE_SELECT, NULL, "CW LSB/USB Select", UiMenuDesc("Set appropriate sideband mode for CW. If AUTO, sideband is chosen for bands by its frequency. A long press on Mode button gets the other sideband mode")},
     { MENU_CW, MENU_ITEM, MENU_CW_DECODER, NULL,"CW decoder enable", UiMenuDesc("enable experimental CW decoding") },
     { MENU_CW, MENU_ITEM, MENU_CW_DECODER_THRESH, NULL,"Signal threshold", UiMenuDesc("All signals above this threshold are intepreted as a dit or daah") },
-    { MENU_CW, MENU_ITEM, MENU_CW_DECODER_SNAP_ENABLE, NULL,"Tune helper", UiMenuDesc("graphical tune helper: adjust frequency until yellow vertical line is in centre of green box --> right on CW carrier frequency") },
+//    { MENU_CW, MENU_ITEM, MENU_CW_DECODER_SNAP_ENABLE, NULL,"Tune helper", UiMenuDesc("graphical tune helper: adjust frequency until yellow vertical line is in centre of green box --> right on CW carrier frequency") },
 //    { MENU_CW, MENU_ITEM, MENU_CW_DECODER_AVERAGE, NULL,"Goertzel averager", UiMenuDesc("The CW tone is averaged over N Goertzel values") },
     { MENU_CW, MENU_ITEM, MENU_CW_DECODER_BLOCKSIZE, NULL,"Blocksize for Goertzel", UiMenuDesc("How many samples are taken for the signal detection with the Goertzel algorithm?") },
 //    { MENU_CW, MENU_ITEM, MENU_CW_DECODER_AGC, NULL,"AGC for decoder", UiMenuDesc("Enable/disable AGC for CW decoder") },
     { MENU_CW, MENU_ITEM, MENU_CW_DECODER_NOISECANCEL, NULL,"Noise cancel", UiMenuDesc("Enable/disable noise canceler for CW decoder") },
     { MENU_CW, MENU_ITEM, MENU_CW_DECODER_SPIKECANCEL, NULL,"Spike cancel", UiMenuDesc("Enable/disable spike canceler or short cancel for CW decoder") },
     { MENU_CW, MENU_ITEM, MENU_CW_DECODER_USE_3_GOERTZEL, NULL,"AGC for decoder", UiMenuDesc("Enable/disable AGC for CW decoder") },
-    { MENU_CW, MENU_ITEM, MENU_CW_DECODER_SHOW_CW_LED, NULL,"show CW LED", UiMenuDesc("Enable/disable LED for CW decoder") },
+    { MENU_CW, MENU_ITEM, MENU_CW_DECODER_SHOW_CW_LED, NULL,"Show CW LED", UiMenuDesc("Enable/disable LED for CW decoder") },
+    { MENU_CW, MENU_ITEM, MENU_CW_MACRO_INTERVAL, NULL,"CW MacroCycledInterv, sec.", UiMenuDesc("CW Macros Cycled TX interval, sec.") },
+    { MENU_CW, MENU_ITEM, MENU_CW_BEACON_INTERVAL, NULL,"CW Beacon Interval, min.", UiMenuDesc("CW Beacon interval, min.") },
+    { MENU_CW, MENU_ITEM, MENU_CW_FAST_MACRO_1_2, NULL,"CW Fast Macro 1,2", UiMenuDesc("Enable/disable fast TXing CW macro 1 and 2") },
 	{ MENU_CW, MENU_STOP, 0, NULL, NULL, UiMenuDesc("") }
 };
 
@@ -320,12 +377,19 @@ const MenuDescriptor filterGroup[] =
 
 const MenuDescriptor powGroup[] =
 {
-    { MENU_POW, MENU_ITEM, CONFIG_TUNE_POWER_LEVEL, NULL, "Tune Power Level", UiMenuDesc("Select the power level for TUNE operation. May be set using the selected power level or have a fixed power level.") },
+	{ MENU_POW, MENU_ITEM, CONFIG_TX_DISABLE, NULL, "Transmit Disable", UiMenuDesc("Disable all transmissions unconditionally. In CW you will be able to hear a sidetone but no transmission is made.") },
+	{ MENU_POW, MENU_ITEM, CONFIG_VSWR_PROTECTION_THRESHOLD, NULL, "VSWR Protect.threshold", UiMenuDesc("If not OFF, on TX/tune the bias of PA will be down to 0 etc when exceeding the specified value of VSWR") },
+	{ MENU_POW, MENU_ITEM, MENU_MIC_TYPE, NULL, "Mic Type", UiMenuDesc("Microphone type. Electret or Dynamic. ELECTRET is recommended. Selecting DYNAMIC when an Electret mic is present will likely cause terrible audio distortion") },
+	{ MENU_POW, MENU_ITEM, MENU_MIC_GAIN, NULL, "Mic Input Gain", UiMenuDesc("Microphone gain. Also changeable via Encoder 3 if Microphone is selected as Input") },
+	{ MENU_POW, MENU_ITEM, MENU_LINE_GAIN, NULL, "Line Input Gain", UiMenuDesc("LineIn gain. Also changeable via Encoder 3 if LineIn Left (L>L) or LineIn Right (L>R) is selected as Input") },
+	{ MENU_POW, MENU_ITEM, MENU_TX_COMPRESSION_LEVEL, NULL, "TX Audio Compress", UiMenuDesc("Control the TX audio compressor. Higher values give more compression. Set to CUSTOM for user defined compression parameters. See below. Also changeable via Encoder 1 (CMP).") },
+	{ MENU_POW, MENU_ITEM, MENU_ALC_RELEASE, NULL, "TX ALC Release Time", UiMenuDesc("If Audio Compressor Config is set to CUSTOM, sets the value of the Audio Compressor Release time. Otherwise shows predefined value of selected compression level.") },
+	{ MENU_POW, MENU_ITEM, MENU_ALC_POSTFILT_GAIN, NULL, "TX ALC Input Gain", UiMenuDesc("If Audio Compressor Config is set to CUSTOM, sets the value of the ALC Input Gain. Otherwise shows predefined value of selected compression level.") },
+	{ MENU_POW, MENU_ITEM, CONFIG_TUNE_POWER_LEVEL, NULL, "Tune Power Level", UiMenuDesc("Select the power level for TUNE operation. May be set using the selected power level or have a fixed power level.") },
     { MENU_POW, MENU_ITEM, CONFIG_TUNE_TONE_MODE, NULL, "Tune Tone (SSB)", UiMenuDesc("Select if single tone or two tone is generated during TUNE operation. Not persistent.") },
     { MENU_POW, MENU_ITEM, CONFIG_CW_PA_BIAS, NULL, "CW PA Bias (If >0 )", UiMenuDesc("If set to a value above 0, this BIAS is used during CW transmission; otherwise normal BIAS is used during CW") },
     { MENU_POW, MENU_ITEM, CONFIG_REDUCE_POWER_ON_LOW_BANDS, NULL, "Reduce Power on Low Bands", UiMenuDesc("If set (recommended!)  frequencies below 8Mhz (40m or lower) require higher power adjust values (four times). This permits better control of generated power on these frequencies.") },
     { MENU_POW, MENU_ITEM, CONFIG_REDUCE_POWER_ON_HIGH_BANDS, NULL, "Reduce Power on High Bands", UiMenuDesc("If set frequencies above 8Mhz (30m or higher) require higher power adjust values (four times). This permits better control of generated power on these frequencies.") },
-    { MENU_POW, MENU_ITEM, CONFIG_VSWR_PROTECTION_THRESHOLD, NULL, "VSWR Protect.threshold", UiMenuDesc("If not OFF, on TX/tune the bias of PA will be down to 0 etc when exceeding the specified value of VSWR") }, 
     { MENU_POW, MENU_ITEM, CONFIG_PA_BIAS, NULL, "PA Bias", UiMenuDesc("Defines the BIAS value of the PA. See Adjustment and Calibration for more information.") },
     { MENU_POW, MENU_ITEM, CONFIG_2200M_5W_ADJUST,&band_enabled[BAND_MODE_2200],"2200m 5W PWR Adjust", UiMenuDesc("Defines the internal power adjustment factor to achieve 5W power on this band. See Adjustment and Calibration for more information.") },
     { MENU_POW, MENU_ITEM, CONFIG_630M_5W_ADJUST,&band_enabled[BAND_MODE_630],"630m  5W PWR Adjust", UiMenuDesc("Defines the internal power adjustment factor to achieve 5W power on this band. See Adjustment and Calibration for more information.") },
@@ -367,17 +431,69 @@ const MenuDescriptor powGroup[] =
     { MENU_POW, MENU_ITEM, CONFIG_FWD_REV_COUPLING_80M_ADJ, NULL, "80m  Coupling Adj.", UiMenuDesc("Power Meter Adjustment factor for the 80m band power values. See Wiki.") },
     { MENU_POW, MENU_ITEM, CONFIG_FWD_REV_COUPLING_40M_ADJ, NULL, "40m  Coupling Adj.", UiMenuDesc("Power Meter Adjustment factor for the 40m and 60m band power values. See Wiki.") },
     { MENU_POW, MENU_ITEM, CONFIG_FWD_REV_COUPLING_20M_ADJ, NULL, "20m  Coupling Adj.", UiMenuDesc("Power Meter Adjustment factor for the 20m and 30m band power values. See Wiki.") },
-    { MENU_POW, MENU_ITEM, CONFIG_FWD_REV_COUPLING_15M_ADJ, NULL, "15m  Coupling Adj.", UiMenuDesc("Power Meter Adjustment factor for the 10m - 17m bands power values. See Wiki.") },
+    { MENU_POW, MENU_ITEM, CONFIG_FWD_REV_COUPLING_15M_ADJ, NULL, "15m  Coupling Adj.", UiMenuDesc("Power Meter Adjustment factor for the 15m - 12m bands power values. See Wiki.") },
+    { MENU_POW, MENU_ITEM, CONFIG_FWD_REV_COUPLING_10M_ADJ, NULL, "10m  Coupling Adj.", UiMenuDesc("Power Meter Adjustment factor for the 10m band power values. See Wiki.") },
     { MENU_POW, MENU_ITEM, CONFIG_FWD_REV_COUPLING_6M_ADJ,&band_enabled[BAND_MODE_6], "6m   Coupling Adj.", UiMenuDesc("Power Meter Adjustment factor for the 6m band power values. See Wiki.") },
     { MENU_POW, MENU_ITEM, CONFIG_FWD_REV_COUPLING_2M_ADJ,&band_enabled[BAND_MODE_2], "2m   Coupling Adj.", UiMenuDesc("Power Meter Adjustment factor for the 2m band power values. See Wiki.") },
     { MENU_POW, MENU_ITEM, CONFIG_FWD_REV_COUPLING_70CM_ADJ,&band_enabled[BAND_MODE_70], "70cm Coupling Adj.", UiMenuDesc("Power Meter Adjustment factor for the 70cm band power values. See Wiki.") },
     { MENU_POW, MENU_ITEM, CONFIG_FWD_REV_COUPLING_23CM_ADJ,&band_enabled[BAND_MODE_23], "23cm Coupling Adj.", UiMenuDesc("Power Meter Adjustment factor for the 23cm band power values. See Wiki.") },
+//    { MENU_POW, MENU_ITEM, CONFIG_80M_RX_IQ_GAIN_BAL, &ts.display_rx_iq, "RX IQ Balance (80m)", UiMenuDesc("IQ Balance Adjust for all receive if frequency translation is NOT OFF. Requires USB/LSB/CW mode to be changeable.See Wiki Adjustments and Calibration.") },
+//    { MENU_POW, MENU_ITEM, CONFIG_80M_RX_IQ_PHASE_BAL, &ts.display_rx_iq, "RX IQ Phase   (80m)", UiMenuDesc("IQ Phase Adjust for all receive if frequency translation is NOT OFF. Requires USB/LSB/CW mode to be changeable.See Wiki Adjustments and Calibration.") },
+//    { MENU_POW, MENU_ITEM, CONFIG_10M_RX_IQ_GAIN_BAL, &ts.display_rx_iq, "RX IQ Balance (10m)", UiMenuDesc("IQ Balance Adjust for all receive if frequency translation is NOT OFF. Requires USB/LSB/CW mode to be changeable.See Wiki Adjustments and Calibration.") },
+//    { MENU_POW, MENU_ITEM, CONFIG_10M_RX_IQ_PHASE_BAL, &ts.display_rx_iq, "RX IQ Phase   (10m)", UiMenuDesc("IQ Phase Adjust for all receive if frequency translation is NOT OFF. Requires USB/LSB/CW mode to be changeable. See Wiki Adjustments and Calibration.") },
+    { MENU_POW, MENU_ITEM, CONFIG_160M_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (160m)*", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 1.900 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_160M_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (160m)*", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 1.900 MHz.") },
+	{ MENU_POW, MENU_ITEM, CONFIG_80M_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (80m)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is NOT OFF.  Calibrate on 3.600 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_80M_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (80m)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF.  Calibrate on 3.600 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_40M_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (40m)*", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 7.100 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_40M_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (40m)*", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 7.100 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_30M_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (30m)*", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 10.100 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_30M_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (30m)*", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 10.100 MHz.") },
+	{ MENU_POW, MENU_ITEM, CONFIG_20M_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (20m)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 14.100 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_20M_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (20m)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 14.100 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_17M_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (17m)*", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 18.100 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_17M_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (17m)*", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 18.100 MHz.") },
+	{ MENU_POW, MENU_ITEM, CONFIG_15M_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (15m)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 21.100 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_15M_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (15m)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 21.100 MHz.") },
+	{ MENU_POW, MENU_ITEM, CONFIG_12M_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (12m)*", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 24.900 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_12M_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (12m)*", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 24.900 MHz.") },
+	{ MENU_POW, MENU_ITEM, CONFIG_10M_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (10m)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 28.100 MHz..") },
+    { MENU_POW, MENU_ITEM, CONFIG_10M_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (10m)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 28.100 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_10M_UP_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (10mUp)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 29.650 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_10M_UP_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (10mUp)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 29.650 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_6M_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (6m)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 52.000 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_6M_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (6m)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 52.000 MHz.") },
+	{ MENU_POW, MENU_ITEM, CONFIG_160M_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (160m,CW)*", UiMenuDesc("IQ Balance Adjust for CW transmissions (and all transmission if frequency translation is OFF). Calibrate on 1.900 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_160M_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (160m,CW)*", UiMenuDesc("IQ Phase Adjust for CW transmissions (and all transmission if frequency translation is OFF). Calibrate on 1.900 MHz.") },
+	{ MENU_POW, MENU_ITEM, CONFIG_80M_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (80m,CW)", UiMenuDesc("IQ Balance Adjust for CW transmissions (and all transmission if frequency translation is OFF). Calibrate on 3.600 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_80M_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (80m,CW)", UiMenuDesc("IQ Phase Adjust for CW transmissions (and all transmission if frequency translation is OFF). Calibrate on 3.600 MHz.") },
+	{ MENU_POW, MENU_ITEM, CONFIG_40M_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (40m,CW)*", UiMenuDesc("IQ Balance Adjust for CW transmissions (and all transmission if frequency translation is OFF). Calibrate on 7.100 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_40M_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (40m,CW)*", UiMenuDesc("IQ Phase Adjust for CW transmissions (and all transmission if frequency translation is OFF). Calibrate on 7.100 MHz.") },
+	{ MENU_POW, MENU_ITEM, CONFIG_30M_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (30m,CW)*", UiMenuDesc("IQ Balance Adjust for CW transmissions (and all transmission if frequency translation is OFF). Calibrate on 10.100 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_30M_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (30m,CW)*", UiMenuDesc("IQ Phase Adjust for CW transmissions (and all transmission if frequency translation is OFF). Calibrate on 10.100 MHz.") },
+	{ MENU_POW, MENU_ITEM, CONFIG_20M_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (20m,CW)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is OFF. Calibrate on 14.100 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_20M_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (20m,CW)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is OFF. Calibrate on 14.100 MHz.") },
+	{ MENU_POW, MENU_ITEM, CONFIG_17M_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (17m,CW)*", UiMenuDesc("IQ Balance Adjust for CW transmissions (and all transmission if frequency translation is OFF). Calibrate on 18.100 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_17M_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (17m,CW)*", UiMenuDesc("IQ Phase Adjust for CW transmissions (and all transmission if frequency translation is OFF). Calibrate on 18.100 MHz.") },
+	{ MENU_POW, MENU_ITEM, CONFIG_15M_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (15m,CW)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is OFF. Calibrate on 21.100 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_15M_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (15m,CW)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is OFF. Calibrate on 21.100 MHz.") },
+	{ MENU_POW, MENU_ITEM, CONFIG_12M_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (12m,CW)*", UiMenuDesc("IQ Balance Adjust for CW transmissions (and all transmission if frequency translation is OFF). Calibrate on 24.900 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_12M_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (12m,CW)*", UiMenuDesc("IQ Phase Adjust for CW transmissions (and all transmission if frequency translation is OFF). Calibrate on 24.900 MHz.") },
+	{ MENU_POW, MENU_ITEM, CONFIG_10M_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (10m,CW)", UiMenuDesc("IQ Balance Adjust for CW transmissions (and all transmission if frequency translation is OFF). Calibrate on 28.100 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_10M_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (10m,CW)", UiMenuDesc("IQ Phase Adjust for CW transmissions (and all transmission if frequency translation is OFF). Calibrate on 28.100 MHz.") },
+	{ MENU_POW, MENU_ITEM, CONFIG_10M_UP_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (10mUp,CW)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is OFF. Calibrate on 29.650 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_10M_UP_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (10mUp,CW)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is OFF. Calibrate on 29.650 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_6M_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (6m,CW)", UiMenuDesc("IQ Balance Adjust for CW transmissions (and all transmission if frequency translation is OFF). Calibrate on 52.000 MHz.") },
+    { MENU_POW, MENU_ITEM, CONFIG_6M_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (6m,CW)", UiMenuDesc("IQ Phase Adjust for CW transmissions (and all transmission if frequency translation is OFF). Calibrate on 52.000 MHz.") },
 
     { MENU_POW, MENU_STOP, 0, NULL, NULL, UiMenuDesc("") }
 };
 
 const MenuDescriptor men2touchGroup[] =
 {
+#ifdef SDR_AMBER
+    { MENU_MEN2TOUCH, MENU_ITEM, MENU_INPUT_STATE, NULL, "RX Input State", UiMenuDesc("Amber - State of RX input group.") },
+#endif
     { MENU_MEN2TOUCH, MENU_ITEM, MENU_DYNAMICTUNE, NULL, "Dynamic Tune", UiMenuDesc("Toggles dynamic tune mode") },
     { MENU_MEN2TOUCH, MENU_ITEM, MENU_MIC_LINE_MODE, NULL, "Mic/Line Select", UiMenuDesc("Select the required signal input for transmit (except in CW). Also changeable via long press on M3") },
     { MENU_MEN2TOUCH, MENU_ITEM, MENU_SPECTRUM_MODE, NULL, "Spectrum Type", UiMenuDesc("Select if you want a scope-like or a waterfall-like (actually a fountain) display") },
@@ -408,7 +524,13 @@ const MenuDescriptor infoGroup[] =
     { MENU_SYSINFO, MENU_INFO, INFO_CODEC_TWINPEAKS, NULL,"Audio Codec Twinpeaks Corr.", UiMenuDesc("In some cases the audio codec needs to be restarted to produce correct IQ. The IQ auto correction detects this. If this fixes the problem, Done is displayed, Failed otherwise") },
     { MENU_SYSINFO, MENU_INFO, INFO_VBAT, NULL,"Backup RAM Battery", UiMenuDesc("Battery Support for Backup RAM present?") },
     { MENU_SYSINFO, MENU_INFO, INFO_RTC, NULL,"Real Time Clock", UiMenuDesc("Battery Supported Real Time Clock present?") },
-    { MENU_SYSINFO, MENU_INFO, INFO_LICENCE, NULL,"FW license", UiMenuDesc("Display license of firmware") },
+	{ MENU_SYSINFO, MENU_INFO, INFO_LO_TX_SUPR_DACs, NULL,"LO_TX Supression DACs", UiMenuDesc("LO_TX Supression DACs (0/1) are present?") },
+#ifdef SDR_AMBER
+	{ MENU_SYSINFO, MENU_INFO, INFO_AMBER_IO8, NULL,"Amber-I/Ox8", UiMenuDesc("Amber - I/Ox8 PCF8574A is present?") },
+	{ MENU_SYSINFO, MENU_INFO, INFO_AMBER_IO4, NULL,"Amber-I/Ox4", UiMenuDesc("Amber - I/Ox4 PCA9536 is present?") },
+	{ MENU_SYSINFO, MENU_INFO, INFO_AMBER_DAC_PWR_TX, NULL,"Amber-DAC_TX_PWR", UiMenuDesc("Amber - DAC MCP4725 for TX PWR reg. is present?") },
+#endif
+	{ MENU_SYSINFO, MENU_INFO, INFO_LICENCE, NULL,"FW license", UiMenuDesc("Display license of firmware") },
     { MENU_SYSINFO, MENU_INFO, INFO_HWLICENCE, NULL,"HW license", UiMenuDesc("Display license of hardware") },
 
     { MENU_SYSINFO, MENU_STOP, 0, NULL, NULL, UiMenuDesc("") }
@@ -417,6 +539,7 @@ const MenuDescriptor infoGroup[] =
 const MenuDescriptor debugGroup[] =
 {
     { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_ENABLE_INFO, NULL,"Enable Debug Info Display", UiMenuDesc("Enable debug outputs on LCD for testing purposes (touch screen coordinates, load) and audio interrupt duration indication via green led") },
+    { MENU_DEBUG, MENU_ITEM, CONFIG_FWD_REV_PWR_DISP, NULL, "Pwr. F/R Display (mW)", UiMenuDesc("Shows the forward and reverse power values in mW, can be used to calibrate the SWR meter.") },
     { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_CW_OFFSET_SHIFT_KEEP_SIGNAL, NULL,"CW Shift Keeps Signal", UiMenuDesc("Enable automatic sidetone correction for CW OFFSET MODE = SHIFT. If you tuned in SSB to a CW signal around the sidetone frequency, you'll keep that signal when going to CW. Even if you switch from USB to CW-LSB etc.") },
     { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_TX_AUDIO, NULL,"TX Audio via USB", UiMenuDesc("If enabled, send generated audio to PC during TX.") },
     { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_CLONEOUT, NULL,"FT817 Clone Transmit", UiMenuDesc("Will in future send out memory data to an FT817 Clone Info (to be used with CHIRP).") },
@@ -424,7 +547,7 @@ const MenuDescriptor debugGroup[] =
 //    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_NEW_NB, NULL,"New Noiseblanker", UiMenuDesc("New noiseblanker for testing purposes") },
 //    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_NR_ENABLE, NULL,"Spectral NR", UiMenuDesc("enable spectral noise reduction for testing purposes") },
 //    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_NR_LONG_TONE_ENABLE, NULL,"Long tone", UiMenuDesc("enable long tone detection in spectral noise reduction for testing purposes") },
-    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_NR_GAIN_SHOW, NULL,"Show gains", UiMenuDesc("Debugging: show gains of spectral noise reduction") },
+//    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_NR_GAIN_SHOW, NULL,"Show gains", UiMenuDesc("Debugging: show gains of spectral noise reduction") },
 
 //	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_NR_LONG_TONE_ALPHA, NULL,"Long tone alpha", UiMenuDesc("time constant alpha for long tone detection in spectral noise reduction") },
 //	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_NR_LONG_TONE_THRESH, NULL,"Long tone thresh", UiMenuDesc("threshold for long tone detection in spectral noise reduction") },
@@ -435,26 +558,27 @@ const MenuDescriptor debugGroup[] =
 //    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_NR_VAD_TYPE, NULL,"NR VAD type", UiMenuDesc("VAD type for spectral noise reduction voice activity detector") },
 //	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_NR_VAD_DELAY, NULL,"NR VAD delay", UiMenuDesc("delay for spectral noise reduction voice activity detector") },
 
-	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_NR_BETA, NULL,"NR beta", UiMenuDesc("time constant beta for spectral noise reduction, leave at 0.85") },
+//	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_NR_BETA, NULL,"NR beta", UiMenuDesc("time constant beta for spectral noise reduction, leave at 0.85") },
 //	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_NR_Mode, NULL,"NR Mode", UiMenuDesc("switch between the released NR and two development NRs") },
-	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_NR_ASNR, NULL,"NR asnr", UiMenuDesc("Devel 2 NR: asnr") },
+//	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_NR_ASNR, NULL,"NR asnr", UiMenuDesc("Devel 2 NR: asnr") },
 //#if defined(STM32F7) || defined(STM32H7)
 //	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_NR_FFT_SIZE, NULL,"NR FFT Size256", UiMenuDesc("enable FFT256 instead of FFT128 for devel2 NR") },
 //	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_NR_DEC_ENABLE, NULL,"NR decimation", UiMenuDesc("enable decimation-by-2 down to 6ksps for NR") },
 //#endif
-	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_NR_GAIN_SMOOTH_WIDTH, NULL,"NR smooth wd.", UiMenuDesc("Devel 2 NR: width of gain smoothing window") },
-	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_NR_GAIN_SMOOTH_THRESHOLD, NULL,"NR smooth thr.", UiMenuDesc("Devel 2 NR: threhold for gain smoothing") },
+//	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_NR_GAIN_SMOOTH_WIDTH, NULL,"NR smooth wd.", UiMenuDesc("Devel 2 NR: width of gain smoothing window") },
+//	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_NR_GAIN_SMOOTH_THRESHOLD, NULL,"NR smooth thr.", UiMenuDesc("Devel 2 NR: threhold for gain smoothing") },
 
 	//    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_RTTY_ATC, NULL,"RTTY ATC Enable", UiMenuDesc("Enable automatic threshold correction ATC for RTTY decoding") },
 #ifdef USE_TWO_CHANNEL_AUDIO
 	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_ENABLE_STEREO, NULL,"STEREO Enable", UiMenuDesc("Enable stereo demodulation modes") },
 #endif
 #ifdef USE_LEAKY_LMS
-	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_LEAKY_LMS, NULL,"leaky LMS", UiMenuDesc("Use leaky LMS noise reduction instead of built-in CMSIS LMS algorithm") },
-	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_ANR_TAPS, NULL,"NR no taps", UiMenuDesc("Number of taps of leaky LMS noise reduction") },
-	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_ANR_DELAY, NULL,"NR delay", UiMenuDesc("Delay length of leaky LMS noise reduction") },
-	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_ANR_GAIN, NULL,"NR gain", UiMenuDesc("Gain of leaky LMS noise reduction") },
-	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_ANR_LEAK, NULL,"NR leak", UiMenuDesc("Leak of leaky LMS noise reduction") },
+//	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_LEAKY_LMS, NULL,"ANR(LeakyLMS) Enable", UiMenuDesc("Use leaky LMS noise reduction instead of built-in CMSIS LMS algorithm") },
+//  { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_NR_POST_AGC_SELECT, NULL, "ANR after AGC", UiMenuDesc("DSP LMS noise reduction: Perform the DSP LMS noise reduction BEFORE or AFTER the AGC. NO = before AGC, YES = after AGC.") },
+//	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_ANR_TAPS, NULL,"ANR num taps", UiMenuDesc("Number of taps of leaky LMS noise reduction") },
+//	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_ANR_DELAY, NULL,"ANR corr. delay", UiMenuDesc("Delay length of leaky LMS noise reduction") },
+//	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_ANR_GAIN, NULL,"ANR gain", UiMenuDesc("Gain of leaky LMS noise reduction") },
+//	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_ANR_LEAK, NULL,"ANR leak", UiMenuDesc("Leak of leaky LMS noise reduction") },
 #endif
 	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_OSC_SI5351_PLLRESET, NULL,"Si5351a PLL Reset", UiMenuDesc("Debug Setting: Select when the Si5351a does a PLL RESET") },
     { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_HMC1023_COARSE, &hmc1023.present,"HMC1023 Coarse", UiMenuDesc("Debug Setting: Change LPF HMC1023LP5E coarse bandwidth") },
@@ -464,11 +588,53 @@ const MenuDescriptor debugGroup[] =
     { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_HMC1023_OPAMP, &hmc1023.present,"HMC1023 Opamp Bias", UiMenuDesc("Debug Setting: Switch LPF HMC1023LP5E Opamp Bias") },
     { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_HMC1023_DRVR, &hmc1023.present,"HMC1023 Driver Bias", UiMenuDesc("Debug Setting: Set HMC1023 Driver Bias") },
     { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_TWINPEAKS_CORR_RUN, NULL,"Trigger Twinpeaks Corr.", UiMenuDesc("Trigger Twinpeaks Correction Manually if IQ Auto Correction is enabled, otherwise you will see 'Not Possible'") },
-    { MENU_DEBUG, MENU_ITEM, CONFIG_RESET_SER_EEPROM_SIGNATURE, NULL, "Rst Conf EEPROM", UiMenuDesc("Clear the EEPROMi signature but keep all config values. This is mainly for debugging purposes).") },
-    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_FREEDV_MODE, NULL, "FreeDV Mode", UiMenuDesc("Change active FreeDV mode. Please note, you have to reboot to activate new mode") },
-    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_FREEDV_SQL_THRESHOLD, NULL, "FreeDV Squelch threshold", UiMenuDesc("If not OFF, FreeDV will squelch if detected SNR is below set value.") },
+//    { MENU_DEBUG, MENU_ITEM, CONFIG_20M_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (20m)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 14.100 MHz.") },
+//    { MENU_DEBUG, MENU_ITEM, CONFIG_20M_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (20m)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 14.100 MHz.") },
+//    { MENU_DEBUG, MENU_ITEM, CONFIG_15M_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (15m)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 21.100 MHz.") },
+//    { MENU_DEBUG, MENU_ITEM, CONFIG_15M_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (15m)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 21.100 MHz.") },
+//    { MENU_DEBUG, MENU_ITEM, CONFIG_10M_UP_TX_IQ_GAIN_BAL, NULL, "TX IQ Balance (10mUp)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 29.650 MHz.") },
+//    { MENU_DEBUG, MENU_ITEM, CONFIG_10M_UP_TX_IQ_PHASE_BAL, NULL, "TX IQ Phase   (10mUp)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is NOT OFF. Calibrate on 29.650 MHz.") },
+//    { MENU_DEBUG, MENU_ITEM, CONFIG_20M_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (20m,CW)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is OFF. Calibrate on 14.100 MHz.") },
+//    { MENU_DEBUG, MENU_ITEM, CONFIG_20M_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (20m,CW)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is OFF. Calibrate on 14.100 MHz.") },
+//    { MENU_DEBUG, MENU_ITEM, CONFIG_15M_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (15m,CW)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is OFF. Calibrate on 21.100 MHz.") },
+//    { MENU_DEBUG, MENU_ITEM, CONFIG_15M_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (15m,CW)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is OFF. Calibrate on 21.100 MHz.") },
+//    { MENU_DEBUG, MENU_ITEM, CONFIG_10M_UP_TX_IQ_GAIN_BAL_TRANS_OFF, NULL, "TX IQ Balance (10mUp,CW)", UiMenuDesc("IQ Balance Adjust for all transmission if frequency translation is OFF. Calibrate on 29.650 MHz.") },
+//    { MENU_DEBUG, MENU_ITEM, CONFIG_10M_UP_TX_IQ_PHASE_BAL_TRANS_OFF, NULL, "TX IQ Phase   (10mUp,CW)", UiMenuDesc("IQ Phase Adjust for all transmission if frequency translation is OFF. Calibrate on 29.650 MHz.") },
+//    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_VSWR_PROTECTION_THRESHOLD, NULL, "VSWR Protect.threshold", UiMenuDesc("If not OFF, on TX/tune the bias of PA will be down to 0 etc when exceeding the specified value of VSWR") },
+//    { MENU_DEBUG, MENU_ITEM, CONFIG_RESET_SER_EEPROM_SIGNATURE, NULL, "Rst Conf EEPROM", UiMenuDesc("Clear the EEPROMi signature but keep all config values. This is mainly for debugging purposes).") },
+//    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_FREEDV_MODE, NULL, "FreeDV Mode", UiMenuDesc("Change active FreeDV mode. Please note, you have to reboot to activate new mode") },
+//    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_FREEDV_SQL_THRESHOLD, NULL, "FreeDV Squelch threshold", UiMenuDesc("If not OFF, FreeDV will squelch if detected SNR is below set value.") },
+//    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_BANDEF_SELECT, NULL, "Band Definition", UiMenuDesc("Select which band definition to use for ham bands (Original UHSDR or IARU Region 1 - 3") },
+//    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_CB_27MC_TX_ENABLE, NULL, "CB 27Mc TX Enable(max4W)", UiMenuDesc("Enable transmitting (4W) on CB band 27 MHz (AM, FM, SSB).") },
+//    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_CB_26MC_TX_ENABLE, NULL, "CB 26Mc TX Enable(max4W)", UiMenuDesc("Enable transmitting (4W) on CB band 26 MHz (AM, FM, SSB).") },
+    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_CB_27MC_TX_ENABLE, NULL, "CB 27Mc TX Enable(max4W)", UiMenuDesc("Enable transmitting (4W) on CB band 27 MHz (AM, FM, SSB, CW).") },
+    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_CB_26MC_TX_ENABLE, NULL, "CB 26Mc TX Enable(max4W)", UiMenuDesc("Enable transmitting (4W) on CB band 26 MHz (AM, FM, SSB, CW).") },
+    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_CB_12W_SSB_TX_ENABLE, NULL, "CB 12W SSB TX Enable", UiMenuDesc("Enable transmitting 12W SSB on CB bands, where TX is open.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_CB_10W_TX_ENABLE, NULL, "CB 10W TX Enable", UiMenuDesc("Enable transmitting 10W for any mode on CB bands, where TX is open.") },
+    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_CAL_LO_TX_SUPR_0, NULL, "Cal.LO_TX Supression C0", UiMenuDesc("Calibration of LO_TX Supression on every band via balancing of TX mixer, channel 0") },
+    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_CAL_LO_TX_SUPR_1, NULL, "Cal.LO_TX Supression C1", UiMenuDesc("Calibration of LO_TX Supression on every band via balancing of TX mixer, channel 1") },
+#ifdef SDR_AMBER
+    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_SHOW_GREETING, NULL, "Show FS Greeting", UiMenuDesc("Not for users.") },
+#endif
     { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_SMOOTH_DYN_TUNE, NULL, "Smooth dynamic tune", UiMenuDesc("Activate smooth dynamic tune.") },
-
+    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_CLEAN_TX_CW_RTTY_BPSK, NULL, "Clear TX CW,RTTY,BPSK", UiMenuDesc("Forming CW/RTTY/BPSK signal at intermediate frequency for clean TX.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_MEM_BW_MOD_BAND, NULL, "Remember BWs on bands", UiMenuDesc("Remember the filter settings of each mode in each range for the duration of the session.") },
+#ifdef SDR_AMBER
+    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_ILLUM_BUTT, NULL, "Illum. of buttons", UiMenuDesc("Illumination of buttons.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_BPF_OPTION, NULL, "RF - Amber BPF Option", UiMenuDesc("3 extra BPF instead of 2 on Amber-RF board.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_XVTR_OFF_PA, NULL, "XVTR - OFF PA", UiMenuDesc("Transverter mode - blocking PA on TX. The optional 'XVTR TX' SMA connector must be soldered and connected with coaxial cable to the output of the amplifier before PA driver ('XVTR_TX' contacts).") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_BANDCODE, NULL, "Ext. PA Bandcode", UiMenuDesc("PA bandcode variant, if not OFF.") },
+    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_ALT_PWR_CTRL, NULL, "TX_PREAMP_DUC Option", UiMenuDesc("Alternative POWER lewel control ON/OFF") },
+    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_ALT_PWR_CTRL_VOL, NULL, "TX_PREAMP_DUC Vol.", UiMenuDesc("Alternative POWER lewel control - DAC volume in points, 0-4096 (0-5V).") },
+#endif
+	//    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_WIDE_SPEC_DEF, NULL, "Wide Spectrum Default", UiMenuDesc("Wide mode of spectrum on screen 320x240 is default.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_DISABLE_TP, NULL, "Disable touchscreen", UiMenuDesc("Disable touchscreen actions.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_FMENUS_SEL, NULL, "Choice of F-menu", UiMenuDesc("Type of F-menus selection.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_IMPROV_IQ_ADJ, NULL, "Improved I/Q Adj.", UiMenuDesc("Improved I/Q adjusting. Added 160, 40, 30, 17, 12m.") },
+#ifdef SDR_AMBER_4INCH
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_F6_IND_SEL, NULL, "F6 Ind.", UiMenuDesc("Amber 4'' - Indication of F6 button.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_F7_IND_SEL, NULL, "F7 Ind.", UiMenuDesc("Amber 4'' - Indication of F7 button.") },
+#endif
 	{ MENU_DEBUG, MENU_STOP, 0, NULL, NULL, UiMenuDesc("") }
 };
 
@@ -493,8 +659,7 @@ const MenuDescriptor hall_of_fameGroup[] =
     { MENU_HALL_OF_FAME, MENU_TEXT, 0, NULL,"UB8JDC (Yuri)", UiMenuDesc("") },
     { MENU_HALL_OF_FAME, MENU_TEXT, 0, NULL,"RV9YW  (Max)", UiMenuDesc("") },
     { MENU_HALL_OF_FAME, MENU_TEXT, 0, NULL,"M0LNG  (Martin)", UiMenuDesc("") },
-	{ MENU_HALL_OF_FAME, MENU_TEXT, 0, NULL,"KB3CS  (Chris)", UiMenuDesc("") },
-
+    { MENU_HALL_OF_FAME, MENU_TEXT, 0, NULL,"KB3CS  (Chris)", UiMenuDesc("") },
     { MENU_HALL_OF_FAME, MENU_STOP, 0, NULL, NULL, UiMenuDesc("") }
 };
 

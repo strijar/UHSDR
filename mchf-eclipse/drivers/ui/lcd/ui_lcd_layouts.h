@@ -38,7 +38,7 @@ typedef enum
 {
     RESOLUTION_320_240,
     RESOLUTION_480_320,
-	RESOLUTION_800_480
+    RESOLUTION_800_480
 } disp_resolution_t;
 
 typedef struct {
@@ -51,8 +51,8 @@ typedef struct {
 typedef struct
 {
 	UiArea_t region;
-	void (*function_short_press)(void);
-	void (*function_long_press)(void);
+	void (*function_short_press)();
+	void (*function_long_press)();
 } touchaction_descr_t;
 
 typedef struct
@@ -150,6 +150,7 @@ enum LcdLayout_{
 	LcdLayout_320x240=0,
 	LcdLayout_480x320,
 	LcdLayout_800x480,
+	LcdLayout_320x240_ws,       // full wide panoram
 	LcdLayoutsCount		//this is last position enumerated used for layout array definition. Insert new layout name before this one
 };
 

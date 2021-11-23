@@ -94,11 +94,20 @@ void TxProcessor_Set(uint8_t dmod_mode)
         case TX_FILTER_BASS:
             IIR_TXFilterSelected_ptr = &IIR_TX_WIDE_BASS;
             break;
-        case TX_FILTER_TENOR:
-            IIR_TXFilterSelected_ptr = &IIR_TX_WIDE_TREBLE;
+        case TX_FILTER_SOPRANO:
+            IIR_TXFilterSelected_ptr = &IIR_TX_SOPRANO;
+            break;
+        case TX_FILTER_ESSB_4k:
+            IIR_TXFilterSelected_ptr = &IIR_TX_eSSB_4k;
+            break;
+        case TX_FILTER_ESSB_5k:
+            IIR_TXFilterSelected_ptr = &IIR_TX_eSSB_5k;
+            break;
+        case TX_FILTER_ESSB_6k:
+            IIR_TXFilterSelected_ptr = &IIR_TX_eSSB_6k;
             break;
         default:
-            IIR_TXFilterSelected_ptr = &IIR_TX_SOPRANO;
+            IIR_TXFilterSelected_ptr = &IIR_TX_WIDE_TREBLE;
         }
     }
     else        // This is FM - use a filter with "better" lows and highs more appropriate for FM
@@ -287,6 +296,11 @@ static void TxProcessor_IqFinalProcessing(float32_t scaling, bool swap, iq_buffe
     // this aligns resulting signal with 16 or 32 bit width integer MSB, see comment in
     // the first part of AudioDriver_RxProcessor
 
+    if(ts.codecCS4270_present)
+    {
+        scaling /= 186.0; // Scaling 32 to 24 bits with some "+"
+    }
+
     if (RadioManagement_IsTxAtZeroIF(ts.dmod_mode, ts.digital_mode) || ts.iq_freq_mode == FREQ_IQ_CONV_MODE_OFF)
     {
         trans_idx = IQ_TRANS_OFF;
@@ -351,19 +365,21 @@ static void TxProcessor_AudioBufferFill(audio_block_t a_block, AudioSample_t * c
         switch(tx_audio_source)
         {
         case TX_AUDIO_LINEIN_L:
-        case TX_AUDIO_LINEIN_R:      // Are we in LINE IN mode?
+        case TX_AUDIO_LINEIN_R:      			// Are we in LINE IN mode?
         {
-            gain_calc = LINE_IN_GAIN_RESCALE;           // Yes - fixed gain scaling for line input - the rest is done in hardware
+            gain_calc = LINE_IN_GAIN_RESCALE;	// Yes - fixed gain scaling for line input - the rest is done in hardware
         }
         break;
         case TX_AUDIO_MIC:
         {
-            gain_calc = ts.tx_mic_gain_mult;     // We are in MIC In mode:  Calculate Microphone gain
-            gain_calc /= MIC_GAIN_RESCALE;       // rescale microphone gain to a reasonable range
-	    if(ts.tx_mic_boost > 0)
-	    { // value is either 14 dB (g=25.1) or 0 dB (g=1) right now
-	      gain_calc += 25.1;
-	    }
+            gain_calc = ts.tx_mic_gain_mult;	// We are in MIC In mode:  Calculate Microphone gain
+            gain_calc /= MIC_GAIN_RESCALE;		// rescale microphone gain to a reasonable range
+    	    if(ts.tx_mic_boost > 0)
+//    	    { // value is either 15 dB (g=31.6) or 0 dB (g=1) right now
+//    	    	gain_calc += 31.6;
+    	    { // value is either 14 dB (g=25.1) or 0 dB (g=1) right now
+    	      gain_calc += 25.1;
+    	    }
         }
         break;
         case TX_AUDIO_DIG:
@@ -440,6 +456,7 @@ static void TxProcessor_PrepareVoice(audio_block_t a_buffer, AudioSample_t* src,
 {
     TxProcessor_AudioBufferFill(a_buffer, src,blockSize);
 
+//  if (!ts.tune)
     if (!ts.tune)
     {
         TxProcessor_FilterAudio(runFilter, ts.tx_audio_source != TX_AUDIO_DIG, a_buffer, a_buffer, blockSize);
@@ -815,7 +832,9 @@ static bool TxProcessor_Rtty(audio_block_t a_block, iq_buffer_t* iq_buf_p, uint1
         a_block[idx] = Rtty_Modulator_GenSample();
     }
     TxProcessor_FilterAudio(true, false, a_block, a_block, blockSize);
-    TxProcessor_SSB(a_block, iq_buf_p, blockSize, 0, ts.digi_lsb);
+    // UB8JDC - for good signal quality the frequency shift must be applied!
+    //TxProcessor_SSB(a_block, iq_buf_p, blockSize, 0, ts.digi_lsb);
+    TxProcessor_SSB(a_block, iq_buf_p, blockSize, (ts.expflags1 & EXPFLAGS1_CLEAR_TX_CW_RTTY_BPSK)? AudioDriver_GetTranslateFreq() : 0, ts.digi_lsb);
 
     return true;
 }
@@ -838,7 +857,9 @@ static bool TxProcessor_Psk(audio_block_t a_block, iq_buffer_t* iq_buf_p, uint16
     }
 
     TxProcessor_FilterAudio(true,false, a_block, a_block, blockSize);
-    TxProcessor_SSB(a_block, iq_buf_p, blockSize, 0, ts.digi_lsb);
+    // UB8JDC - for good signal quality the frequency shift must be applied!
+//  TxProcessor_SSB(a_block, iq_buf_p, blockSize, 0, ts.digi_lsb);
+    TxProcessor_SSB(a_block, iq_buf_p, blockSize, (ts.expflags1 & EXPFLAGS1_CLEAR_TX_CW_RTTY_BPSK)? AudioDriver_GetTranslateFreq() : 0, ts.digi_lsb);
 
     return true;
 }
@@ -852,6 +873,7 @@ static bool TxProcessor_Psk(audio_block_t a_block, iq_buffer_t* iq_buf_p, uint16
  * @param blockSize     size of iq / audio buffers
  * @return signal active, if the CW generator produced samples (otherwise we have a break and should "transmit" silence
  */
+// UB8JDC - for good signal quality the frequency shift must be applied!
 static bool TxProcessor_CW(audio_block_t a_block, iq_buffer_t* iq_buf_p, uint16_t blockSize)
 {
     bool signal_active = false;
@@ -882,6 +904,11 @@ static bool TxProcessor_CW(audio_block_t a_block, iq_buffer_t* iq_buf_p, uint16_
     {
         memset ( a_block, 0, sizeof( a_block[0]) * blockSize );
     }
+
+    if((ts.expflags1 & EXPFLAGS1_CLEAR_TX_CW_RTTY_BPSK) && AudioDriver_GetTranslateFreq())              // Added by UB8JDC
+    {                                                                                                   //
+        FreqShift(iq_buf_p->i_buffer, iq_buf_p->q_buffer, blockSize, AudioDriver_GetTranslateFreq());   //
+    }                                                                                                   //
 
     return signal_active;
 }

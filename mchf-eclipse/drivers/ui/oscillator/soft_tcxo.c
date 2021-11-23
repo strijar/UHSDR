@@ -82,7 +82,7 @@ static int32_t MCP9801_ConvExternalTemp(uint8_t *temp)
  * @brief configures the MCP9801 external temperature sensor for monitoring Si570 temperature
  * @returns 0 if detected and working, 1 if not detected on I2C, 2 for other errors
  */
-static uint8_t MCP9801_InitExternalTempSensor()
+static uint8_t MCP9801_InitExternalTempSensor(void)
 {
     uint8_t config, retval = 0;
     uint16_t res;

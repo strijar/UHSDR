@@ -18,7 +18,7 @@
 // The API is simple, and mimics the standard output calls:
 // - trace_printf()
 // - trace_puts()
-// - trace_putchar(void);
+// - trace_putchar();
 //
 // The implementation is done in
 // - trace_write()

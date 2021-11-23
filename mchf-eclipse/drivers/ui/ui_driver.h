@@ -35,7 +35,9 @@ enum UpdateFrequencyMode_t
 #define 	STARTUP_FREQ					56000000
 
 #define 	T_STEP_1HZ						1
+#define 	T_STEP_5HZ						5
 #define 	T_STEP_10HZ						10
+#define     T_STEP_50HZ                     50
 #define 	T_STEP_100HZ					100
 #define 	T_STEP_500HZ					500
 #define 	T_STEP_1KHZ						1000
@@ -49,7 +51,9 @@ enum UpdateFrequencyMode_t
 enum
 {
     T_STEP_1HZ_IDX = 0,
+    T_STEP_5HZ_IDX,
     T_STEP_10HZ_IDX,
+    T_STEP_50HZ_IDX,
     T_STEP_100HZ_IDX,
     T_STEP_500HZ_IDX,
     T_STEP_1KHZ_IDX,
@@ -197,8 +201,8 @@ void UiDriver_UpdateDisplayAfterParamChange(void);
 void UiDriver_UpdateDemodSpecificDisplayAfterParamChange(void);
 void UiDriver_SetDemodMode(uint8_t new_mode);
 
-void UiDriver_StartUpScreenInit(void);
-void UiDriver_StartUpScreenFinish(void);
+void UiDriver_StartUpScreenInit();
+void UiDriver_StartUpScreenFinish();
 
 void UiDriver_DoCrossCheck(int16_t cross[]);
 void UiAction_ToggleVfoAB(void);
@@ -224,15 +228,19 @@ void UiAction_ToggleWaterfallScopeDisplay(void);
 void UiAction_ChangeSpectrumSize(void);
 void UiAction_ChangeSpectrumZoomLevelDown(void);
 void UiAction_ChangeSpectrumZoomLevelUp(void);
+void UiAction_ZoomResetToOne(void);
 void UiAction_CheckSpectrumTouchActions(void);
 void UiAction_ChangeFrequencyToNextKhz(void);
 void UiAction_ChangeDemodMode(void);
+void UiAction_ChangeDemodModeToAlternativeMode(void);
 void UiAction_ChangePowerLevel(void);
 void UiAction_ChangeAudioSource(void);
 void UiAction_ChangeBandDownOrUp(void);
 void UiAction_ChangeBandUpOrDown(void);
 void UiAction_ChangeDigitalMode(void);
 void UiAction_ChangeDynamicTuning(void);
+void UiAction_ChangeRXInputStateDown(void);
+void UiAction_ChangeRXInputStateUp(void);
 void UiAction_ChangeDebugInfoDisplay(void);
 void UiAction_ChangeRfModPresence(void);
 void UiAction_ChangeVhfUhfModPresence(void);
@@ -250,6 +258,14 @@ void UiDriver_SelectBandMemory(uint16_t vfo_sel, uint8_t new_band_index);
 
 
 void UiDriver_Callback_AudioISR(void);
+void UiDriver_ToggleWideSpectrum(void);
+void UiDriver_ClearMemoryLabel(void);
+void UiDriver_DisplayMemoryLabel(void);
+void UiDriver_RIT_Reset(void);
+void UiDriver_CreateMainFreqDisplay(bool all_digits);
+void UiDriver_StoreBwData(void);
+void UiDriver_CreateFunctionButtons(bool full_repaint);
+void UiDriver_RefreshPowerLevel(const BandInfo* band, uint8_t power_level);
 
 // Items that are timed using ts.sysclock (operates at 100 Hz)
 //

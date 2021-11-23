@@ -139,7 +139,7 @@ static uint16_t Si570_ReadRegisters(uint8_t* regs)
  * @brief reads Si570 registers and verifies match with local copy of settings
  * @returns SI570_OK if matching, SI570_I2C_ERROR if I2C is not working, SI570_ERROR otherwise
  */
-static Oscillator_ResultCodes_t Si570_VerifyFrequencyRegisters()
+static Oscillator_ResultCodes_t Si570_VerifyFrequencyRegisters(void)
 {
     Oscillator_ResultCodes_t retval = OSC_OK;
     uchar	regs[6];
@@ -191,7 +191,7 @@ static uint16_t Si570_ClearRegisterBits(uint8_t si570_address, uint8_t regaddr ,
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-static Oscillator_ResultCodes_t Si570_SmallFrequencyChange()
+static Oscillator_ResultCodes_t Si570_SmallFrequencyChange(void)
 {
     uint16_t ret;
     Oscillator_ResultCodes_t retval = OSC_OK;
@@ -223,7 +223,7 @@ static Oscillator_ResultCodes_t Si570_SmallFrequencyChange()
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-static Oscillator_ResultCodes_t Si570_LargeFrequencyChange()
+static Oscillator_ResultCodes_t Si570_LargeFrequencyChange(void)
 {
     uint16_t ret;
     uint8_t reg_135, reg_137;
@@ -437,7 +437,7 @@ static Oscillator_ResultCodes_t Si570_PrepareChangeFrequency(float64_t new_freq)
 /**
  * @returns true if the next prepared step will be a large one, requiring sound muting etc. Requires a call to Si570_PrepareNextFrequency to have correct information
  */
-static bool Si570_IsNextStepLarge()
+static bool Si570_IsNextStepLarge(void)
 {
     return os.next_is_small == false;
 }
@@ -446,7 +446,7 @@ static bool Si570_IsNextStepLarge()
  * @brief execute the prepared frequency change. May be called multiple times in case of I2C issues
  * @returns SI570_OK or SI570_I2C_ERROR if I2C communication failed (which can happen at very high I2C speeds).  SI570_ERROR_VERIFY should never happen anymore.
  */
-static Oscillator_ResultCodes_t Si570_ChangeToNextFrequency()
+static Oscillator_ResultCodes_t Si570_ChangeToNextFrequency(void)
 {
     Oscillator_ResultCodes_t retval = OSC_OK;
     Si570_FreqConfig* next_config_ptr = &os.next_config;
@@ -482,7 +482,7 @@ static Oscillator_ResultCodes_t Si570_ChangeToNextFrequency()
 // by DF8OE
 //
 // startupfrequency-subroutine
-static void Si570_CalcSufHelper()
+static void Si570_CalcSufHelper(void)
 {
     uchar si_regs[6];
     int hs_div;
@@ -526,7 +526,7 @@ static void Si570_SetPPM(float32_t ppm)
     }
 }
 
-static uint8_t Si570_ResetConfiguration()
+static uint8_t Si570_ResetConfiguration(void)
 {
     uint8_t retval = 0;
 
@@ -618,12 +618,12 @@ bool Si570_ReadyForIrqCall()
     return (SI570_I2C->Lock == HAL_UNLOCKED);
 }
 
-static bool Oscillator_IsPresent()
+static bool Oscillator_IsPresent(void)
 {
     return os.present;
 }
 
-static uint32_t Si570_getMinFrequency()
+static uint32_t Si570_getMinFrequency(void)
 {
 #ifdef RF_BRD_LAPWING
     return 1240000000L;
@@ -632,7 +632,7 @@ static uint32_t Si570_getMinFrequency()
 #endif
 }
 
-static uint32_t Si570_getMaxFrequency()
+static uint32_t Si570_getMaxFrequency(void)
 {
 #ifdef RF_BRD_LAPWING
     return 1300000000L;

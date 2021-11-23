@@ -52,3 +52,7 @@ void     Codec_PrepareTx(uint8_t current_txrx_mode);
 
 bool     Codec_ReadyForIrqCall(void);
 #endif
+
+#ifdef SDR_AMBER
+uint32_t Codec_Reset_CS4270_Codec(void);
+#endif

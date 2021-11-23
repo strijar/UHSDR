@@ -33,12 +33,12 @@ enum
     BUTTON_PWR_PRESSED,   // 16 - Used for press and release
     TOUCHSCREEN_ACTIVE, 	// 17 - Touchscreen touched, needs to last entry before BUTTON_NUM,
 #ifdef UI_BRD_OVI40
-    BUTTON_F6_PRESSED,      // we have one more function button
     BUTTON_E1_PRESSED,      // encoder 1 click
-    BUTTON_E2_PRESSED,      // encoder 1 click
-    BUTTON_E3_PRESSED,      // encoder 1 click
-    BUTTON_E4_PRESSED,      // encoder 1 click
-    BUTTON_L1_PRESSED,		// and again one more function button
+    BUTTON_E2_PRESSED,      // encoder 2 click
+    BUTTON_E3_PRESSED,      // encoder 3 click
+    BUTTON_E4_PRESSED,      // encoder 4 click
+    BUTTON_L1_PRESSED,		// one more button
+    BUTTON_F6_PRESSED,      // one more function button
 #endif
     //      init code relies on this
     BUTTON_NUM, // How many buttons we have defined

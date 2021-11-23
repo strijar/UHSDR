@@ -165,6 +165,11 @@ typedef enum
     SPEC_GREY4,
     SPEC_GREY5,
     SPEC_GREY6,
+    SPEC_GREY7,
+	SPEC_RED4,
+	SPEC_GREEN2,
+    SPEC_BLUE3,
+    SPEC_BROWN,
     SPEC_MAX_COLOUR,
 } mchf_color_t;
 
@@ -190,7 +195,15 @@ enum
 #define LCD_STARTUP_BLANKING_TIME	3000		// number of DECISECONDS (e.g. SECONDS * 100) after power-up before LCD blanking occurs if no buttons are pressed/knobs turned
 #define LOW_POWER_SHUTDOWN_DELAY_TIME   6000        // number of DECISECONDS after power-up before low power auto shutdown is checked
 
-
+#ifndef SDR_AMBER
+enum
+{
+	INPUT_NOIPO = 0,
+	INPUT_IPO,
+	INPUT_ATT12,
+	INPUT_ATT24,
+};
+#endif
 
 // Enumeration of transmit tune  modes
 typedef enum
@@ -213,11 +226,13 @@ typedef struct {
     int32_t value[IQ_TRANS_NUM];
 } iq_balance_data_t;
 
-#define KEYER_BUTTONS 3
+//#define KEYER_BUTTONS 3
+#define KEYER_BUTTONS 4
 #define KEYER_BUTTON_NONE -1
 #define KEYER_BUTTON_1 0
 #define KEYER_BUTTON_2 1
 #define KEYER_BUTTON_3 2
+#define KEYER_BUTTON_4 3
 #define KEYER_MACRO_LEN 200
 #define KEYER_CAP_LEN 6
 typedef struct {
@@ -227,6 +242,18 @@ typedef struct {
 	uint8_t cap[KEYER_BUTTONS][KEYER_CAP_LEN + 1];
 }
 keyer_mode_t;
+
+uint32_t mem_data[4][2][20];
+uint32_t xvtr_data[4][3];
+uint16_t bw_data[10][20];
+
+typedef enum
+{
+    TXRX_U = 0,
+    TXRX_B,
+    CYCLED,
+    BEACON,
+} keyer_mode_tx_t;
 
 //
 // Bands tuning values - WORKING registers - used "live" during transceiver operation
@@ -239,6 +266,15 @@ typedef struct vfo_reg_s
     uint8_t  digital_mode;
 //    uint32_t filter_mode;
 } VfoReg;
+
+typedef enum
+{
+    BEACON_INTERVAL_1M = 0,
+	BEACON_INTERVAL_3M,
+	BEACON_INTERVAL_5M,
+	BEACON_INTERVAL_10M,
+	BEACON_INTERVAL_15M,
+} beacon_int_t;
 
 typedef struct BandInfo BandInfo; // forward declaration of BandInfo data type, we need this to be able to make a pointer to it.
 
@@ -353,6 +389,7 @@ typedef struct TransceiverState
     // Current CW mode
     uint8_t	cw_keyer_mode;
     uint8_t	cw_keyer_speed;
+    uint8_t cw_keyer_speed_bak;
     uint8_t	cw_paddle_reverse;
     bool cw_text_entry;
 
@@ -373,13 +410,15 @@ typedef struct TransceiverState
     uint32_t	audio_spkr_unmute_delay_count;
 
     uint8_t	power_level; // an abstract power level id
+    uint8_t	power_scale_gen; // power scale for Gen, %
+    uint8_t	power_scale_gen_full; // power scale for Gen, FULL POWER, %
     int32_t power; // the actual request power in mW
     bool    power_modified; // the actual power is lower than the requested power_level, e.g. because of out side band.
 
     uint8_t 	tx_audio_source;
     uint8_t     rx_iq_source;
 //
-    uint8_t     tx_mic_boost;		// in dB
+	uint8_t     tx_mic_boost;		// in dB
 
 #define MIC_BOOST_DEFAULT		 0	// 0 dB boost (no boost)
 #define MIC_BOOST_MIN			 0
@@ -417,9 +456,18 @@ typedef struct TransceiverState
 
     struct mchf_waterfall waterfall;
 
-    uint32_t	xverter_mode;		// TRUE if transverter mode active
+    uint8_t box_colour;             // screen boxes color
+    uint8_t txtline_colour;         // ticker color
+    uint8_t cw_smooth;              // smooth of CW signal edges
+    uint8_t cw_smooth_len;          // duration of CW signal edges
+    uint8_t cw_smooth_steps;        // duration steps of CW signal edges
+
+//    uint8_t	xverter_mode;		// TRUE if transverter mode active
+    uint32_t    xverter_mode;       // TRUE if transverter mode active
     uint32_t	xverter_offset;		// frequency offset for transverter (added to frequency display)
     uint32_t    xverter_offset_tx;  // used for tx if set, frequency offset for transverter (added to frequency display)
+
+
     //
     // Calibration factors for output power, in percent (100 = 1.00)
     //
@@ -478,8 +526,8 @@ typedef struct TransceiverState
 #define TX_DISABLE_RXMODE       8
     uint8_t	tx_disable;		// >0 if no transmit permitted, use RadioManagement_IsTxDisabled() to get boolean
 
-    uint16_t	flags1;					// Used to hold individual status flags, stored in EEPROM location "EEPROM_FLAGS1"
 
+    uint16_t	flags1;					// Used to hold individual status flags, stored in EEPROM location "EEPROM_FLAGS1"
 #define FLAGS1_TX_AUTOSWITCH_UI_DISABLE 0x01    // if on-screen AFG/(STG/CMP) and WPM/(MIC/LIN) indicators are changed on TX
 #define FLAGS1_SWAP_BAND_BTN			0x02    // if BAND-/BAND+ buttons are to be swapped in their positions
 #define FLAGS1_MUTE_LINEOUT_TX			0x04    // if TX audio output from LINE OUT is to be muted during transmit (audio output only enabled when translate mode is DISABLED
@@ -497,24 +545,43 @@ typedef struct TransceiverState
 #define FLAGS1_REVERSE_X_TOUCHSCREEN	0x4000  // 1 = X direcction of touchscreen is mirrored
 #define FLAGS1_REVERSE_Y_TOUCHSCREEN	0x8000  // 1 = Y direcction of touchscreen is mirrored
 
-    uint16_t    expflags1;              // Used to hold flags for options in Debug/Expert menu, stored in EEPROM location "EEPROM_EXPFLAGS1"
+    uint16_t    expflags1;              // Used to hold flags for options in menu, stored in EEPROM location "EEPROM_EXPFLAGS1"
 #define EXPFLAGS1_SMOOTH_DYNAMIC_TUNE   0x01    // 1 = Smooth dynamic tune is ON
-// #define EXPFLAGS1_RESERVE_1          0x02    // Reserve flag for options in Debug/Expert menu
-// #define EXPFLAGS1_RESERVE_2          0x04    // Reserve flag for options in Debug/Expert menu
-// #define EXPFLAGS1_RESERVE_3          0x08    // Reserve flag for options in Debug/Expert menu
-// #define EXPFLAGS1_RESERVE_4          0x10    // Reserve flag for options in Debug/Expert menu
-// #define EXPFLAGS1_RESERVE_5          0x20    // Reserve flag for options in Debug/Expert menu
-// #define EXPFLAGS1_RESERVE_6          0x40    // Reserve flag for options in Debug/Expert menu
-// #define EXPFLAGS1_RESERVE_7          0x80    // Reserve flag for options in Debug/Expert menu
-// #define EXPFLAGS1_RESERVE_8          0x100   // Reserve flag for options in Debug/Expert menu
-// #define EXPFLAGS1_RESERVE_9          0x200   // Reserve flag for options in Debug/Expert menu
-// #define EXPFLAGS1_RESERVE_10         0x400   // Reserve flag for options in Debug/Expert menu
-// #define EXPFLAGS1_RESERVE_11         0x800   // Reserve flag for options in Debug/Expert menu
-// #define EXPFLAGS1_RESERVE_12         0x1000  // Reserve flag for options in Debug/Expert menu
-// #define EXPFLAGS1_RESERVE_13         0x2000  // Reserve flag for options in Debug/Expert menu
-// #define EXPFLAGS1_RESERVE_14         0x4000  // Reserve flag for options in Debug/Expert menu
-// #define EXPFLAGS1_RESERVE_15         0x8000  // Reserve flag for options in Debug/Expert menu
+#define EXPFLAGS1_CB_27MC_TX_ENABLE     0x02    // 1 = Enable transmitting (4W) on CB band 27 MHz (AM, FM, SSB)
+#define EXPFLAGS1_CB_26MC_TX_ENABLE     0x04    // 1 = Enable transmitting (4W) on CB band 26 MHz (AM, FM, SSB)
+#define EXPFLAGS1_CB_12W_SSB_TX_ENABLE  0x08    // 1 = Enable transmitting 12W SSB on CB bands, where TX is open
+#define EXPFLAGS1_WIDE_SPEC_DEF         0x10    // 1 = Enable default wide spectrum on screen
+#define EXPFLAGS1_NO_SHOW_BNDMEM        0x20    // 1 - Don't show BndMemory on screen
+#define EXPFLAGS1_BANDCH_JUMP_SWAP      0x40    // 1 - LongAction of Band+/- is band change, ShortAction is jump by freq on panorama width
+#define EXPFLAGS1_TUNE_HELPER_DEFENABLE	0x80    // 1 - Tune Helper enable by default
+#define EXPFLAGS1_ENC1_REVERSE          0x100   // 1 - encoder1 are reversed
+#define EXPFLAGS1_ENC4_REVERSE          0x200   // 1 - encoder4 (TUNE) are reversed
+#define EXPFLAGS1_SHOW_GREETING         0x400   // 1 - Amber/Axis - show once on start the greeting for foreign buyers
+#define EXPFLAGS1_CLEAR_PAN_ON_TX       0x800   // 1 - clear panoram on TX/TUNE
+#define EXPFLAGS1_SMETER_AM_NOT_LO      0x1000  // 1 - Don't calculate LO for S-meter in AM mode
+#define EXPFLAGS1_FAST_MACRO_1_2        0x2000  // 1 - Fast TXing CW macros 1, 2
+#define EXPFLAGS1_CLEAR_TX_CW_RTTY_BPSK 0x4000  // 1 - Forming CW/RTTY/BPSK signal at intermediate frequency for clean TX
+#define EXPFLAGS1_CB_10W_TX_ENABLE      0x8000  // 1 - Enable transmitting 10W for any mode on CB bands, where TX is open
 #define EXPFLAGS1_CONFIG_DEFAULT        0x0000  // Default flags state
+
+    uint16_t    expflags2;              // Used to hold flags for options in menu, stored in EEPROM location "EEPROM_EXPFLAGS2"
+#define EXPFLAGS2_TEMP_MEM_BW_MOD_BAND  0x01      // 1 - Remember the filter settings of each mode in each range for the duration of the session
+#define EXPFLAGS2_ILLUM_BUTT              0x02    // 1 - Amber, illumination of buttons is ON
+#define EXPFLAGS2_3_ADD_BPF               0x04    // 1 - On Amber-RF board the BPF-option is present, add. BPF 6, 160 and <160m (usually 6 and <=160m)
+#define EXPFLAGS2_XVTR_OFF_PA             0x08    // 1 - Amber - OFF PA in XVTR mode TX
+#define EXPFLAGS2_DISABLE_TP              0x10    // 1 - Disabled touchscreen actions
+#define EXPFLAGS2_FMENUS_SELECT           0x20    // 0 - carousel, 1 - menu
+#define EXPFLAGS2_AMBER_4INCH_F6_IND      0x40    // Amber 4": 0 - Soft, 1 - AT (Autotuner UT0UM)
+#define EXPFLAGS2_AMBER_4INCH_F7_IND      0x80    // Amber 4": 0 - AT, 1 - POWER
+#define EXPFLAGS2_ALT_PWR_CTRL            0x100   // 1 - Alternative POWER level control via DAC -> mosfet in TX preamp
+#define EXPFLAGS2_IMPROV_IQ_ADJ           0x200   // 1 - Improved I/Q adjusting. Added 160, 40, 30, 17, 12m
+#define EXPFLAGS2_ENC2_REVERSE            0x400   // 1 - encoder2 are reversed
+#define EXPFLAGS2_ENC3_REVERSE            0x800   // 1 - encoder3 are reversed
+//#define EXPFLAGS2_BLABLABLA             0x1000  // reserved
+//#define EXPFLAGS2_BLABLABLA             0x2000  // reserved
+//#define EXPFLAGS2_BLABLABLA             0x4000  // reserved
+//#define EXPFLAGS2_BLABLABLA             0x8000  // reserved
+#define EXPFLAGS2_CONFIG_DEFAULT        0x0000  // Default flags state
 
 #ifdef UI_BRD_MCHF
     // the default screen needs no reversed touch
@@ -571,7 +638,8 @@ typedef struct TransceiverState
     uint8_t	filter_disp_colour;			// used to hold the current color of the line that indicates the filter passband/bandwidth
     bool	audio_dac_muting_flag;			// when TRUE, audio is to be muted after PTT/keyup
     bool	vfo_mem_flag;				// when TRUE, memory mode is enabled
-    bool	mem_disp;				// when TRUE, memory display is enabled
+    bool	mem_disp;				// when TRUE, memory list is enabled
+    bool    xvtr_disp;               // when TRUE, XVTR list is enabled
 
     uint32_t    fm_subaudible_tone_gen_select;		// lookup ("tone number") used to index the table tone generation (0 corresponds to "tone disabled")
     uint8_t     fm_tone_burst_mode;			// this is the setting for the tone burst generator
@@ -599,6 +667,7 @@ typedef struct TransceiverState
     mchf_touchscreen_t *tp;
 
     bool	show_debug_info;	// show coordinates on LCD
+    bool    show_wide_spectrum;     // Mode of alternate full wide spectrum on screen
     uint8_t	tune_power_level;		// TX power in antenna tuning function
     uint8_t	power_temp;				// temporary tx power if tune is different from actual tx power
     uint8_t	cat_band_index;			// buffered bandindex before first CAT command arrived
@@ -635,6 +704,9 @@ typedef struct TransceiverState
     #define TX_FILTER_SOPRANO		1
     #define TX_FILTER_TENOR			2
     #define TX_FILTER_BASS			3
+    #define TX_FILTER_ESSB_4k       4
+    #define TX_FILTER_ESSB_5k       5
+    #define TX_FILTER_ESSB_6k       6
     uint8_t	tx_filter;				// which TX filter has been chosen?
 
 
@@ -672,6 +744,9 @@ typedef struct TransceiverState
     int16_t rtc_calib; // ppm variation value, unit 1 ppm
     bool vbat_present; // we detected a working vbat mod
     bool codec_present; // we detected a working codec
+    bool codecWM8731_Audio_present; // we detected a working codec
+    bool codecCS4270_present; // we detected a working codec
+    float32_t rf_gain_codecCS4270; // for imitation of RF-gain
 	bool rtty_atc_enable; // is ATC enabled for RTTY decoding? (for testing!)
 
 	uint8_t enable_rtty_decode; // new rtty encoder (experimental)
@@ -680,7 +755,18 @@ typedef struct TransceiverState
 	bool enable_ptt_rts; // disable/enable ptt via virtual serial port rts
 
 	keyer_mode_t keyer_mode; // disable/enable keyer mode for F1-F5 buttons
-	bool buffered_tx; // disable/enable buffered sending for CW and digital modes
+//	bool buffered_tx; // disable/enable buffered sending for CW and digital modes
+	uint8_t keyer_mode_tx; // mode of TX in CW keyer mode
+	bool keyer_cycled_tx_active; // active repeating TX in keyer mode
+	uint32_t keyer_cycled_tx_timer; // timer for repeating TX in keyer mode
+	uint8_t keyer_cycled_tx_button; // for repeating TX in keyer mode - activated button
+	uint8_t keyer_cycled_interval; // in sec.
+	uint32_t cw_beacon_interval; // in 1/100 of sec.
+	uint8_t swbi; // cw beacon interval numerator
+	uint8_t peak_ind_tune; // in 0.25 sec, 0 is OFF
+	bool ExtFMenuActive; // active external menu for buttons F1...F5
+	bool XvtrFMenuActive; // active XVTR menu for buttons F1...F5
+	bool MenuOfFMenusActive; // active menu for coise the F-menu
 #ifdef USE_TWO_CHANNEL_AUDIO
 	bool stereo_enable; // enable/disable stereo demodulation (only in special hardware, NOT in mcHF)
 #endif
@@ -699,12 +785,51 @@ typedef struct TransceiverState
 
 	bool paddles_active; // setting this to false disables processing of external gpio interrupts (right now just the paddles/PTT)
 
-    uint8_t vswr_protection_threshold; // 1 - protection OFF
+    uint8_t debug_vswr_protection_threshold; // 1 - protection OFF
 
 	// noise reduction gain display in spectrum
     int16_t  nr_gain_display; // 0 = do not display gains, 1 = display bin gain in spectrum display, 2 = display long_tone_gain
     //                                           3 = display bin gain multiplied with long_tone_gain
 
+	bool lotx_dacs_present;           // TX LO Supression DACs MCP4725 (x096/x97) is present?
+	int16_t cal_lo_tx_supr0[15];      // Band calibrated values for DACs MCP4725
+	int16_t cal_lo_tx_supr1[15];      // Band calibrated values for DACs MCP4725
+	uint8_t band_index;               // Index of current band in table (by tune freq)
+	bool HereIsEnableCB26Mc;          // Tune on enable CB band 26 Mc
+	bool HereIsEnableCB27Mc;          // Tune on enable CB band 27 Mc
+	uint8_t band_lo_tx_supr;          // The band the currently selected frequency is in (CB bands == 24/28 MHz)
+	uint8_t band_lo_tx_supr_old;      // Old value
+#define MIN_LO_TX_SUPR_BALANCE     48 // Minimum setting for TX LO Supression balance
+#define MAX_LO_TX_SUPR_BALANCE   4000 // Maximum setting for TX LO Supression balance
+#define LO_TX_SUPR_DAC0_WRITE     192 // address I2C_2
+#define LO_TX_SUPR_DAC0_READ      193 // address I2C_2
+#define LO_TX_SUPR_DAC1_WRITE     194 // address I2C_2
+#define LO_TX_SUPR_DAC1_READ      195 // address I2C_2
+
+#ifdef SDR_AMBER
+	uint8_t amber_input_state;		  // Amber - state of RX input group
+	bool amber_io8_present;           // Amber - I/Ox8 PCF8574A is present?
+	uint8_t amber_io8_state;
+    #define AMBER_IO8_WRITE           112 // address I2C_2
+	bool amber_io4_present;           // Amber - I/Ox4 PCA9536 is present?
+	uint8_t amber_io4_state;
+    uint8_t amber_pa_bandcode_mode;
+    #define AMBER_IO4_WRITE           130 // address I2C_2
+    bool amber_dac_pwr_tx_present;    // Amber - DAC MCP4725 for TX PWR reg. is present?
+    int16_t amber_dac_pwr_tx_state;
+    #define AMBER_DAC_PWR_TX_WRITE    194 // address I2C_1
+    #define AMBER_CS4270_WRITE        144 // address I2C_4
+    #define AMBER_CS4270_READ         145 // address I2C_4
+#endif
+    uint8_t anr_n_taps;
+    uint8_t anr_delay;
+    uint16_t anr_two_mu_int;
+    uint16_t anr_gamma_int;
+    uint8_t dummy;
+#ifdef FAST_FREQ_ENC
+    uint16_t freq_enc_timer;
+#endif
+    bool disabled_tp;
 } TransceiverState;
 
 extern __IO TransceiverState ts;
@@ -758,7 +883,18 @@ void Board_RedLed(ledstate_t state);
 void Board_BlueLed(ledstate_t state);
 #endif
 
+#ifdef SDR_AMBER
+void Board_IllumButt(void);
+uint16_t Board_AmberIOx8_Write(uint8_t value);
+void Board_Amber_InputStateSet(uint8_t code);
+uint16_t Board_AmberIOx4_Write(uint8_t command, uint8_t value);
+uint16_t Board_AmberCS4270_Write(uint8_t map, uint8_t value);
+#endif
+
 bool Board_PttDahLinePressed(void);
+#ifdef SDR_AMBER_PTT_ALT
+bool Board_PttAltLinePressed(void);
+#endif
 bool Board_DitLinePressed(void);
 
 uint32_t Board_RamSizeGet(void);
@@ -769,27 +905,30 @@ const char* Board_BootloaderVersion(void);
 void CriticalError(uint32_t error);
 
 bool is_vfo_b(void);
+void CW_Smooth_Settings(void);
 
-static inline bool is_ssb_tx_filter_enabled() {
+static inline bool is_ssb_tx_filter_enabled(void)
+{
 	return (ts.tx_filter != 0);
 	//    return (ts.flags1 & FLAGS1_SSB_TX_FILTER_DISABLE) == false;
 }
 
-static inline bool is_ssb(const uint32_t dmod_mode) {
+static inline bool is_ssb(const uint32_t dmod_mode)
+{
     return (dmod_mode == DEMOD_LSB || dmod_mode == DEMOD_USB);
 }
 
-static inline bool is_splitmode()
+static inline bool is_splitmode(void)
 {
     return (ts.vfo_mem_mode & VFO_MEM_MODE_SPLIT) != 0;
 }
 
-static inline bool is_scopemode()
+static inline bool is_scopemode(void)
 {
     return (ts.flags1 & FLAGS1_SCOPE_ENABLED) != 0;
 }
 
-static inline bool is_waterfallmode()
+static inline bool is_waterfallmode(void)
 {
     return (ts.flags1 & FLAGS1_WFALL_ENABLED) != 0;
 }
@@ -797,6 +936,7 @@ static inline bool is_waterfallmode()
 bool is_dsp_nb_active(void);
 bool is_dsp_nb(void);
 bool is_dsp_nr(void);
+bool is_dsp_anr(void);
 bool is_dsp_nr_postagc(void);
 bool is_dsp_notch(void);
 bool is_dsp_mnotch(void);
@@ -804,7 +944,20 @@ bool is_dsp_mpeak(void);
 
 
 #ifdef USE_PENDSV_FOR_HIGHPRIO_TASKS
-extern void UiDriver_TaskHandler_HighPrioTasks(void);
+extern void UiDriver_TaskHandler_HighPrioTasks();
 #endif
 
+#endif
+
+// For DACs MCP4725 - on band carrier TX depression
+uint16_t LO_TX_SUPR_DAC_WriteReg(uint8_t qitem, uint16_t cal_value);
+
+#ifdef SDR_AMBER
+uint16_t ALT_RWP_CTRL_DAC_WriteReg(uint16_t vol_value);
+#endif
+
+void LO_TX_SUPR_DAC_GetBand(uint32_t freq);
+
+#ifndef UI_BRD_MCHF
+void MIC_bias_set(void);
 #endif

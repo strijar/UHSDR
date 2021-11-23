@@ -20,15 +20,15 @@
 
 typedef struct
 {
-    float32_t sampling_freq;
-    float32_t target_freq;
-    //	float32_t speed;
-    uint8_t speed;
-    //	uint8_t average;
-    uint32_t thresh;
-    uint8_t blocksize;
+	float32_t sampling_freq;
+	float32_t target_freq;
+//	float32_t speed;
+	uint8_t speed;
+//	uint8_t average;
+	uint32_t thresh;
+	uint8_t blocksize;
 
-    //	uint8_t AGC_enable;
+//	uint8_t AGC_enable;
     union
     {
         struct

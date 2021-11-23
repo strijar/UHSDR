@@ -486,32 +486,34 @@ static void AudioDriver_FM_Rx_Init(fm_conf_t* fm)
 }
 
 #ifdef USE_LEAKY_LMS
-static void AudioDriver_LeakyLmsNr_Init()
+static void AudioDriver_LeakyLmsNr_Init(void) // LEAKY LMS noise reduction variables
 {
-    /////////////////////// LEAKY LMS noise reduction
-    leakyLMS.n_taps =     64; //64;                       // taps
-    leakyLMS.delay =    16; //16;                       // delay
+    leakyLMS.n_taps =     64; //64;
+    leakyLMS.delay =      16; //16;
     leakyLMS.dline_size = LEAKYLMSDLINE_SIZE;
-    //int ANR_buff_size = FFT_length / 2.0;
-    leakyLMS.position = 0;
-    leakyLMS.two_mu =   0.0001;                     // two_mu --> "gain"
+    leakyLMS.position =   0;
+    leakyLMS.two_mu =     0.0001;
     leakyLMS.two_mu_int = 100;
-    leakyLMS.gamma =    0.1;                      // gamma --> "leakage"
-    leakyLMS.gamma_int = 100;
-    leakyLMS.lidx =     120.0;                      // lidx
-    leakyLMS.lidx_min = 0.0;                      // lidx_min
-    leakyLMS.lidx_max = 200.0;                      // lidx_max
-    leakyLMS.ngamma =   0.001;                      // ngamma
-    leakyLMS.den_mult = 6.25e-10;                   // den_mult
-    leakyLMS.lincr =    1.0;                      // lincr
-    leakyLMS.ldecr =    3.0;                     // ldecr
-    //int leakyLMS.mask = leakyLMS.dline_size - 1;
-    leakyLMS.mask = LEAKYLMSDLINE_SIZE - 1;
-    leakyLMS.in_idx = 0;
-    leakyLMS.on = 0;
-    leakyLMS.notch = 0;
-    /////////////////////// LEAKY LMS END
-
+    leakyLMS.gamma =      0.1; // gamma --> "leakage"
+    leakyLMS.gamma_int =  100;
+    leakyLMS.lidx =       120.0;
+    leakyLMS.lidx_min =   0.0;
+    leakyLMS.lidx_max =   200.0;
+    leakyLMS.ngamma =     0.001;
+    leakyLMS.den_mult =   6.25e-10;
+    leakyLMS.lincr =      1.0;
+    leakyLMS.ldecr =      3.0;
+    leakyLMS.mask = 	  LEAKYLMSDLINE_SIZE - 1;
+    leakyLMS.in_idx = 	  0;
+    leakyLMS.on = 		  0;
+    leakyLMS.notch = 	  0;
+    // from config
+    leakyLMS.n_taps = ts.anr_n_taps;
+    leakyLMS.delay = ts.anr_delay;
+    leakyLMS.two_mu_int = ts.anr_two_mu_int;
+    leakyLMS.two_mu = leakyLMS.two_mu_int / 1000000.0;
+    leakyLMS.gamma_int = ts.anr_gamma_int;
+    leakyLMS.gamma = leakyLMS.gamma_int / 1000.0;
 }
 
 // Automatic noise reduction
@@ -520,10 +522,9 @@ static void AudioDriver_LeakyLmsNr_Init()
 // GPLv3 licensed
 void AudioDriver_LeakyLmsNr (float32_t *in_buff, float32_t *out_buff, int buff_size, bool notch)
 {
-    int i, j, idx;
-    float32_t c0, c1;
-    float32_t y, error, sigma, inv_sigp;
-    float32_t nel, nev;
+    uint8_t i, j, idx;
+    float32_t y, error, sigma, inv_sigp, c0, c1, nel, nev;
+
         for (i = 0; i < buff_size; i++)
         {
             leakyLMS.d[leakyLMS.in_idx] = in_buff[i];
@@ -546,9 +547,9 @@ void AudioDriver_LeakyLmsNr (float32_t *in_buff, float32_t *out_buff, int buff_s
             }
             else
             { // noise reduction
-                out_buff[i] = y;
+//				out_buff[i] = y;
+				out_buff[i] = y * 2; // volume up
             }
-//          leakyLMS.out_buff[2 * i + 1] = 0.0;
 
             if((nel = error * (1.0 - leakyLMS.two_mu * sigma * inv_sigp)) < 0.0) nel = -nel;
             if((nev = leakyLMS.d[leakyLMS.in_idx] - (1.0 - leakyLMS.two_mu * leakyLMS.ngamma) * y - leakyLMS.two_mu * error * sigma * inv_sigp) < 0.0) nev = -nev;
@@ -636,7 +637,7 @@ void AudioDriver_AgcWdsp_Set()
  * Called once during startup by AudioDriver_Init
  *
  */
-static void RxProcessor_Init()
+static void RxProcessor_Init(void)
 {
     AudioAgc_AgcWdsp_Init(); // RX
 
@@ -744,7 +745,7 @@ void AudioDriver_SetSamPllParameters()
     adb.sam.onem_mtauI = (1.0 - adb.sam.mtauI);
 }
 
-static void AudioDriver_SetRxIqCorrection()
+static void AudioDriver_SetRxIqCorrection(void)
 {
     // these change during operation
     adb.iq_corr.M_c1 = 0.0;
@@ -1052,7 +1053,7 @@ static void AudioDriver_SetRxTxAudioProcessingAudioFilters(uint8_t dmod_mode)
 /**
  * Sets up the spectrum filters according to the current zoom level
  */
-static void AudioDriver_Spectrum_Set()
+static void AudioDriver_Spectrum_Set(void)
 {
     // this sets the coefficients for the ZoomFFT decimation filter
     // according to the desired magnification mode sd.magnify.
@@ -1779,7 +1780,8 @@ void AudioDriver_IQPhaseAdjust(uint16_t txrx_mode, float32_t* i_buffer, float32_
     int16_t trans_idx;
 
     // right now only in TX used, may change in future
-    if ((txrx_mode == TRX_MODE_TX && ts.dmod_mode == DEMOD_CW) || ts.iq_freq_mode == FREQ_IQ_CONV_MODE_OFF)
+//  if ((txrx_mode == TRX_MODE_TX && ts.dmod_mode == DEMOD_CW) || ts.iq_freq_mode == FREQ_IQ_CONV_MODE_OFF) // Comm. by UB8JDC
+    if ((!(ts.expflags1 & EXPFLAGS1_CLEAR_TX_CW_RTTY_BPSK) && (txrx_mode == TRX_MODE_TX && ts.dmod_mode == DEMOD_CW)) || ts.iq_freq_mode == FREQ_IQ_CONV_MODE_OFF) // UB8JDC
     {
         trans_idx = IQ_TRANS_OFF;
     }
@@ -2442,13 +2444,14 @@ static void RxProcessor_DemodAudioPostprocessing(float32_t (*a_buffer)[AUDIO_BLO
     {
         if((dsp_active & DSP_NOTCH_ENABLE) && (dmod_mode != DEMOD_CW) && !(dmod_mode == DEMOD_SAM && sampleRateDecim == 24000))       // No notch in CW
         {
-#ifdef USE_LEAKY_LMS
-            if(ts.enable_leaky_LMS)
-            {
-                  AudioDriver_LeakyLmsNr(a_buffer[0], a_buffer[0], blockSizeDecim, 1);
-            }
-            else
-#endif
+//#ifdef USE_LEAKY_LMS
+//            if(ts.enable_leaky_LMS)
+//            {
+//                  AudioDriver_LeakyLmsNr(a_buffer[0], a_buffer[0], blockSizeDecim, 1);
+//            }
+//            else
+//#endif
+// commented by UB8JDC 2020.07.22
             {
 #ifdef USE_LMS_AUTONOTCH
                 AudioDriver_NotchFilter(blockSizeDecim, a_buffer[0]);     // Do notch filter
@@ -2459,9 +2462,10 @@ static void RxProcessor_DemodAudioPostprocessing(float32_t (*a_buffer)[AUDIO_BLO
 #if defined(USE_LEAKY_LMS)
         // DSP noise reduction using LMS (Least Mean Squared) algorithm
         // This is the pre-filter/AGC instance
-        if((dsp_active & DSP_NR_ENABLE) && (!(dsp_active & DSP_NR_POSTAGC_ENABLE)) && !(dmod_mode == DEMOD_SAM && sampleRateDecim == 24000))      // Do this if enabled and "Pre-AGC" DSP NR enabled
+        if((dsp_active & DSP_ANR_ENABLE) && (!(dsp_active & DSP_NR_POSTAGC_ENABLE)) && !(dmod_mode == DEMOD_SAM && sampleRateDecim == 24000))      // Do this if enabled and "Pre-AGC" DSP NR enabled
         {
-            if(ts.enable_leaky_LMS)
+//          if(ts.enable_leaky_LMS)
+            if(is_dsp_anr())
             {
                   AudioDriver_LeakyLmsNr(a_buffer[0], a_buffer[0], blockSizeDecim, 0);
             }
@@ -2489,9 +2493,10 @@ static void RxProcessor_DemodAudioPostprocessing(float32_t (*a_buffer)[AUDIO_BLO
     // This is the post-filter, post-AGC instance
 #if defined(USE_LEAKY_LMS)
 
-    if((is_dsp_nr()) && (is_dsp_nr_postagc()) && (!ts.dsp.inhibit) && !(dmod_mode == DEMOD_SAM && sampleRateDecim == 24000))     // Do DSP NR if enabled and if post-DSP NR enabled
+    if((dsp_active & DSP_ANR_ENABLE) && (is_dsp_nr_postagc()) && (!ts.dsp.inhibit) && !(dmod_mode == DEMOD_SAM && sampleRateDecim == 24000))     // Do DSP NR if enabled and if post-DSP NR enabled
     {
-        if(ts.enable_leaky_LMS)
+//      if(ts.enable_leaky_LMS)
+        if(is_dsp_anr())
         {
               AudioDriver_LeakyLmsNr(a_buffer[0], a_buffer[0], blockSizeDecim, 0);
         }
@@ -2679,9 +2684,18 @@ static void AudioDriver_RxProcessor(IqSample_t * const srcCodec, AudioSample_t *
         }
         if (IQ_BIT_SCALE_DOWN != 1.0)
         {
-            // we scale everything into the range of +/-32767 if we are getting 32 bit input
-            arm_scale_f32 (adb.iq_buf.i_buffer, IQ_BIT_SCALE_DOWN, adb.iq_buf.i_buffer, blockSize);
-            arm_scale_f32 (adb.iq_buf.q_buffer, IQ_BIT_SCALE_DOWN, adb.iq_buf.q_buffer, blockSize);
+            if(ts.codecCS4270_present)
+            {
+                // bla-bla-bla for CS4270 codec scaling for 24 bits
+                arm_scale_f32 (adb.iq_buf.i_buffer, IQ_BIT_SCALE_DOWN24, adb.iq_buf.i_buffer, blockSize);
+                arm_scale_f32 (adb.iq_buf.q_buffer, IQ_BIT_SCALE_DOWN24, adb.iq_buf.q_buffer, blockSize);
+            }
+            else
+            {
+                // we scale everything into the range of +/-32767 if we are getting 32 bit input
+                arm_scale_f32 (adb.iq_buf.i_buffer, IQ_BIT_SCALE_DOWN, adb.iq_buf.i_buffer, blockSize);
+                arm_scale_f32 (adb.iq_buf.q_buffer, IQ_BIT_SCALE_DOWN, adb.iq_buf.q_buffer, blockSize);
+            }
         }
         AudioDriver_RxHandleIqCorrection(adb.iq_buf.i_buffer, adb.iq_buf.q_buffer, blockSize);
 
@@ -2986,6 +3000,17 @@ void AudioDriver_I2SCallback(AudioSample_t *audio, IqSample_t *iq, AudioSample_t
             }
             to_rx = false;                          // caused by the content of the buffers from TX - used on return from SSB TX
         }
+
+#ifdef SDR_AMBER
+        if(ts.codecCS4270_present && (ts.rf_gain_codecCS4270 != 1.0)) // simulation of level control at the ADC input, which is absent in the CS4270 codec
+        {
+            for(uint16_t i = 0; i < blockSize; i++)
+            {
+                iq[i].l = (uint32_t) (iq[i].l * ts.rf_gain_codecCS4270);
+                iq[i].r = (uint32_t) (iq[i].r * ts.rf_gain_codecCS4270);
+            }
+        }
+#endif
 
 #ifdef USE_CONVOLUTION
         AudioDriver_RxProcessorConvolution(iq, audio, blockSize, muted);

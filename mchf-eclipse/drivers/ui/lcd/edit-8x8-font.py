@@ -15,7 +15,11 @@ end_marker = '};' # Indicates end of font data.
 # Image filename used in extract and insert modes.
 image_file = 'font-8x8.png'
 
-mode = None
+#mode = None
+#mode = show
+mode = extract
+#mode = insert
+
 if len(sys.argv) > 1:
     mode = sys.argv[1]
 

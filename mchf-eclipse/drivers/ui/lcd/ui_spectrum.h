@@ -263,6 +263,9 @@ typedef struct SpectrumDisplay
     uint32_t   scope_centre_grid_colour_active;    // active colour of the spectrum scope center grid line
     uint32_t   scope_grid_colour_active;   // active color of spectrum scope grid;
 
+    uint32_t   boxes_colour;               // screen boxes colour
+    uint32_t   txtline_colour;             // ticker colour
+
     uint16_t old_left_filter_border_pos;	//previous BW highlight left border
     uint16_t old_right_filter_border_pos;	//previous BW highlight right border
     uint8_t RedrawType;
@@ -273,7 +276,8 @@ typedef struct SpectrumDisplay
 // Spectrum display
 extern SpectrumDisplay      sd;
 
-#define MinimumScopeSize 24
+//#define MinimumScopeSize 24
+#define MinimumScopeSize 46
 #define MinimumWaterfallSize 16
 
 

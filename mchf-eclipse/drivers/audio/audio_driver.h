@@ -198,6 +198,7 @@ typedef struct
 #define DSP_NB_ENABLE           0x08    // DSP is to be displayed on screen instead of NB (| 8)
 #define DSP_MNOTCH_ENABLE       0x10    // Manual Notch enabled
 #define DSP_MPEAK_ENABLE        0x20    // Manual Peak enabled
+#define DSP_ANR_ENABLE          0x40    // DSP ANR (Leak LMS) mode is on
 
     uint8_t active;                 // Used to hold various aspects of DSP mode selection
     uint8_t mode;                   // holds the mode chosen in the DSP
@@ -499,6 +500,7 @@ typedef enum
 {
     DSP_SWITCH_OFF			=	0,
     DSP_SWITCH_NR,
+    DSP_SWITCH_ANR,
     DSP_SWITCH_NOTCH,
     DSP_SWITCH_NR_AND_NOTCH,
     DSP_SWITCH_NOTCH_MANUAL,
@@ -508,8 +510,21 @@ typedef enum
     DSP_SWITCH_TREBLE        =   99,
 } dsp_mode_t;
 
+typedef enum
+{
+    ModeVK_SSB               =   0,
+    ModeVK_CW,
+    ModeVK_AM,
+    ModeVK_SAM,
+    ModeVK_FM,
+    ModeVK_RTTY,
+    ModeVK_BPSK,
+    ModeVK_FDV,
+    ModeVK_SWITCH_MAX,
+} ModeVK_t;
+
 #define DSP_SWITCH_MODEMASK_ENABLE_MASK             ((1<<DSP_SWITCH_MAX)-1)
-#define DSP_SWITCH_MODEMASK_ENABLE_DEFAULT              ((1<<DSP_SWITCH_MAX)-1)
+#define DSP_SWITCH_MODEMASK_ENABLE_DEFAULT          ((1<<DSP_SWITCH_MAX)-1)
 #define DSP_SWITCH_MODEMASK_ENABLE_DSPOFF           (1<<DSP_SWITCH_OFF)
 
 //
@@ -599,6 +614,7 @@ extern lLMS leakyLMS;
     #define IQ_BIT_SCALE_DOWN (1.0)
 #endif
 #define IQ_BIT_SCALE_UP (1<<IQ_BIT_SHIFT)
+#define IQ_BIT_SCALE_DOWN24 (0.0039)
 
 #ifdef USE_32_AUDIO_BITS
     #define AUDIO_BIT_SHIFT 16

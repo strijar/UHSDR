@@ -82,6 +82,12 @@ typedef enum {
     IQ_15M,
     IQ_10M,
     IQ_10M_UP,
+    IQ_6M,
+    IQ_160M,
+    IQ_40M,
+    IQ_30M,
+    IQ_17M,
+    IQ_12M,
     IQ_FREQ_NUM
 } iq_freq_enum_t;
 
@@ -89,5 +95,7 @@ typedef enum {
 
 extern freq_adjust_point_t iq_adjust[];
 
+// For advance I/Q jusify
+//const uint8_t iq_adv_adj_order[] = {6, 0, 7, 8, 1, 9, 2, 10, 3, 4, 5};
 
 #endif /* DRIVERS_AUDIO_AUDIO_MANAGEMENT_H_ */

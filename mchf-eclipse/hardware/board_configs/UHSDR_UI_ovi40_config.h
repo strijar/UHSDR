@@ -43,7 +43,10 @@
 #endif // STM32H7
 
 #define USE_TWO_CHANNEL_AUDIO
-#define USE_HMC1023
+
+#ifndef SDR_AMBER
+    #define USE_HMC1023
+#endif
 
 #if defined(STM32F7)
     #ifndef TRX_NAME
@@ -93,8 +96,8 @@
 #define ENC_THREE_CH2           GPIO_PIN_1
 #define ENC_THREE_CH2_PIO       GPIOA
 // pin 2
-#define XADC3_FWD                GPIO_PIN_2
-#define XXADC3_FWD_PIO            GPIOA
+#define XADC3_FWD               GPIO_PIN_2
+#define XXADC3_FWD_PIO          GPIOA
 // pin 3
 #define ADC2_RET                GPIO_PIN_3
 #define ADC2_RET_PIO            GPIOA

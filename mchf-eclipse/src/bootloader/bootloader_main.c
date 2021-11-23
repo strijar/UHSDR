@@ -32,9 +32,9 @@ FIL MyFile;                   /* File object */
 char USBDISKPath[4];          /* USB Host logical drive path */
 
 bool boot_failed;
-
+static FIL fileR;
 extern USBH_HandleTypeDef hUsbHostHS;
-static uint8_t Bootloader_USBConnected()
+static uint8_t Bootloader_USBConnected(void)
 {
     return hUsbHostHS.device.is_connected;
 }
@@ -45,7 +45,8 @@ static const char*  bl_help[] =
         TRX_NAME " Bootloader",
         "Firmware Name: " BASE_FILE,
         "USB Drive Mode",
-        "Release Band- to skip firmware update",
+//        "Release Band- to skip firmware update",
+		"Release Band- to skip fw/config update",
         "",
         "DFU Update Mode",
         "Keep Power pressed until finish.",
@@ -55,7 +56,7 @@ static const char*  bl_help[] =
 };
 
 
-static void Bootloader_DisplayInit()
+static void Bootloader_DisplayInit(void)
 {
     MX_DMA_Init();
     MX_SPI2_Init();
@@ -83,7 +84,7 @@ static void Bootloader_DisplayInit()
 // bin rw: 0 1 2 3 4
 // dfu     0 1 5 4 6 7 8 9
 
-static void Bootloader_InfoScreen()
+static void Bootloader_InfoScreen(void)
 {
     Bootloader_DisplayInit();
     Bootloader_PrintLine(bl_help[0]);
@@ -94,7 +95,7 @@ static void Bootloader_InfoScreen()
     Bootloader_PrintLine(bl_help[4]);
 }
 
-static void Bootloader_InfoScreenDFU()
+static void Bootloader_InfoScreenDFU(void)
 {
     Bootloader_DisplayInit();
     Bootloader_PrintLine(bl_help[0]);
@@ -107,7 +108,7 @@ static void Bootloader_InfoScreenDFU()
     Bootloader_PrintLine(bl_help[9]);
 }
 
-static void Bootloader_UsbHost_Idle()
+static void Bootloader_UsbHost_Idle(void)
 {
     static bool power_was_up = false;
     static uint32_t tick;
@@ -154,21 +155,45 @@ static int Bootloader_UsbMSCDevice_Application(void)
         /* Reads all flash memory */
 		if(was_download)
 		{
-        Bootloader_PrintLine("Firmware will be updated...");
+//        Bootloader_PrintLine("Firmware will be updated...");
+        Bootloader_PrintLine("Firmware/config will be updated...");
 		}
         Bootloader_PrintLine("Saving Flash to \"" UPLOAD_FILE  "\"...");
         COMMAND_UPLOAD();
+
+        Bootloader_PrintLine("Saving Flash to \"" UPLOAD_FILE_CONF  "\"...");
+        COMMAND_UPLOAD_CONF();
 
         /* Check if BAND- Button was pressed */
         if (was_download)
         {
             /* Writes Flash memory */
-            Bootloader_PrintLine("Updating firmware using \"" DOWNLOAD_FILE "\"...");
-            COMMAND_DOWNLOAD();
+//            Bootloader_PrintLine("Updating firmware using \"" DOWNLOAD_FILE "\"...");
+//            COMMAND_DOWNLOAD();
+            bool FilesAreHere = false;
+            if (f_open(&fileR, DOWNLOAD_FILENAME, FA_READ) == FR_OK)
+            {
+            	f_close (&fileR);
+            	FilesAreHere = true;
+            	Bootloader_PrintLine("Updating firmware using \"" DOWNLOAD_FILE "\"...");
+            	COMMAND_DOWNLOAD();
+            }
+            if (f_open(&fileR, DOWNLOAD_FILENAME_CONF, FA_READ) == FR_OK)
+            {
+            	f_close (&fileR);
+            	FilesAreHere = true;
+            	Bootloader_PrintLine("Updating config using \"" DOWNLOAD_FILE_CONF "\"...");
+            	COMMAND_DOWNLOAD_CONF();
+            }
+            if(FilesAreHere == false)
+            {
+            	Bootloader_PrintLine("No files for update.");
+            }
         }
         else
         {
-            Bootloader_PrintLine("Skipping firmware update.");
+//            Bootloader_PrintLine("Skipping firmware update.");
+            Bootloader_PrintLine("Skipping firmware/conf update.");
         }
 
         Bootloader_PrintLine("");
@@ -309,9 +334,27 @@ int Bootloader_Main()
 	  ;
 	}
 
+//	#ifdef SBLA
+//	  *(uint32_t*)(SRAM2_BASE+5) = 0x29;	// signature for DF8OE development features
+//	#endif
+//	#ifdef SBLS
+//	  *(uint32_t*)(SRAM2_BASE+10) = 0x29;	// signature for special beta-testing features
+//	#endif
+
     /* initialization */
     BSP_Init();
 
+//#if 0
+//    mcHF_PowerHoldOff();
+//
+//
+//    if( *(uint32_t*)(SRAM2_BASE) != 0x55)		// no reboot requested?
+//    {
+//        // we wait for a longer time
+//        HAL_Delay(300);
+//    }
+//#else
+//#endif
     Bootloader_PowerHoldOn();
     HAL_Delay(50);
 

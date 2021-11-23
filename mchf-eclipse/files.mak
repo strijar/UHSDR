@@ -112,6 +112,8 @@ drivers/audio/filters/iir_2_7k.c \
 drivers/audio/filters/iir_2_9k.c \
 drivers/audio/filters/iir_2k7_tx_bpf.c \
 drivers/audio/filters/iir_2k7_tx_bpf_fm.c \
+drivers/audio/filters/iir_100hz.c \
+drivers/audio/filters/iir_200hz.c \
 drivers/audio/filters/iir_300hz.c \
 drivers/audio/filters/iir_3_2k.c \
 drivers/audio/filters/iir_3_4k.c \

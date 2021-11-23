@@ -18,7 +18,7 @@
 #define NB_OF_VAR               (0x1ff)
 
 
-void ConfigStorage_Init();
+void ConfigStorage_Init(void);
 
 uint16_t ConfigStorage_ReadVariable(uint16_t addr, uint16_t *value);
 uint16_t ConfigStorage_WriteVariable(uint16_t addr, uint16_t value);
@@ -26,8 +26,8 @@ uint16_t ConfigStorage_WriteVariable(uint16_t addr, uint16_t value);
 void ConfigStorage_CopyFlash2Serial(void);
 void ConfigStorage_CopySerial2Flash(void);
 
-void ConfigStorage_CopySerial2RAMCache();
-uint16_t ConfigStorage_CopyRAMCache2Serial();
+void ConfigStorage_CopySerial2RAMCache(void);
+uint16_t ConfigStorage_CopyRAMCache2Serial(void);
 
 uint16_t ConfigStorage_CopyArray2Serial(uint32_t Addr, const uint8_t *buffer, uint16_t length);
 void ConfigStorage_CopySerial2Array(uint32_t Addr, uint8_t *buffer, uint16_t length);

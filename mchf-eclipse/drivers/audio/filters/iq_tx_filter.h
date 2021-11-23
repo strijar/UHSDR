@@ -25,5 +25,8 @@
 
 extern const IQ_FilterDescriptor iq_tx_narrow;
 extern const IQ_FilterDescriptor iq_tx_wide;
+extern const IQ_FilterDescriptor iq_tx_essb_4k; // Just for eSSB
+extern const IQ_FilterDescriptor iq_tx_essb_5k; // Just for eSSB
+extern const IQ_FilterDescriptor iq_tx_essb_6k; // Just for eSSB
 
 #endif

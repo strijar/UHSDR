@@ -74,7 +74,14 @@ inline void profileEvent(const ProfiledEventNames pe) {
  * remove the overhead later.
  */
 
-void profileEventsTracePrint();
+void profileEventsTracePrint(void);
+
+
+//inline void profileTimedEventInit(void);
+//inline void profileTimedEventStart(const ProfiledEventNames pe);
+//inline void profileTimedEventStop(const ProfiledEventNames pe);
+//inline void profileTimedEventReset(const ProfiledEventNames pe);
+//inline  ProfilingTimedEvent* profileTimedEventGet(const ProfiledEventNames pe);
 
 
 // INLINE IMPLEMENTATIONS
@@ -84,6 +91,7 @@ void profileEventsTracePrint();
 #define SCB_DEMCR     ((volatile uint32_t *)0xE000EDFC)
 #define DWT_LAR       ((volatile uint32_t *)0xE0001FB0)
 
+//inline void profileCycleCount_reset(void){
 static inline void profileCycleCount_reset(){
     *SCB_DEMCR   |= 0x01000000;
 #ifdef STM32F7
@@ -93,27 +101,32 @@ static inline void profileCycleCount_reset(){
     *DWT_CONTROL = 0;
 }
 
+//inline void profileCycleCount_start(void)
 static inline void profileCycleCount_start()
 {
     *DWT_CONTROL = *DWT_CONTROL | 1;
 }
 
-static inline void profileCycleCount_stop()
+//inline void profileCycleCount_stop(void)
+static inline void profileCycleCount_stop(void)
 {
     *DWT_CONTROL = *DWT_CONTROL  & ~1; //
 }
 
-static inline uint32_t profileCycleCount_get()
+//inline uint32_t profileCycleCount_get(void)
+static inline uint32_t profileCycleCount_get(void)
 {
     return *DWT_CYCCNT;
 }
 
-static inline void profileTimedEventInit()
+//inline void profileTimedEventInit(void)
+static inline void profileTimedEventInit(void)
 {
     profileCycleCount_reset();
     profileCycleCount_start();
 }
 
+//inline void profileTimedEventStart(const ProfiledEventNames pe)
 static inline void profileTimedEventStart(const ProfiledEventNames pe)
 {
 #ifdef PROFILE_EVENTS
@@ -123,6 +136,7 @@ static inline void profileTimedEventStart(const ProfiledEventNames pe)
 #endif
 
 }
+//inline void profileTimedEventStop(const ProfiledEventNames pe)
 static inline void profileTimedEventStop(const ProfiledEventNames pe)
 {
 
@@ -136,6 +150,7 @@ static inline void profileTimedEventStop(const ProfiledEventNames pe)
 #endif
 
 }
+//inline void profileTimedEventReset(const ProfiledEventNames pe)
 static inline void profileTimedEventReset(const ProfiledEventNames pe)
 {
 #ifdef PROFILE_EVENTS
@@ -148,6 +163,7 @@ static inline void profileTimedEventReset(const ProfiledEventNames pe)
 #endif
 }
 
+//inline  ProfilingTimedEvent* profileTimedEventGet(const ProfiledEventNames pe)
 static inline  ProfilingTimedEvent* profileTimedEventGet(const ProfiledEventNames pe)
 {
     ProfilingTimedEvent* pe_ptr = NULL;

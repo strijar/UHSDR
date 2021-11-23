@@ -47,6 +47,7 @@ const ConfigEntryDescriptor* UiConfiguration_GetEntry(uint16_t id);
 
 void        UiConfiguration_LoadEepromValues(bool load_freq_mode_defaults, bool load_eeprom_defaults);
 uint16_t    UiConfiguration_SaveEepromValues(void);
+void		UiConfiguration_UpdateMacroCap(void);
 
 // Configuration Value Definitions Follow
 //
@@ -102,8 +103,9 @@ uint16_t    UiConfiguration_SaveEepromValues(void);
 //
 
 #define XVERTER_MULT_MAX        10      // maximum LO multipler in xverter mode
-#define XVERTER_OFFSET_MAX_HZ    999999000   //  transverter offset is in Hz (999,999,999 Hz), above khz
-#define XVERTER_OFFSET_MAX      1019999999   // Maximum transverter offset (19,999,999,999 kHz ~ 20 Ghz)
+//#define XVERTER_OFFSET_MAX      999000000   // Maximum transverter offset (999 MHz)
+#define XVERTER_OFFSET_MAX_HZ      499999999   // Maximum transverter offset, setting in Hz. More - in kHz
+#define XVERTER_OFFSET_MAX         1999999999   // Maximum transverter offset
 //
 #define AUTO_LSB_USB_OFF        0
 #define AUTO_LSB_USB_ON         1
@@ -260,7 +262,7 @@ uint16_t    UiConfiguration_SaveEepromValues(void);
 #define EEPROM_DETECTOR_COUPLING_COEFF_80M	93  // Calibration coupling coefficient for FWD/REV power sensor for 80 meters
 #define EEPROM_DETECTOR_COUPLING_COEFF_40M	94  // Calibration coupling coefficient for FWD/REV power sensor for 60/40 meters
 #define EEPROM_DETECTOR_COUPLING_COEFF_20M	95  // Calibration coupling coefficient for FWD/REV power sensor for 30/20/17 meters
-#define EEPROM_DETECTOR_COUPLING_COEFF_15M	96  // Calibration coupling coefficient for FWD/REV power sensor for 15/12/10 meters
+#define EEPROM_DETECTOR_COUPLING_COEFF_15M	96  // Calibration coupling coefficient for FWD/REV power sensor for 15/12 meters
 //
 // The following are the coefficients used to set the RF output power settings
 //
@@ -608,17 +610,92 @@ uint16_t    UiConfiguration_SaveEepromValues(void);
 #define EEPROM_TX_IQ_10M_UP_PHASE_BALANCE_TRANS_OFF	425
 #define EEPROM_VSWR_PROTECTION_THRESHOLD            426
 #define EEPROM_EXPFLAGS1                            427     // Flags for options in Debug/Expert menu - see variable "expflags1"
-#define EEPROM_XVERTER_OFFSET_TX_HIGH               428     // Secondary frequency by which the display is offset for transverter use, high word
-#define EEPROM_XVERTER_OFFSET_TX_LOW                429     // Secondary frequency by which the display is offset for transverter use, low word
-#define EEPROM_CW_DECODER_FLAGS                     430     // Various flags controlling operation of CW decoder
-#define EEPROM_BAND_REGION                          431     // store which region the TRX is being used in
-#define EEPROM_FIRST_UNUSED                         432		// change this if new value ids are introduced, must be correct at any time
+//#define EEPROM_FIRST_UNUSED                         428		// change this if new value ids are introduced, must be correct at any time
+#define EEPROM_LO_TX_SUPR0_0                         428
+#define EEPROM_LO_TX_SUPR0_1                         429
+#define EEPROM_LO_TX_SUPR0_2                         430
+#define EEPROM_LO_TX_SUPR0_3                         431
+#define EEPROM_LO_TX_SUPR0_4                         432
+#define EEPROM_LO_TX_SUPR0_5                         433
+#define EEPROM_LO_TX_SUPR0_6                         434
+#define EEPROM_LO_TX_SUPR0_7                         435
+#define EEPROM_LO_TX_SUPR0_8                         436
+#define EEPROM_LO_TX_SUPR0_9                         437
+#define EEPROM_LO_TX_SUPR0_10                        438
+#define EEPROM_LO_TX_SUPR0_11                        439
+#define EEPROM_LO_TX_SUPR0_12                        440
+#define EEPROM_LO_TX_SUPR1_0                         441
+#define EEPROM_LO_TX_SUPR1_1                         442
+#define EEPROM_LO_TX_SUPR1_2                         443
+#define EEPROM_LO_TX_SUPR1_3                         444
+#define EEPROM_LO_TX_SUPR1_4                         445
+#define EEPROM_LO_TX_SUPR1_5                         446
+#define EEPROM_LO_TX_SUPR1_6                         447
+#define EEPROM_LO_TX_SUPR1_7                         448
+#define EEPROM_LO_TX_SUPR1_8                         449
+#define EEPROM_LO_TX_SUPR1_9                         450
+#define EEPROM_LO_TX_SUPR1_10                        451
+#define EEPROM_LO_TX_SUPR1_11                        452
+#define EEPROM_LO_TX_SUPR1_12                        453
+#define EEPROM_BOX_COLOUR                            454
+#define EEPROM_DETECTOR_COUPLING_COEFF_10M			 455  // Calibration coupling coefficient for FWD/REV power sensor for 10 meters
+#define EEPROM_TX_IQ_6M_GAIN_BALANCE				 456
+#define EEPROM_TX_IQ_6M_PHASE_BALANCE				 457
+#define EEPROM_TX_IQ_6M_GAIN_BALANCE_TRANS_OFF		 458
+#define EEPROM_TX_IQ_6M_PHASE_BALANCE_TRANS_OFF		 459
+#define EEPROM_TX_IQ_6M_PHASE_BALANCE_TRANS_OFF		 459
+#define EEPROM_PEAK_IND_TUNE				 		 460  // in 1/4 sec, 0 is OFF
+#define EEPROM_XVERTER_OFFSET_TX_HIGH                461  // Secondary frequency by which the display is offset for transverter use, high word
+#define EEPROM_XVERTER_OFFSET_TX_LOW                 462  // Secondary frequency by which the display is offset for transverter use, low word
+#define EEPROM_LO_TX_SUPR0_13                        463  // Wild zone
+#define EEPROM_LO_TX_SUPR1_13                        464  // Wild zone
+#define EEPROM_LO_TX_SUPR0_14                        465  // 28 MHz Up
+#define EEPROM_LO_TX_SUPR1_14                        466  // 28 MHz Up
+#define EEPROM_TXTLINE_COLOUR                        467  // Ticker colour
+#define EEPROM_CW_SMOOTH                             468  // Smooth of CW signal edges
+#define EEPROM_PWR_SCALE_GEN                         469  // Power scale for Gen band 5W
+#define EEPROM_EXPFLAGS2                             470     // Flags for options in the system menu - see variable "expflags2"
+#define EEPROM_PWR_SCALE_GEN_FULL                    471  // Power scale for Gen band FULL POWER
+#define EEPROM_AMBER_BANDCODE                        472
+#define EEPROM_ANR_N_TAPS                            473
+#define EEPROM_ANR_DELAY                             474
+#define EEPROM_ANR_TWO_MU_INT                        475
+#define EEPROM_ANR_GAMMA_INT                         476
+#define EEPROM_CW_DECODER_FLAGS                      477  // Various flags controlling operation of CW decoder
+#define EEPROM_BAND_REGION                           478  // store which region the TRX is being used in
 
-#define MAX_VAR_ADDR (EEPROM_FIRST_UNUSED - 1)
+#define EEPROM_TX_IQ_160M_GAIN_BALANCE		         479  // Advanced I/Q justify
+#define EEPROM_TX_IQ_160M_PHASE_BALANCE		         480
+#define EEPROM_TX_IQ_40M_GAIN_BALANCE		         481
+#define EEPROM_TX_IQ_40M_PHASE_BALANCE		         482
+#define EEPROM_TX_IQ_30M_GAIN_BALANCE		         483
+#define EEPROM_TX_IQ_30M_PHASE_BALANCE		         484
+#define EEPROM_TX_IQ_17M_GAIN_BALANCE		         485
+#define EEPROM_TX_IQ_17M_PHASE_BALANCE		         486
+#define EEPROM_TX_IQ_12M_GAIN_BALANCE		         487
+#define EEPROM_TX_IQ_12M_PHASE_BALANCE		         488
+
+#define EEPROM_TX_IQ_160M_GAIN_BALANCE_TRANS_OFF	 489
+#define EEPROM_TX_IQ_160M_PHASE_BALANCE_TRANS_OFF	 490
+#define EEPROM_TX_IQ_40M_GAIN_BALANCE_TRANS_OFF		 491
+#define EEPROM_TX_IQ_40M_PHASE_BALANCE_TRANS_OFF	 492
+#define EEPROM_TX_IQ_30M_GAIN_BALANCE_TRANS_OFF		 493
+#define EEPROM_TX_IQ_30M_PHASE_BALANCE_TRANS_OFF	 494
+#define EEPROM_TX_IQ_17M_GAIN_BALANCE_TRANS_OFF		 495
+#define EEPROM_TX_IQ_17M_PHASE_BALANCE_TRANS_OFF	 496
+#define EEPROM_TX_IQ_12M_GAIN_BALANCE_TRANS_OFF		 497
+#define EEPROM_TX_IQ_12M_PHASE_BALANCE_TRANS_OFF	 498
+
+#define EEPROM_FIRST_UNUSED                          499  // change this if new value ids are introduced, must be correct at any time
+
+#define MAX_VAR_ADDR (EEPROM_FIRST_UNUSED - 1) // Max 511
 
 // Note: EEPROM addresses up to 383 are currently defined. If this value is passed you
 // need to modify virtual EEPROM routines otherwise system may crash
 
-#define EEPROM_KEYER_MEMORY_ADDRESS		0x1000
+//#define EEPROM_KEYER_MEMORY_ADDRESS		0x1000
+#define EEPROM_KEYER_MEMORY_ADDRESS		0x3C30
+#define EEPROM_MEMS_MEMORY_ADDRESS		0x3F5C
+#define EEPROM_XVTR_MEMORY_ADDRESS      0x535D
 
 #endif /* DRIVERS_UI_UI_CONFIGURATION_H_ */

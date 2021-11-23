@@ -38,7 +38,7 @@
 //#define RTC_PRESENCE_NACK_VAL              0x0004       // if we find this value after power on, we assume user decided against using RTC
 #ifdef USE_RTC_LSE
 
-static void RTC_LSE_Config() {
+static void RTC_LSE_Config(void) {
 
     RCC_OscInitTypeDef RCC_OscInitStruct;
     RCC_PeriphCLKInitTypeDef PeriphClkInitStruct;
@@ -67,7 +67,7 @@ void Rtc_FullReset() {
     __HAL_RCC_BACKUPRESET_FORCE();
 }
 #if 0
-static void RTC_LSI_Config() {
+static void RTC_LSI_Config(void) {
 
     RCC_OscInitTypeDef RCC_OscInitStruct;
     RCC_PeriphCLKInitTypeDef PeriphClkInitStruct;

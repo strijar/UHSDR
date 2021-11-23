@@ -198,7 +198,7 @@ int  golay23_count_errors(int recd_codeword, int corrected_codeword) {
 #ifdef GOLAY23_MAKETABLES
 #include <stdio.h>
 
-int main() {
+int main(void) {
     int x;
     //generate and dump
     golay23_init();
@@ -233,7 +233,7 @@ const int static decoding_table[]={\n");
 #include <stdlib.h>
 #include <memory.h>
 
-int main() {
+int main(void) {
     int c;
 
     golay23_init();

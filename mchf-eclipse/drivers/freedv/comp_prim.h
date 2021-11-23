@@ -102,7 +102,7 @@ inline static COMP comp_exp_j(float phi){
 /*
  * Quick and easy complex 0
  */
-inline static COMP comp0(){
+inline static COMP comp0(void){
     COMP res;
     res.real = 0;
     res.imag = 0;

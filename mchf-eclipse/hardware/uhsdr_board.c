@@ -190,7 +190,7 @@ static void Board_BandCntr_Init(void)
     GPIO_SetBits(BAND2_PIO,BAND2);
 }
 
-static void Board_Touchscreen_Init()
+static void Board_Touchscreen_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
 
@@ -493,7 +493,7 @@ void Board_RamSizeDetection() {
 
 
 
-static void Board_BandFilterPulseRelays()
+static void Board_BandFilterPulseRelays(void)
 {
     // FIXME: Replace non_os_delay with HAL_Delay
     GPIO_ResetBits(BAND2_PIO, BAND2);
@@ -502,6 +502,102 @@ static void Board_BandFilterPulseRelays()
     non_os_delay();
     GPIO_SetBits(BAND2_PIO, BAND2);
 }
+
+#ifdef SDR_AMBER
+void Board_Amber_InputStateSet(uint8_t code)
+{
+    uint8_t tstate = ts.amber_io8_state;
+    switch(code)
+    {
+    case 0: // PRE   [11]
+    {
+        tstate = tstate | 3; // set bits
+        break;
+    }
+    case 1: // NoPRE [10]
+    {
+        tstate = tstate | 2; // set bit
+        tstate = tstate & ~1; // reset bit
+        break;
+    }
+    case 2: // Att12 [01]
+    {
+        tstate = tstate | 1; // set bit
+        tstate = tstate & ~2; // reset bit
+        break;
+    }
+    case 3: // ATT24 [00]
+    {
+        tstate = tstate & ~3; // reset bits
+        break;
+    }
+    default:
+        break;
+    }
+
+    if(ts.amber_io8_present)
+    {
+        ts.amber_io8_state = tstate;
+        Board_AmberIOx8_Write(tstate);
+    }
+}
+
+static void Board_Amber_BandFilterPulseRelays(bool up)
+{
+    if(ts.amber_io8_present)
+    {
+        // Control, set relays bits to high
+        ts.amber_io8_state = ts.amber_io8_state | 48;
+        Board_AmberIOx8_Write(ts.amber_io8_state);
+        // Pulse
+        ts.amber_io8_state = ts.amber_io8_state & ~(up ? 16 : 32); // reset bit
+        Board_AmberIOx8_Write(ts.amber_io8_state);
+        // HAL_Delay(20);
+        non_os_delay();
+        // Off, set relays bits to high
+        ts.amber_io8_state = ts.amber_io8_state | 48;
+        Board_AmberIOx8_Write(ts.amber_io8_state);
+    }
+}
+
+static void Board_Amber_BPF_FilterSet(uint8_t code)
+{
+    uint8_t tstate = ts.amber_io8_state;
+    switch(code)
+    {
+    case 0:
+    {
+        tstate = tstate & ~12; // reset bits
+        break;
+    }
+    case 1:
+    {
+        tstate = tstate | 4; // set bit
+        tstate = tstate & ~8; // reset bit
+        break;
+    }
+    case 2:
+    {
+        tstate = tstate & ~4; // reset bit
+        tstate = tstate | 8; // set bit
+        break;
+    }
+    case 3:
+    {
+        tstate = tstate | 12; // set bits
+        break;
+    }
+    default:
+        break;
+    }
+
+    if(ts.amber_io8_present)
+    {
+        ts.amber_io8_state = tstate;
+        Board_AmberIOx8_Write(tstate);
+    }
+}
+#endif
 
 /**
  * @brief switches one of the four LPF&BPF groups into the RX/TX signal path
@@ -516,7 +612,12 @@ void Board_SelectLpfBpf(uint8_t group)
     //   40m        1           0           x
     //   20/30m     0           0           x
     //   15-10m     0           1           x
-    //
+    // ---------------------------------------------
+    // Amber
+    // ---------------------------------------------
+    //   <=160m     1           1           x        group==4     BPF-option - <160m
+    //   Not in use 1           1           x        group==5     BPF-option - 160m
+    //   6m         1           1           x        group==6
     // ---------------------------------------------
     // Set LPFs:
     // Set relays in groups, internal first, then external group
@@ -531,6 +632,11 @@ void Board_SelectLpfBpf(uint8_t group)
     {
     case 0:
     {
+#ifdef SDR_AMBER
+        // Subinternal group - Set(Up)
+        Board_Amber_BandFilterPulseRelays(true);
+#endif
+
         // Internal group - Set(High/Low)
         GPIO_SetBits(BAND0_PIO, BAND0);
         GPIO_ResetBits(BAND1_PIO, BAND1);
@@ -547,11 +653,19 @@ void Board_SelectLpfBpf(uint8_t group)
         GPIO_SetBits(BAND0_PIO, BAND0);
         GPIO_SetBits(BAND1_PIO, BAND1);
 
+#ifdef SDR_AMBER
+        Board_Amber_BPF_FilterSet(3);
+#endif
         break;
     }
 
     case 1:
     {
+#ifdef SDR_AMBER
+        // Subinternal group - Set(Up)
+        Board_Amber_BandFilterPulseRelays(true);
+#endif
+
         // Internal group - Set(High/Low)
         GPIO_SetBits(BAND0_PIO, BAND0);
         GPIO_ResetBits(BAND1_PIO, BAND1);
@@ -568,11 +682,19 @@ void Board_SelectLpfBpf(uint8_t group)
         GPIO_SetBits(BAND0_PIO, BAND0);
         GPIO_ResetBits(BAND1_PIO, BAND1);
 
+#ifdef SDR_AMBER
+        Board_Amber_BPF_FilterSet(3);
+#endif
         break;
     }
 
     case 2:
     {
+#ifdef SDR_AMBER
+        // Subinternal group - Set(Up)
+        Board_Amber_BandFilterPulseRelays(true);
+#endif
+
         // Internal group - Reset(Low/Low)
         GPIO_ResetBits(BAND0_PIO, BAND0);
         GPIO_ResetBits(BAND1_PIO, BAND1);
@@ -589,11 +711,19 @@ void Board_SelectLpfBpf(uint8_t group)
         GPIO_ResetBits(BAND0_PIO, BAND0);
         GPIO_ResetBits(BAND1_PIO, BAND1);
 
+#ifdef SDR_AMBER
+        Board_Amber_BPF_FilterSet(3);
+#endif
         break;
     }
 
     case 3:
     {
+#ifdef SDR_AMBER
+        // Subinternal group - Set(Up)
+        Board_Amber_BandFilterPulseRelays(true);
+#endif
+
         // Internal group - Reset(Low/Low)
         GPIO_ResetBits(BAND0_PIO, BAND0);
         GPIO_ResetBits(BAND1_PIO, BAND1);
@@ -610,9 +740,84 @@ void Board_SelectLpfBpf(uint8_t group)
         GPIO_ResetBits(BAND0_PIO, BAND0);
         GPIO_SetBits(BAND1_PIO, BAND1);
 
+#ifdef SDR_AMBER
+        Board_Amber_BPF_FilterSet(3);
+#endif
+        break;
+    }
+#ifdef SDR_AMBER
+    case 4: // <=160m (BPF-option - <160m)
+    {
+        // Subinternal group - Set(Down) - for 160m
+        Board_Amber_BandFilterPulseRelays(false);
+
+        // Internal group - Set(High/Low) - as 80m
+        GPIO_SetBits(BAND0_PIO, BAND0);
+        GPIO_ResetBits(BAND1_PIO, BAND1);
+        Board_BandFilterPulseRelays();
+
+        // External group -Set(High/High) - as 80m
+        GPIO_SetBits(BAND0_PIO, BAND0);
+        GPIO_SetBits(BAND1_PIO, BAND1);
+        Board_BandFilterPulseRelays();
+
+        // BPF - as 80m
+        GPIO_SetBits(BAND0_PIO, BAND0);
+        GPIO_SetBits(BAND1_PIO, BAND1);
+
+        Board_Amber_BPF_FilterSet(2);
+
         break;
     }
 
+    case 5: // Not in use (BPF-option - 160m)
+    {
+        // Subinternal group - Set(Down) - for 160m
+        Board_Amber_BandFilterPulseRelays(false);
+
+        // Internal group - Set(High/Low) - as 80m
+        GPIO_SetBits(BAND0_PIO, BAND0);
+        GPIO_ResetBits(BAND1_PIO, BAND1);
+        Board_BandFilterPulseRelays();
+
+        // External group -Set(High/High) - as 80m
+        GPIO_SetBits(BAND0_PIO, BAND0);
+        GPIO_SetBits(BAND1_PIO, BAND1);
+        Board_BandFilterPulseRelays();
+
+        // BPF - as 80m
+        GPIO_SetBits(BAND0_PIO, BAND0);
+        GPIO_SetBits(BAND1_PIO, BAND1);
+
+        Board_Amber_BPF_FilterSet(0);
+
+        break;
+    }
+
+    case 6: // 6m
+    {
+        // Subinternal group - Set(Down) - for 6m
+        Board_Amber_BandFilterPulseRelays(false);
+
+        // Internal group - Reset(Low/Low) - as 10m
+        GPIO_ResetBits(BAND0_PIO, BAND0);
+        GPIO_ResetBits(BAND1_PIO, BAND1);
+        Board_BandFilterPulseRelays();
+
+        // External group - Set(High/High) - as 10m
+        GPIO_SetBits(BAND0_PIO, BAND0);
+        GPIO_SetBits(BAND1_PIO, BAND1);
+        Board_BandFilterPulseRelays();
+
+        // BPF - as 80m
+        GPIO_SetBits(BAND0_PIO, BAND0);
+        GPIO_SetBits(BAND1_PIO, BAND1);
+
+        Board_Amber_BPF_FilterSet(1);
+
+        break;
+    }
+#endif
     default:
         break;
     }
@@ -713,6 +918,26 @@ void Board_BlueLed(ledstate_t state)
     }
 }
 #endif
+
+#ifdef SDR_AMBER
+void Board_IllumButt()
+{
+	if(ts.amber_io8_present)
+	{
+		// bit6 == 1 - Illumination of buttons is ON
+		if(ts.expflags2 & EXPFLAGS2_ILLUM_BUTT)
+		{
+            ts.amber_io8_state = ts.amber_io8_state | 64; // set bit
+		}
+		else
+		{
+			ts.amber_io8_state = ts.amber_io8_state & ~64; // reset bit
+		}
+		Board_AmberIOx8_Write(ts.amber_io8_state);
+	}
+}
+#endif
+
 /**
  * @brief sets the hw ptt line and by this switches the mcHF board signal path between rx and tx configuration
  * @param tx_enable true == TX Paths, false == RX Paths
@@ -751,9 +976,142 @@ bool Board_PttDahLinePressed() {
     return  !HAL_GPIO_ReadPin(PADDLE_DAH_PIO,PADDLE_DAH);
 }
 
+#ifdef SDR_AMBER_PTT_ALT
+bool Board_PttAltLinePressed()
+{
+    return  !HAL_GPIO_ReadPin(BUTTON_S19_PIO, BUTTON_S19);
+}
+#endif
+
 /**
  * Is the hardware contact named DIT pressed
  */
 bool Board_DitLinePressed() {
     return  !HAL_GPIO_ReadPin(PADDLE_DIT_PIO,PADDLE_DIT);
 }
+
+// For DACs MCP4725 - on band carrier TX depression
+uint16_t LO_TX_SUPR_DAC_WriteReg(uint8_t qitem, uint16_t cal_value)
+{
+    uint8_t write_address = qitem?LO_TX_SUPR_DAC1_WRITE:LO_TX_SUPR_DAC0_WRITE;
+    uint8_t write_data[2] =
+        {
+                (cal_value & 0x00FFFFFF) >> 4,
+                (cal_value & 0x000000FF) << 4
+        };
+    return UhsdrHw_I2C_WriteBlock(SERIALEEPROM_I2C, write_address, 64, 1, write_data, 2);
+}
+
+#ifdef SDR_AMBER
+// For DAC MCP4725 - Alt. POWER level ctrl.
+uint16_t ALT_RWP_CTRL_DAC_WriteReg(uint16_t vol_value)
+{
+    uint8_t write_address = AMBER_DAC_PWR_TX_WRITE;
+    uint8_t write_data[2] =
+        {
+                (vol_value & 0x00FFFFFF) >> 4,
+                (vol_value & 0x000000FF) << 4
+        };
+    return UhsdrHw_I2C_WriteBlock(SI5351A_I2C, write_address, 64, 1, write_data, 2);
+}
+
+uint16_t Board_AmberIOx8_Write(uint8_t value)
+{
+    uint8_t write_address = AMBER_IO8_WRITE;
+    uint8_t write_data[2] =
+        {
+                value,
+                value
+        };
+    return UhsdrHw_I2C_WriteBlock(SERIALEEPROM_I2C, write_address, 64, 1, write_data, 2);
+}
+
+uint16_t Board_AmberIOx4_Write(uint8_t command, uint8_t value)
+{
+    return UhsdrHw_I2C_WriteRegister(SERIALEEPROM_I2C, AMBER_IO4_WRITE, command, 1, value);
+}
+
+uint16_t Board_AmberCS4270_Write(uint8_t map, uint8_t value)
+{
+    return UhsdrHw_I2C_WriteRegister(CODEC_IQ_I2C, AMBER_CS4270_WRITE, map, 1, value);
+}
+#endif
+
+// Determine the "band" for LO TX Supression
+void LO_TX_SUPR_DAC_GetBand(uint32_t freq)
+{
+    ts.band_lo_tx_supr = ts.band_index;
+    if (ts.band_lo_tx_supr == 16) // BAND_MODE_160
+    {
+    	ts.band_lo_tx_supr = 10; // Don't calibrate add.OVI40 bands, but 160m is so far away...
+    }
+
+    if (ts.band_lo_tx_supr > 10)
+    {
+    	ts.band_lo_tx_supr = 13;  // Gen band for LO TX Supression. Don't calibrate add. OVI40 bands
+    }
+
+    if (ts.band_lo_tx_supr == 13) // CB band?
+    {
+		if (ts.HereIsEnableCB26Mc)
+		{
+			ts.band_lo_tx_supr = 11;
+		}
+		if (ts.HereIsEnableCB27Mc)
+		{
+			ts.band_lo_tx_supr = 12;
+		}
+	}
+
+    if (ts.band_lo_tx_supr == 8) // 28Mc?
+    {
+        if (freq > 28850000)
+        {
+            ts.band_lo_tx_supr = 14; // Additional adjustment point for the upper half of the band 28 Mc
+        }
+    }
+
+    if (ts.band_lo_tx_supr != ts.band_lo_tx_supr_old)
+    {
+        LO_TX_SUPR_DAC_WriteReg(0, ts.cal_lo_tx_supr0[ts.band_lo_tx_supr]); // Set the DAC0 voltage
+        LO_TX_SUPR_DAC_WriteReg(1, ts.cal_lo_tx_supr1[ts.band_lo_tx_supr]); // Set the DAC1 voltage
+        ts.band_lo_tx_supr_old = ts.band_lo_tx_supr;
+    }
+}
+
+void CW_Smooth_Settings(void)
+{
+    switch (ts.cw_smooth)
+    {
+    case 0: // 3 ms
+    	ts.cw_smooth_len = 1;
+    	ts.cw_smooth_steps = 5;
+        break;
+    case 1: // 5 ms
+    	ts.cw_smooth_len = 2;
+    	ts.cw_smooth_steps = 9;
+        break;
+    case 2: // 8 ms
+    	ts.cw_smooth_len = 3;
+    	ts.cw_smooth_steps = 13;
+        break;
+    case 3: // 10 ms
+    	ts.cw_smooth_len = 4;
+    	ts.cw_smooth_steps = 18;
+        break;
+    }
+}
+
+#ifndef UI_BRD_MCHF
+void MIC_bias_set(void)
+{
+    if(ts.tx_mic_boost > 0) // dinamic MIC
+    {
+        GPIO_SetBits(AUDIO_MIC_BIAS_PIO,AUDIO_MIC_BIAS);
+    }
+    else // electret MIC
+    {
+        GPIO_ResetBits(AUDIO_MIC_BIAS_PIO,AUDIO_MIC_BIAS);
+    }
+}
+#endif

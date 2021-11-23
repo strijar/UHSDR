@@ -59,10 +59,10 @@
 #define CW_DIT_PROC         0x04
 #define CW_END_PROC         0x10
 
-#define CW_SMOOTH_LEN       2	// with sm_table size of 128 -> 2 => ~5.3ms for edges, ~ 9 steps of 0.66 ms,
+//#define CW_SMOOTH_LEN       2	// with sm_table size of 128 -> 2 => ~5.3ms for edges, ~ 9 steps of 0.66 ms,
 // 1 => 2.7ms , 5 steps of 0.66ms required.
 // 3 => 8ms, 13 steps
-#define CW_SMOOTH_STEPS		9	// 1 step = 0.6ms; 13 for 8ms, 9 for 5.4 ms, for internal keyer
+//#define CW_SMOOTH_STEPS		9	// 1 step = 0.6ms; 13 for 8ms, 9 for 5.4 ms, for internal keyer
 
 
 typedef struct PaddleState
@@ -96,8 +96,8 @@ PaddleState  ps;
 
 static bool   CwGen_ProcessStraightKey( float32_t* i_buffer, float32_t* q_buffer, uint32_t size );
 static bool   CwGen_ProcessIambic( float32_t* i_buffer, float32_t* q_buffer, uint32_t size );
-static void   CwGen_TestFirstPaddle();
-static void   CwGen_ResetBufferSending();
+static void   CwGen_TestFirstPaddle(void);
+static void   CwGen_ResetBufferSending(void);
 
 #define CW_SPACE_CHAR		1
 
@@ -391,9 +391,12 @@ void CwGen_SetSpeed()
 	// so 1800 * 100 = 180000
 
 	// weight 1.00
-	int32_t dit_time         = 180000/ts.cw_keyer_speed + CW_SMOOTH_STEPS*100;  // +9 =  6ms * 1/1500 =  0,006*1500
-	int32_t dah_time         = 3*180000/ts.cw_keyer_speed + CW_SMOOTH_STEPS*100;  // +9 =  6ms * 1/1500 =  0,006*1500
-	int32_t pause_time       = 180000/ts.cw_keyer_speed - CW_SMOOTH_STEPS*100;  // -9 = -6ms * 1/1500 = -0,006*1500
+//	int32_t dit_time         = 180000/ts.cw_keyer_speed + CW_SMOOTH_STEPS*100;  // +9 =  6ms * 1/1500 =  0,006*1500
+	int32_t dit_time         = 180000/ts.cw_keyer_speed + ts.cw_smooth_steps * 100;  // +9 =  6ms * 1/1500 =  0,006*1500
+//	int32_t dah_time         = 3*180000/ts.cw_keyer_speed + CW_SMOOTH_STEPS*100;  // +9 =  6ms * 1/1500 =  0,006*1500
+	int32_t dah_time         = 3*180000/ts.cw_keyer_speed + ts.cw_smooth_steps * 100;  // +9 =  6ms * 1/1500 =  0,006*1500
+//	int32_t pause_time       = 180000/ts.cw_keyer_speed - CW_SMOOTH_STEPS*100;  // -9 = -6ms * 1/1500 = -0,006*1500
+	int32_t pause_time       = 180000/ts.cw_keyer_speed - ts.cw_smooth_steps * 100;  // -9 = -6ms * 1/1500 = -0,006*1500
 	int32_t space_time       = 6*180000/ts.cw_keyer_speed;
 
 	int32_t weight_corr = ((int32_t)ts.cw_keyer_weight-100) * dit_time/100;
@@ -410,7 +413,7 @@ static uint32_t CwGen_GetBreakTime( )
     return ts.cw_rx_delay*50 + 1;
 }
 
-static void CwGen_SetBreakTime()
+static void CwGen_SetBreakTime(void)
 {
 	ps.break_timer = CwGen_GetBreakTime();      // break timer value
 }
@@ -449,7 +452,8 @@ void CwGen_Init(void)
 static void CwGen_RemoveClickOnRisingEdge( float32_t* i_buffer, float32_t* q_buffer, uint32_t size )
 {
     assert( i_buffer && q_buffer );
-    assert( !( size < CW_SMOOTH_LEN )); // size shouldn't be less
+//	assert( !( size < CW_SMOOTH_LEN )); // size shouldn't be less
+    assert( !( size < ts.cw_smooth_len )); // size shouldn't be less
 	// Do not overload
 	if(ps.sm_tbl_ptr < (CW_SMOOTH_TBL_SIZE ))
 	{
@@ -459,7 +463,8 @@ static void CwGen_RemoveClickOnRisingEdge( float32_t* i_buffer, float32_t* q_buf
 			q_buffer[i] = q_buffer[i] * sm_table[ps.sm_tbl_ptr];
 
 			j++;
-			if(j == CW_SMOOTH_LEN)
+//			if(j == CW_SMOOTH_LEN)
+			if(j == ts.cw_smooth_len)
 			{
 				j = 0;
 
@@ -480,7 +485,8 @@ static void CwGen_RemoveClickOnRisingEdge( float32_t* i_buffer, float32_t* q_buf
 static void CwGen_RemoveClickOnFallingEdge( float32_t* i_buffer, float32_t* q_buffer, uint32_t size )
 {
     assert( i_buffer && q_buffer );
-    assert( !( size < CW_SMOOTH_LEN )); // size shouldn't be less
+//	assert( !( size < CW_SMOOTH_LEN )); // size shouldn't be less
+    assert( !( size < ts.cw_smooth_len )); // size shouldn't be less
 	// Do not overload
 		// Fix ptr, so we start from the last element
     if(ps.sm_tbl_ptr > (CW_SMOOTH_TBL_SIZE - 1))
@@ -494,7 +500,8 @@ static void CwGen_RemoveClickOnFallingEdge( float32_t* i_buffer, float32_t* q_bu
         q_buffer[i] = q_buffer[i] * sm_table[ps.sm_tbl_ptr];
 
         j++;
-        if(j == CW_SMOOTH_LEN)
+//		if(j == CW_SMOOTH_LEN)
+        if(j == ts.cw_smooth_len)
         {
             j = 0;
 
@@ -509,7 +516,7 @@ static void CwGen_RemoveClickOnFallingEdge( float32_t* i_buffer, float32_t* q_bu
 /**
  * @brief Is the logically DIT pressed (may reverse logic of HW contacts)
  */
-static bool CwGen_DitRequested()
+static bool CwGen_DitRequested(void)
 {
 	bool retval;
 	if(ts.cw_paddle_reverse)      // Paddles ARE reversed
@@ -527,7 +534,7 @@ static bool CwGen_DitRequested()
 /**
  * @brief Is the logically DAH pressed (may reverse logic of HW contacts)
  */
-static bool CwGen_DahRequested()
+static bool CwGen_DahRequested(void)
 {
 	bool retval;
 	if(!ts.cw_paddle_reverse)      // Paddles NOT reversed
@@ -574,11 +581,21 @@ static void CwGen_CheckPaddleState(void)
    if (CwGen_DahRequested())
    {
       ps.port_state |= CW_DAH_L;
+      if(ts.cw_keyer_speed != ts.cw_keyer_speed_bak)
+      {
+          ts.cw_keyer_speed = ts.cw_keyer_speed_bak;
+          CwGen_SetSpeed();
+      }
    }
 
    if (CwGen_DitRequested())
    {
       ps.port_state |= CW_DIT_L;
+      if(ts.cw_keyer_speed != ts.cw_keyer_speed_bak)
+      {
+          ts.cw_keyer_speed = ts.cw_keyer_speed_bak;
+          CwGen_SetSpeed();
+      }
    }
 }
 
@@ -968,7 +985,8 @@ static bool CwGen_ProcessIambic( float32_t* i_buffer, float32_t* q_buffer, uint3
 					CwGen_RemoveClickOnRisingEdge(i_buffer,q_buffer,blockSize);
 				}
 				// Smooth end of element
-				if(ps.key_timer < CW_SMOOTH_STEPS)
+//				if(ps.key_timer < CW_SMOOTH_STEPS)
+				if(ps.key_timer < ts.cw_smooth_steps)
 				{
 					CwGen_RemoveClickOnFallingEdge(i_buffer,q_buffer,blockSize);
 				}
@@ -1033,7 +1051,7 @@ static bool CwGen_ProcessIambic( float32_t* i_buffer, float32_t* q_buffer, uint3
 }
 
 
-static void CwGen_TestFirstPaddle()
+static void CwGen_TestFirstPaddle(void)
 {
 	if(ts.cw_keyer_mode == CW_KEYER_MODE_ULTIMATE)
 	{
@@ -1054,6 +1072,7 @@ void CwGen_ResetBufferSending()
 	if (!ts.cw_text_entry && ts.dmod_mode == DEMOD_CW)
 	{
 		DigiModes_TxBufferReset();
+		ts.keyer_cycled_tx_active = false;
 		ps.sending_char = 0;
 	}
 }

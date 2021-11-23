@@ -63,18 +63,20 @@ typedef struct
 enum Vkey_Group_ {Vkey_Group_OneAllowed=0, Vkey_Group_MultipleAllowed};
 
 
-//void UiVk_RedrawDSPVirtualKeys(void);
+//void UiVk_RedrawDSPVirtualKeys();
 bool UiVk_Process_VirtualKeypad(bool LongPress);
 void UiVk_Redraw(void);
 
 void UiVk_DSPVirtualKeys(void);
+void UiVk_ModeVirtualKeys(void);
+void UiVk_RedrawModeVirtualKeys(void);
 
-//void UiVk_RedrawBndSelVirtualKeys(void);
+//void UiVk_RedrawBndSelVirtualKeys();
 void UiVk_BndSelVirtualKeys(void);
 
-//void UiVk_RedrawBndFreqSetVirtualKeys(void);
+//void UiVk_RedrawBndFreqSetVirtualKeys();
 void UiVk_BndFreqSetVirtualKeys(void);
 
-//void UiVk_RedrawModSelVirtualKeys(void);
+//void UiVk_RedrawModSelVirtualKeys();
 void UiVk_ModSelVirtualKeys(void);
 #endif /* UI_UI_VKEYBRD_H_ */

@@ -39,7 +39,7 @@ extern const SerialEEPROM_EEPROMTypeDescriptor SerialEEPROM_eepromTypeDescs[SERI
 
 
 // low level interface
-bool     SerialEEPROM_24xx_Exists();
+bool     SerialEEPROM_24xx_Exists(void);
 uint16_t SerialEEPROM_24Cxx_Write(uint32_t, uint8_t, uint8_t);
 uint16_t SerialEEPROM_24Cxx_Read(uint32_t, uint8_t);
 uint16_t SerialEEPROM_24Cxx_WriteBulk(uint32_t, const uint8_t*, uint16_t, uint8_t);
@@ -49,10 +49,10 @@ uint16_t SerialEEPROM_ReadVariable(uint16_t addr, uint16_t *value);
 uint16_t SerialEEPROM_WriteVariable(uint16_t addr, uint16_t value);
 uint16_t SerialEEPROM_UpdateVariable(uint16_t addr, uint16_t value);
 
-uint8_t  SerialEEPROM_Detect();
+uint8_t  SerialEEPROM_Detect(void);
 uint16_t SerialEEPROM_Set_UseStateInSignature(uint8_t state);
-uint16_t SerialEEPROM_Get_UseStateInSignature();
-void     SerialEEPROM_Clear_Signature();
-void     SerialEEPROM_Clear_AllVariables();
+uint16_t SerialEEPROM_Get_UseStateInSignature(void);
+void     SerialEEPROM_Clear_Signature(void);
+void     SerialEEPROM_Clear_AllVariables(void);
 
 #endif

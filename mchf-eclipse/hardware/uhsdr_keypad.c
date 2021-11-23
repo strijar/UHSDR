@@ -119,7 +119,7 @@ const UhsdrButtonLogical_t buttons[BUTTON_NUM] =
         {BUTTON_M2_PRESSED,     "M2"},     // 0 / S3
         {BUTTON_G3_PRESSED,     "G3"},     // 1 / S2
         {BUTTON_G2_PRESSED,     "G2"},     // 2 / S1
-        {BUTTON_BNDM_PRESSED,   "Band-"},   // 3 / S4
+        {BUTTON_BNDM_PRESSED,   "Band-"},  // 3 / S4
         {BUTTON_G4_PRESSED,     "G4"},     // 4 / S5
         {BUTTON_M3_PRESSED,     "M3"},     // 5 / S6
         {BUTTON_STEPM_PRESSED,  "Step-"},  // 6 / S7
@@ -129,7 +129,7 @@ const UhsdrButtonLogical_t buttons[BUTTON_NUM] =
         {BUTTON_F1_PRESSED,     "F1"},     // 10 / S11
         {BUTTON_F2_PRESSED,     "F2"},     // 11 / S12
         {BUTTON_F4_PRESSED,     "F4"},     // 12 / S13
-        {BUTTON_BNDP_PRESSED,   "Band+"},   // 13 / S14
+        {BUTTON_BNDP_PRESSED,   "Band+"},  // 13 / S14
         {BUTTON_F5_PRESSED,     "F5"},     // 14 / S15
         {BUTTON_G1_PRESSED,     "G1"},     // 15 / S16
         {BUTTON_PWR_PRESSED,    "Power"},       // 16 / S17 Power Button
@@ -139,8 +139,13 @@ const UhsdrButtonLogical_t buttons[BUTTON_NUM] =
         {BUTTON_E2_PRESSED,     "E2" },
         {BUTTON_E3_PRESSED,     "E3" },
         {BUTTON_E4_PRESSED,     "E4" },
-        {BUTTON_F6_PRESSED,     "F6" },
+    #ifndef SDR_AMBER
         {BUTTON_L1_PRESSED,     "L1" },
+        {BUTTON_F6_PRESSED,     "F6" },
+    #else // Too lazy to correct the topology of the Amber-UI board (there is an error in the OVI40-UI schematic diagram).
+        {BUTTON_L1_PRESSED,     "F6" },
+        {BUTTON_F6_PRESSED,     "PTT_Alt" },
+    #endif
 #endif
 };
 

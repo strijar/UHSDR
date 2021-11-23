@@ -45,28 +45,11 @@ digi_buff_consumer_t DigiModes_Set_BufferConsumer( digi_buff_consumer_t consumer
     return prev_consumer;
 }
 
-/**
- * Amount of available characters in tx transmit buffer
- * @return number of available characters in buffer or 0 if empty
- */
 uint8_t DigiModes_TxBufferHasData()
 {
     int32_t len = digimodes_tx_buffer_head - digimodes_tx_tail;
     return len < 0 ? ( len + DIGIMODES_TX_BUFFER_SIZE ) : len;
 }
-
-/**
- * Amount of available characters in tx transmit buffer for a specific customer (RTTY, UI, etc.)
- * @param consumer who wants to read (must match active consumer)
- * @return number of available characters in buffer or 0 if empty or not for active consumer
- */
-uint8_t DigiModes_TxBufferHasDataFor(digi_buff_consumer_t consumer)
-{
-    assert((consumer & RTTY) || (consumer & BPSK) || (consumer & CW) || (consumer & UI));
-
-    return (consumer == active_consumer) ? DigiModes_TxBufferHasData() : 0;
-}
-
 
 bool DigiModes_TxBufferRemove( uint8_t* c_ptr, digi_buff_consumer_t consumer )
 {
@@ -105,7 +88,10 @@ int32_t DigiModes_TxBufferPutChar( uint8_t c, digi_buff_consumer_t source )
      */
     if ( active_consumer == source )
     {
+        if(!(ts.dmod_mode == DEMOD_CW && !ts.cw_decoder_enable))
+        {
         UiDriver_TextMsgPutChar( c );
+        }
     }
     else
     {
@@ -121,7 +107,10 @@ int32_t DigiModes_TxBufferPutChar( uint8_t c, digi_buff_consumer_t source )
              */
             if ( active_consumer == UI )
             {
-                UiDriver_TextMsgPutChar( c );
+                if(!(ts.dmod_mode == DEMOD_CW && !ts.cw_decoder_enable))
+                {
+                    UiDriver_TextMsgPutChar( c );
+                }
             }
             ret ++;
         }

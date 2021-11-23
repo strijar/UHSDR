@@ -428,7 +428,7 @@ psk_ctrl_t psk_ctrl_config =
 
 PskState_Internal_t  psk_state;
 
-static void Bpsk_ResetWin() {
+static void Bpsk_ResetWin(void) {
     // little trick, we just reset the acc
     // which brings us back to the first sample
 	psk_bit_dds.acc = 0;
@@ -736,25 +736,23 @@ int16_t Psk_Modulator_GenSample()
                 }
                 else if (DigiModes_TxBufferHasData())
                 {
-                    if (DigiModes_TxBufferRemove( &psk_state.tx_char, BPSK ))
+                    DigiModes_TxBufferRemove( &psk_state.tx_char, BPSK );
+                    Psk_Modulator_SetState(PSK_MOD_ACTIVE);
+                    if (psk_state.tx_char == 0x04) // EOT, stop tranmission
                     {
-                        Psk_Modulator_SetState(PSK_MOD_ACTIVE);
-                        if (psk_state.tx_char == 0x04) // EOT, stop tranmission
-                        {
-                            // we send from buffer, and nothing more is in the buffer
-                            // request sending the trailing sequence
-                            Psk_Modulator_SetState(PSK_MOD_POSTAMBLE);
-                        }
-                        else
-                        {
-                            // if all zeros have been sent, look for new
-                            // input from input buffer
-                            psk_state.tx_bits = Bpsk_FindCharReversed(psk_state.tx_char);
-                            // reset counter for spacing zeros
-                            psk_state.tx_zeros = 0;
-                            // reset counter for trailing postamble (which conclude a transmission)
-                            psk_state.tx_ones = 0;
-                        }
+                        // we send from buffer, and nothing more is in the buffer
+                        // request sending the trailing sequence
+                        Psk_Modulator_SetState(PSK_MOD_POSTAMBLE);
+                    }
+                    else
+                    {
+                        // if all zeros have been sent, look for new
+                        // input from input buffer
+                        psk_state.tx_bits = Bpsk_FindCharReversed(psk_state.tx_char);
+                        // reset counter for spacing zeros
+                        psk_state.tx_zeros = 0;
+                        // reset counter for trailing postamble (which conclude a transmission)
+                        psk_state.tx_ones = 0;
                     }
                 }
 

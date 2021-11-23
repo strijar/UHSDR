@@ -91,7 +91,7 @@ static uint16_t DataVar = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
-static HAL_StatusTypeDef Flash_Format();
+static HAL_StatusTypeDef Flash_Format(void);
 static uint16_t Flash_FindPage(uint8_t Operation);
 static uint16_t Flash_WriteVariableToPage(uint16_t VirtAddress, uint16_t Data, uint8_t pageType);
 static uint16_t Flash_PageTransfer(uint16_t VirtAddress);

@@ -189,7 +189,7 @@ static SerialEEPROM_24CXX_Descriptor serialEeprom_desc;
 #define MEM_DEVICE_WRITE_ADDR 0xA0
 // serial eeprom functions by DF8OE
 
-static uint16_t SerialEEPROM_24Cxx_DeviceConnected()
+static uint16_t SerialEEPROM_24Cxx_DeviceConnected(void)
 {
     uint16_t retVal = UhsdrHw_I2C_DeviceReady(&hi2c2,MEM_DEVICE_WRITE_ADDR);
     return retVal;
@@ -349,7 +349,7 @@ uint16_t SerialEEPROM_24Cxx_WriteBulk(uint32_t Addr, const uint8_t *buffer, uint
  * this code uses hardware properties to identify the connected I2C eeprom, no previously signature etc. used or required
  * @returns identified eeprom chip type or EEPROM_SER_UNKNOWN
  */
-static uint8_t SerialEEPROM_24Cxx_DetectProbeHardware()
+static uint8_t SerialEEPROM_24Cxx_DetectProbeHardware(void)
 {
     uint8_t ser_eeprom_type = EEPROM_SER_UNKNOWN;
 

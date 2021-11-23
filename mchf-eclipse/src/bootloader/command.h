@@ -56,9 +56,24 @@ typedef enum {
 #define DOWNLOAD_FILENAME          "0:"  DOWNLOAD_FILE
 #define VERSION                    "Version: "UHSDR_BOOT_VER
 #define AUTHOR                     "Author: DF8OE"
+#define UPLOAD_FILE_CONF           "cf-mchf.old"
+#define UPLOAD_FILENAME_CONF       "0:"  UPLOAD_FILE_CONF
+#define DOWNLOAD_FILE_CONF         "cf-mchf.bin"
+#define DOWNLOAD_FILENAME_CONF     "0:"  DOWNLOAD_FILE_CONF
+
+#if defined(STM32F4) || defined(STM32F7)
+	#define CONFIG_START_ADDRESS  ((uint32_t)0x08008000)
+	#define CONFIG_LEIGHT         ((uint32_t)0x00008000)
+#elif defined(STM32H7)
+	#define CONFIG_START_ADDRESS  ((uint32_t)0x08020000)
+	#define CONFIG_LEIGHT         ((uint32_t)0x00040000)
+#endif
+
 /* Exported functions ------------------------------------------------------- */
 void COMMAND_UPLOAD(void);
+void COMMAND_UPLOAD_CONF(void);
 void COMMAND_DOWNLOAD(void);
+void COMMAND_DOWNLOAD_CONF(void);
 void COMMAND_ResetMCU(uint32_t code);
 
 

@@ -22,7 +22,6 @@
 #include "radio_management.h" // only necessary because of RadioManagement_Request_TxOff
 #include "uhsdr_digi_buffer.h"
 
-
 // character tables borrowed from fldigi / rtty.cxx
 static const char RTTYLetters[] = {
     '\0',   'E',    '\n',   'A',    ' ',    'S',    'I',    'U',
@@ -39,137 +38,138 @@ static const char RTTYSymbols[32] = {
 };
 
 
+
 // bits 0-4 -> baudot, bit 5 1 == LETTER, 0 == NUMBER/FIGURE
 const uint8_t Ascii2Baudot[128] =
 {
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0b001011, //	BEL	N
-		0,
-		0,
-		0b000010, //	\n	NL
-		0,
-		0,
-		0b001000, //	\r	NL
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0b100100, // 	 	NL
-		0b001101, //	!   N
-		0b010001, //	"   N
-		0b010100, //	#   N
-		0b001001, //    $   N
-		0, 		  //	%
-		0b011010, //	&   N
-		0b000101, //	'	N
-		0b001111, //	(	N
-		0b010010, //	)	N
-		0, 		  //	*
-		0, 		  //	+	
-		0b001100, //	,	N
-		0b000011, //	-	N
-		0b011100, //	.	N
-		0b011101, //	/	N
-		0b010110, //	0	N
-		0b010111, //	1	N
-		0b010011, //	2	N
-		0b000001, //	3	N
-		0b001010, //	4	N
-		0b010000, //	5	N
-		0b010101, //	6	N
-		0b000111, //	7	N
-		0b000110, //	8	N
-		0b011000, //	9	N
-		0b001110, //	:	N
-		0b011110, //	;   N
-		0, 		  //	<
-		0,        //	=
-		0,        //	>
-		0b011001, //	?	N
-		0,        //	@
-		0b100011, //	A	L
-		0b111001, //	B	L
-		0b101110, //	C	L
-		0b101001, //	D	L
-		0b100001, //	E	L
-		0b101101, //	F	L
-		0b111010, //	G	L
-		0b110100, //	H	L
-		0b100110, //	I	L
-		0b101011, //	J	L
-		0b101111, //	K	L
-		0b110010, //	L	L
-		0b111100, //	M	L
-		0b101100, //	N	L
-		0b111000, //	O	L
-		0b110110, //	P	L
-		0b110111, //	Q	L
-		0b101010, //	R	L
-		0b100101, //	S	L
-		0b110000, //	T	L
-		0b100111, //	U	L
-		0b111110, //	V	L
-		0b110011, //	W	L
-		0b111101, //	X	L
-		0b110101, //	Y	L
-		0b110001, //	Z	L
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0b100011, //	A	L
-		0b111001, //	B	L
-		0b101110, //	C	L
-		0b101001, //	D	L
-		0b100001, //	E	L
-		0b101101, //	F	L
-		0b111010, //	G	L
-		0b110100, //	H	L
-		0b100110, //	I	L
-		0b101011, //	J	L
-		0b101111, //	K	L
-		0b110010, //	L	L
-		0b111100, //	M	L
-		0b101100, //	N	L
-		0b111000, //	O	L
-		0b110110, //	P	L
-		0b110111, //	Q	L
-		0b101010, //	R	L
-		0b100101, //	S	L
-		0b110000, //	T	L
-		0b100111, //	U	L
-		0b111110, //	V	L
-		0b110011, //	W	L
-		0b111101, //	X	L
-		0b110101, //	Y	L
-		0b110001, //	Z	L
-		0,
-		0,
-		0,
-		0,
-		0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0b001011, //    BEL N
+        0,
+        0,
+        0b000010, //    \n  NL
+        0,
+        0,
+        0b001000, //    \r  NL
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0b100100, //        NL
+        0b001101, //    !   N
+        0b010001, //    "   N
+        0b010100, //    #   N
+        0b001001, //    $   N
+        0,        //    %
+        0b011010, //    &   N
+        0b000101, //    '   N
+        0b001111, //    (   N
+        0b010010, //    )   N
+        0,        //    *
+        0,        //    +
+        0b001100, //    ,   N
+        0b000011, //    -   N
+        0b011100, //    .   N
+        0b011101, //    /   N
+        0b010110, //    0   N
+        0b010111, //    1   N
+        0b010011, //    2   N
+        0b000001, //    3   N
+        0b001010, //    4   N
+        0b010000, //    5   N
+        0b010101, //    6   N
+        0b000111, //    7   N
+        0b000110, //    8   N
+        0b011000, //    9   N
+        0b001110, //    :   N
+        0b011110, //    ;   N
+        0,        //    <
+        0,        //    =
+        0,        //    >
+        0b011001, //    ?   N
+        0,        //    @
+        0b100011, //    A   L
+        0b111001, //    B   L
+        0b101110, //    C   L
+        0b101001, //    D   L
+        0b100001, //    E   L
+        0b101101, //    F   L
+        0b111010, //    G   L
+        0b110100, //    H   L
+        0b100110, //    I   L
+        0b101011, //    J   L
+        0b101111, //    K   L
+        0b110010, //    L   L
+        0b111100, //    M   L
+        0b101100, //    N   L
+        0b111000, //    O   L
+        0b110110, //    P   L
+        0b110111, //    Q   L
+        0b101010, //    R   L
+        0b100101, //    S   L
+        0b110000, //    T   L
+        0b100111, //    U   L
+        0b111110, //    V   L
+        0b110011, //    W   L
+        0b111101, //    X   L
+        0b110101, //    Y   L
+        0b110001, //    Z   L
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0b100011, //    A   L
+        0b111001, //    B   L
+        0b101110, //    C   L
+        0b101001, //    D   L
+        0b100001, //    E   L
+        0b101101, //    F   L
+        0b111010, //    G   L
+        0b110100, //    H   L
+        0b100110, //    I   L
+        0b101011, //    J   L
+        0b101111, //    K   L
+        0b110010, //    L   L
+        0b111100, //    M   L
+        0b101100, //    N   L
+        0b111000, //    O   L
+        0b110110, //    P   L
+        0b110111, //    Q   L
+        0b101010, //    R   L
+        0b100101, //    S   L
+        0b110000, //    T   L
+        0b100111, //    U   L
+        0b111110, //    V   L
+        0b110011, //    W   L
+        0b111101, //    X   L
+        0b110101, //    Y   L
+        0b110001, //    Z   L
+        0,
+        0,
+        0,
+        0,
+        0,
 };
 
 #define RTTY_SYMBOL_CODE (0b11011)
@@ -631,6 +631,12 @@ static bool RttyDecoder_waitForStartBit(float32_t sample) {
 }
 
 
+
+//static const char RTTYLetters[] = "<E\nA SIU\nDRJNFCKTZLWHYPQOBG^MXV^";
+//static const char RTTYSymbols[] = "<3\n- ,87\n$4#,.:(5+)2.60197.^./=^";
+
+// character tables borrowed from fldigi / rtty.cxx
+
 void Rtty_Demodulator_ProcessSample(float32_t sample)
 {
 
@@ -814,29 +820,20 @@ int16_t Rtty_Modulator_GenSample()
 		{
 			// load the character and add the stop bits;
 			bool bitsFilled = false;
-
-			while ( bitsFilled == false
-			        &&  DigiModes_TxBufferHasDataFor(RTTY))
+            uint8_t current_ascii;
+			while ( bitsFilled == false && DigiModes_TxBufferRemove( &current_ascii, RTTY ) )
 			{
-
-			    uint8_t current_ascii;
-
-			    // as the character might have been removed from the buffer,
-			    // we do a final check when removing the character
-			    if (DigiModes_TxBufferRemove( &current_ascii, RTTY ))
+			    if (current_ascii == 0x04 ) //EOT
 			    {
-			        if (current_ascii == 0x04 ) //EOT
-			        {
-			            RadioManagement_Request_TxOff();
-			        }
-			        else
-			        {
-			            uint8_t current_baudot = Ascii2Baudot[current_ascii & 0x7f];
-			            if (current_baudot > 0)
-			            { // we have valid baudot code
-			                Rtty_Modulator_Code2Bits(current_baudot);
-			                bitsFilled = true;
-			            }
+			        RadioManagement_Request_TxOff();
+			    }
+			    else
+			    {
+			        uint8_t current_baudot = Ascii2Baudot[current_ascii & 0x7f];
+			        if (current_baudot > 0)
+			        { // we have valid baudot code
+			            Rtty_Modulator_Code2Bits(current_baudot);
+			            bitsFilled = true;
 			        }
 			    }
 			}
