@@ -70,6 +70,7 @@ enum
     WFALL_RAINBOW,
     WFALL_BLUE,
     WFALL_GRAY_INVERSE,
+    WFALL_FLAME,
     WFALL_COLOR_NUM
 };
 //

@@ -1051,6 +1051,9 @@ static void UiSpectrum_InitSpectrumDisplayData(void)
     case WFALL_HOT_COLD:
         wfall_scheme = &waterfall_cold_hot[0];
         break;
+    case WFALL_FLAME:
+        wfall_scheme = &waterfall_flame[0] ;
+        break;
     case WFALL_RAINBOW:
         wfall_scheme = &waterfall_rainbow[0];
         break;

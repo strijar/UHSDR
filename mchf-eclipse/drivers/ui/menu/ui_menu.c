@@ -2459,7 +2459,7 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
 	{
         UiDriverMenuItemChangeUInt8(var, mode, &ts.waterfall.color_scheme,
                                     WATERFALL_COLOR_MIN,
-                                    WATERFALL_COLOR_MAX,
+                                    WATERFALL_COLOR_MAX ,
                                     WATERFALL_COLOR_DEFAULT,
                                     1
                                    );
@@ -2467,6 +2467,9 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
         {
         case WFALL_HOT_COLD:
             txt_ptr = "HotCold";
+            break;
+        case WFALL_FLAME:
+            txt_ptr = "  Flame";
             break;
         case WFALL_RAINBOW:
             txt_ptr = "Rainbow";
@@ -5730,15 +5733,16 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
 
 			if(ts.expflags2 & EXPFLAGS2_ALT_PWR_CTRL)
 			{
+//				ts.expflags2 = ts.expflags2 | EXPFLAGS2_ALT_PWR_CTRL;
 				txt_ptr = " ON";
-				UiDriver_RefreshPowerLevel(ts.band_effective, ts.power_level);
+//				UiDriver_RefreshPowerLevel(ts.band_effective, ts.power_level);
 			}
 			else
 			{
 				txt_ptr = "OFF";
 				ts.amber_dac_pwr_tx_state = DAC_5W;
 				ALT_RWP_CTRL_DAC_WriteReg(DAC_5W); // Set the DAC voltage
-				UiDriver_RefreshPowerLevel(ts.band_effective, ts.power_level);
+//				UiDriver_RefreshPowerLevel(ts.band_effective, ts.power_level);
 			}
 		}
 	}
