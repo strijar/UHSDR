@@ -2468,8 +2468,11 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
         case WFALL_HOT_COLD:
             txt_ptr = "HotCold";
             break;
-        case WFALL_FLAME:
-            txt_ptr = "  Flame";
+        case WFALL_INFERNO:
+            txt_ptr = "Inferno";
+            break;
+        case WFALL_SUNSET:
+            txt_ptr = " Sunset";
             break;
         case WFALL_RAINBOW:
             txt_ptr = "Rainbow";
