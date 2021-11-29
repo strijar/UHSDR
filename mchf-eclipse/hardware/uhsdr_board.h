@@ -830,6 +830,7 @@ typedef struct TransceiverState
     uint16_t freq_enc_timer;
 #endif
     bool disabled_tp;
+    int32_t    iq_freq_delta;
 } TransceiverState;
 
 extern __IO TransceiverState ts;

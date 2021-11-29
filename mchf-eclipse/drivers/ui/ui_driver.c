@@ -1006,7 +1006,7 @@ void UiDriver_Init()
 	}
 	if (ts.special_functions_enabled != 1)
 	{
-	  UiDriver_StartupScreen_LogIfProblem(AudioDriver_GetTranslateFreq() == 0,
+	  UiDriver_StartupScreen_LogIfProblem(ts.iq_freq_mode == FREQ_IQ_CONV_MODE_OFF,
 			"WARNING:  Freq. Translation is OFF!!!\nTranslation is STRONGLY recommended!!");
 	}
 
@@ -4659,21 +4659,44 @@ static bool UiDriver_CheckFrequencyEncoder()
 
 		// Finally convert to frequency incr/decr
 
-		if(pot_diff>0)
-		{
-			df.tune_new += (df.tuning_step * enc_multiplier);
-			//itoa(enc_speed,num,6);
-			//UiSpectrumClearDisplay();			// clear display under spectrum scope
-			//UiLcdHy28_PrintText(110,156,num,Cyan,Black,0);
-		}
-		else
-		{
-			df.tune_new -= (df.tuning_step * enc_multiplier);
-		}
+		if (ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE) {
+		    int32_t freq_delta = ts.iq_freq_delta;
 
-		if (enc_multiplier != 1)
-		{
-			df.tune_new = enc_multiplier*df.tuning_step * div((df.tune_new),enc_multiplier*df.tuning_step).quot;    // keep last digit to zero
+		    if (pot_diff>0) {
+                freq_delta -= (df.tuning_step * enc_multiplier);
+
+                if (freq_delta < -12000) {
+                    freq_delta = -12000;
+                }
+                df.tune_new += df.tuning_step * enc_multiplier;
+		    } else {
+                freq_delta += (df.tuning_step * enc_multiplier);
+
+                if (freq_delta > 12000) {
+                    freq_delta = 12000;
+                }
+                df.tune_new -= df.tuning_step * enc_multiplier;
+		    }
+
+		    ts.iq_freq_delta = freq_delta;
+	        UiSpectrum_DisplayFilterBW();
+		} else {
+            if(pot_diff>0)
+            {
+                df.tune_new += (df.tuning_step * enc_multiplier);
+                //itoa(enc_speed,num,6);
+                //UiSpectrumClearDisplay();			// clear display under spectrum scope
+                //UiLcdHy28_PrintText(110,156,num,Cyan,Black,0);
+            }
+            else
+            {
+                df.tune_new -= (df.tuning_step * enc_multiplier);
+            }
+
+            if (enc_multiplier != 1)
+            {
+                df.tune_new = enc_multiplier*df.tuning_step * div((df.tune_new),enc_multiplier*df.tuning_step).quot;    // keep last digit to zero
+            }
 		}
 
 		retval = true;

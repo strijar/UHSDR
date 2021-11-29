@@ -451,7 +451,7 @@ int32_t AudioDriver_GetTranslateFreq()
         fdelta = 6000;
         break;
     case FREQ_IQ_CONV_M6KHZ:
-        fdelta = - 6000;
+        fdelta = -6000;
         break;
     case FREQ_IQ_CONV_P12KHZ:
         fdelta = 12000;
@@ -459,6 +459,8 @@ int32_t AudioDriver_GetTranslateFreq()
     case FREQ_IQ_CONV_M12KHZ:
         fdelta = -12000;
         break;
+    case FREQ_IQ_CONV_SLIDE:
+        fdelta = ts.iq_freq_delta;
     }
     return fdelta;
 }

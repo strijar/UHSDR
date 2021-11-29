@@ -537,9 +537,10 @@ typedef enum
 #define	FREQ_IQ_CONV_M6KHZ		2	// LO is 6KHz below receive frequency in RX mode
 #define FREQ_IQ_CONV_P12KHZ		3	// LO is 12KHz above receive frequency in RX mode
 #define	FREQ_IQ_CONV_M12KHZ		4	// LO is 12KHz below receive frequency in RX mode
+#define	FREQ_IQ_CONV_SLIDE		5	// LO slide frequency in RX mode
 //
 #define	FREQ_IQ_CONV_MODE_DEFAULT	FREQ_IQ_CONV_M12KHZ		//FREQ_IQ_CONV_MODE_OFF
-#define	FREQ_IQ_CONV_MODE_MAX		4
+#define	FREQ_IQ_CONV_MODE_MAX		5
 
 // Public Audio
 extern AudioDriverState	ads;

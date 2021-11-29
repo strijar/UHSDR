@@ -250,6 +250,7 @@ static void UiSpectrum_UpdateSpectrumPixelParameters(void)
     static uint16_t old_cw_sidetone_freq = 0;
     static uint16_t old_rtty_shift = 0;
     static uint8_t old_digital_mode = 0xFF;
+    static int32_t old_iq_freq_delta = 0;
 
     static bool force_update = true;
 
@@ -260,9 +261,10 @@ static void UiSpectrum_UpdateSpectrumPixelParameters(void)
         force_update = true;
     }
 
-    if (ts.iq_freq_mode != old_iq_freq_mode  || force_update)
+    if (ts.iq_freq_mode != old_iq_freq_mode  || force_update || (ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE && ts.iq_freq_delta != old_iq_freq_delta))
     {
         old_iq_freq_mode = ts.iq_freq_mode;
+        old_iq_freq_delta = ts.iq_freq_delta;
         force_update = true;
 
         if(!sd.magnify)     // is magnify mode on?

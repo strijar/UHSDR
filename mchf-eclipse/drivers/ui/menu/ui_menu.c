@@ -1575,6 +1575,9 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
         case FREQ_IQ_CONV_M12KHZ:
             txt_ptr = "RX -12kHz";
             break;
+        case FREQ_IQ_CONV_SLIDE:
+            txt_ptr = "RX  Slide";
+            break;
         }
         if(var_change)      // update parameters if changed
         {
