@@ -1903,7 +1903,12 @@ static void AudioDriver_SpectrumZoomProcessSamples(iq_buffer_t* iq_buf_p,  const
             // collect samples for spectrum display 256-point-FFT
 
             AudioDriver_SpectrumCopyIqBuffers(&decim_iq_buf, blockSize/ (1<<sd.magnify));
-            sd.FFT_frequency = ts.tune_freq + AudioDriver_GetTranslateFreq(); // spectrum shows center at translate frequency, LO + Translate Freq  is center frequency;
+
+            if (ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE) {
+                sd.FFT_frequency = ts.tune_freq;
+            } else {
+                sd.FFT_frequency = ts.tune_freq + AudioDriver_GetTranslateFreq();
+            }
 
             // TODO: also insert sample collection for snap carrier here
             // and subsequently rebuild snap carrier to use a much smaller FFT (say 256 or 512)
@@ -2709,16 +2714,20 @@ static void AudioDriver_RxProcessor(IqSample_t * const srcCodec, AudioSample_t *
 
         if(iq_freq_mode)            // is receive frequency conversion to be done?
         {
-            FreqShift(adb.iq_buf.i_buffer, adb.iq_buf.q_buffer, blockSize, AudioDriver_GetTranslateFreq());
+            if (ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE) {
+                AudioDriver_SpectrumZoomProcessSamples(&adb.iq_buf, blockSize);
+                FreqShift(adb.iq_buf.i_buffer, adb.iq_buf.q_buffer, blockSize, AudioDriver_GetTranslateFreq());
+            } else {
+                FreqShift(adb.iq_buf.i_buffer, adb.iq_buf.q_buffer, blockSize, AudioDriver_GetTranslateFreq());
+                AudioDriver_SpectrumZoomProcessSamples(&adb.iq_buf, blockSize);
+            }
+        } else {
+            AudioDriver_SpectrumZoomProcessSamples(&adb.iq_buf, blockSize);
         }
 
         // at this point we have phase corrected IQ @ IQ_SAMPLE_RATE, with our RX frequency in the center (i.e. at 0 Hertz Shift)
         // in adb.iq_buf.i_buffer, adb.iq_buf.q_buffer
 
-
-        // Spectrum display sample collect for magnify != 0
-
-        AudioDriver_SpectrumZoomProcessSamples(&adb.iq_buf, blockSize);
 #ifdef USE_FREEDV
         if (ts.dvmode == true && ts.digital_mode == DigitalMode_FreeDV)
         {

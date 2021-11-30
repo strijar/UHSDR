@@ -852,6 +852,7 @@ void UiDriver_SpectrumChangeLayoutParameters()
 {
 	UiSpectrum_WaterfallClearData();
 	AudioDriver_SetProcessingChain(ts.dmod_mode, false);
+	ts.iq_freq_delta = 0;
 
 
 	if (ts.menu_mode == false)
@@ -4660,26 +4661,26 @@ static bool UiDriver_CheckFrequencyEncoder()
 		// Finally convert to frequency incr/decr
 
 		if (ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE) {
-		    int32_t freq_delta = ts.iq_freq_delta;
+		    int32_t    freq_delta = ts.iq_freq_delta;
+		    int32_t    max = 12000 / (1 << sd.magnify);
 
 		    if (pot_diff>0) {
                 freq_delta -= (df.tuning_step * enc_multiplier);
 
-                if (freq_delta < -12000) {
-                    freq_delta = -12000;
+                if (freq_delta < -max) {
+                    freq_delta = -max;
                 }
                 df.tune_new += df.tuning_step * enc_multiplier;
 		    } else {
                 freq_delta += (df.tuning_step * enc_multiplier);
 
-                if (freq_delta > 12000) {
-                    freq_delta = 12000;
+                if (freq_delta > max) {
+                    freq_delta = max;
                 }
                 df.tune_new -= df.tuning_step * enc_multiplier;
 		    }
 
 		    ts.iq_freq_delta = freq_delta;
-	        UiSpectrum_DisplayFilterBW();
 		} else {
             if(pot_diff>0)
             {
@@ -9374,6 +9375,7 @@ void UiDriver_TaskHandler_MainTasks()
 				UiDriver_FrequencyUpdateLOandDisplay(false);
 				RadioManagement_TxRxSwitching_Enable();
 				UiDriver_DisplayMemoryLabel();				// this is because a frequency dialing via CAT must be indicated if "CAT in sandbox" is active
+				UiSpectrum_DisplayFilterBW();
 			}
 			else if (df.temp_factor_changed  || ts.tune_freq != ts.tune_freq_req)
 			{

@@ -261,10 +261,15 @@ static void UiSpectrum_UpdateSpectrumPixelParameters(void)
         force_update = true;
     }
 
-    if (ts.iq_freq_mode != old_iq_freq_mode  || force_update || (ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE && ts.iq_freq_delta != old_iq_freq_delta))
+    if ((ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE && ts.iq_freq_delta != old_iq_freq_delta) || force_update)
+    {
+        old_iq_freq_delta = ts.iq_freq_delta;
+        force_update = true;
+    }
+
+    if (ts.iq_freq_mode != old_iq_freq_mode  || force_update)
     {
         old_iq_freq_mode = ts.iq_freq_mode;
-        old_iq_freq_delta = ts.iq_freq_delta;
         force_update = true;
 
         if(!sd.magnify)     // is magnify mode on?
@@ -273,7 +278,11 @@ static void UiSpectrum_UpdateSpectrumPixelParameters(void)
         }
         else        // magnify mode is on
         {
-            sd.rx_carrier_pos = slayout.scope.w/2 -0.5;                                // line is always in center in "magnify" mode
+            if (ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE) {
+                sd.rx_carrier_pos = slayout.scope.w/2 - 0.5 - (AudioDriver_GetTranslateFreq()/sd.hz_per_pixel);
+            } else {
+                sd.rx_carrier_pos = slayout.scope.w/2 -0.5;                                // line is always in center in "magnify" mode
+            }
         }
     }
     bool cur_lsb = RadioManagement_LSBActive(ts.dmod_mode);
@@ -1744,7 +1753,7 @@ static void UiSpectrum_DrawFrequencyBar()
 
         float32_t freq_calc = RadioManagement_GetRXDialFrequency() + (ts.dmod_mode == DEMOD_CW ? RadioManagement_GetCWDialOffset() : 0 );      // get current tune frequency in Hz
 
-        if (sd.magnify == 0)
+        if (sd.magnify == 0 || ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE)
         {
             freq_calc += AudioDriver_GetTranslateFreq();
             // correct for display center not being RX center frequency location
@@ -2145,8 +2154,8 @@ static void UiSpectrum_CalculateDBm()
         // frequency translation off, IF = 0 Hz OR
         // in all magnify cases (2x up to 32x) the posbin is in the centre of the spectrum display
 
-        const int32_t bin_offset = sd.magnify != 0 ? 0 : (- (buff_len_int * AudioDriver_GetTranslateFreq( )) / (2 * IQ_SAMPLE_RATE));
-        const int32_t posbin = buff_len_int / 4 + bin_offset;  // right in the middle!
+        const int32_t bin_offset = (sd.magnify != 0 && ts.iq_freq_mode != FREQ_IQ_CONV_SLIDE) ? 0 : (- (buff_len_int * AudioDriver_GetTranslateFreq( )) / (2 * IQ_SAMPLE_RATE));
+        const int32_t posbin = buff_len_int / 4 + bin_offset * (1 << sd.magnify);  // right in the middle!
 
 
         // calculate upper and lower limit for determination of signal strength
