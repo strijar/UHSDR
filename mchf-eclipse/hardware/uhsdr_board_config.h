@@ -132,7 +132,7 @@
     #define USE_8bit_FONT
     #define USE_PREDEFINED_WINDOW_DATA
     // OPTION with IS_SMALL_BUILD we are not automatically including USE_FREEDV as it uses lot of memory, both RAM and flash
-	#define USE_FREEDV			// ********************************** Small build (512k) Var. 2
+	// #define USE_FREEDV			// ********************************** Small build (512k) Var. 2
 #endif // IS_SMALL_BUILD
 
 #ifdef SDR_AMBER_4INCH

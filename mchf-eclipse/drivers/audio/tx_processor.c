@@ -15,6 +15,7 @@
 #include "profiling.h"
 
 #include "audio_driver.h"
+#include "audio_reverb.h"
 #include "radio_management.h"
 #include "audio_management.h" // only for AudioManagement_CalcALCDecay
 #include "rtty.h"
@@ -459,6 +460,10 @@ static void TxProcessor_PrepareVoice(audio_block_t a_buffer, AudioSample_t* src,
 //  if (!ts.tune)
     if (!ts.tune)
     {
+        for (int i = 0; i < blockSize; i++) {
+            a_buffer[i] = AudioReverb_Calc(a_buffer[i]);
+        }
+
         TxProcessor_FilterAudio(runFilter, ts.tx_audio_source != TX_AUDIO_DIG, a_buffer, a_buffer, blockSize);
     }
 

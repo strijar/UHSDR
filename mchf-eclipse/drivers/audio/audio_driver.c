@@ -31,6 +31,7 @@
 #include "audio_nr.h"
 #include "audio_agc.h"
 #include "audio_management.h"
+#include "audio_reverb.h"
 #include "radio_management.h"
 #include "usbd_audio_if.h"
 #include "ui_spectrum.h"
@@ -663,6 +664,7 @@ static void RxProcessor_Init(void)
 
     AudioDriver_FreeDV_Rx_Init();  // RX
     AudioDriver_FM_Rx_Init(&ads.fm_conf); // RX
+    AudioReverb_Init();
     //    ads.fade_leveler = 0;
 }
 
