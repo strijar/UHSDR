@@ -831,6 +831,8 @@ typedef struct TransceiverState
 #endif
     bool disabled_tp;
     int32_t    iq_freq_delta;
+    uint8_t     reverb_gain;
+    uint8_t     reverb_delay;
 } TransceiverState;
 
 extern __IO TransceiverState ts;

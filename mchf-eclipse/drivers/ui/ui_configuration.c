@@ -331,6 +331,8 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
 	{ ConfigEntry_UInt16, EEPROM_CW_DECODER_FLAGS,&cw_decoder_config.flags,CW_DECODER_FLAGS_DEFAULT,0,0x7fff},
 //	{ ConfigEntry_UInt8, EEPROM_BAND_REGION,&bandinfo_idx,0,0,0x7f},
 	{ ConfigEntry_UInt8, EEPROM_BAND_REGION, &bandinfo_idx, BAND_INFO_SET_DEFAULT, 0, 0x7f}, // we need to validate the range later as we cannot do it here due to C shortcomings
+    { ConfigEntry_UInt8, EEPROM_TX_REVERB_GAIN, &ts.reverb_gain, 0, 0, 100},
+    { ConfigEntry_UInt8, EEPROM_TX_REVERB_DELAY, &ts.reverb_delay, 25, 25, 100},
     // the entry below MUST be the last entry, and only at the last position Stop is allowed
     {
         ConfigEntry_Stop

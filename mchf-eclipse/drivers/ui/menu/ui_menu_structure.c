@@ -372,6 +372,9 @@ const MenuDescriptor filterGroup[] =
 //    { MENU_FILTER, MENU_ITEM, CONFIG_SSB_TX_FILTER_DISABLE, NULL,"SSB TX Audio Filter", UiMenuDesc(":soon:") },
     { MENU_FILTER, MENU_ITEM, CONFIG_SSB_TX_FILTER, NULL,"SSB TX Audio Filter2", UiMenuDesc("Select if SSB-TX signal is filtered (strongly recommended to agree to regulations)") },
 
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_REVERB_GAIN, NULL,"TX Reverb gain", UiMenuDesc("") },
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_REVERB_DELAY, NULL,"TX Reverb delay", UiMenuDesc("") },
+
     { MENU_FILTER, MENU_STOP, 0, NULL, NULL, UiMenuDesc("") }
 };
 

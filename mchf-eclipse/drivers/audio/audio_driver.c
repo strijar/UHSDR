@@ -664,7 +664,6 @@ static void RxProcessor_Init(void)
 
     AudioDriver_FreeDV_Rx_Init();  // RX
     AudioDriver_FM_Rx_Init(&ads.fm_conf); // RX
-    AudioReverb_Init();
     //    ads.fade_leveler = 0;
 }
 

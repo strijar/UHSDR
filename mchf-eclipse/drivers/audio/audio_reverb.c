@@ -11,6 +11,7 @@
  **  Licence:       GNU GPLv3                                                      **
  ************************************************************************************/
 
+#include "uhsdr_board.h"
 #include "audio_reverb.h"
 
 #define CF0 2595
@@ -83,22 +84,26 @@ void AudioReverb_Init(void) {
     wet0 = 1.0f;
     wet1 = 0.0f;
 
-    AudioReverb_SetDelay(1.0f);
-    AudioReverb_SetWet(0.5f);
+    AudioReverb_SetDelay();
+    AudioReverb_SetWet();
 }
 
-void AudioReverb_SetDelay(float32_t x) {
-    cf0.delay = (uint16_t) (x * CF0);
-    cf1.delay = (uint16_t) (x * CF1);
-    cf2.delay = (uint16_t) (x * CF2);
-    cf3.delay = (uint16_t) (x * CF3);
+void AudioReverb_SetDelay() {
+    float32_t x = ts.reverb_delay / 100.f;
 
-    ap0.delay = (uint16_t) (x * AP0);
-    ap1.delay = (uint16_t) (x * AP1);
-    ap2.delay = (uint16_t) (x * AP2);
+    cf0.index = 0;  cf0.delay = (uint16_t) (x * CF0);
+    cf1.index = 0;  cf1.delay = (uint16_t) (x * CF1);
+    cf2.index = 0;  cf2.delay = (uint16_t) (x * CF2);
+    cf3.index = 0;  cf3.delay = (uint16_t) (x * CF3);
+
+    ap0.index = 0;  ap0.delay = (uint16_t) (x * AP0);
+    ap1.index = 0;  ap1.delay = (uint16_t) (x * AP1);
+    ap2.index = 0;  ap2.delay = (uint16_t) (x * AP2);
 }
 
-void AudioReverb_SetWet(float32_t x) {
+void AudioReverb_SetWet() {
+    float32_t x = ts.reverb_gain / 100.0f;
+
     wet0 = x;
     wet1 = 1.0f - x;
 }

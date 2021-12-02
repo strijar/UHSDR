@@ -385,6 +385,8 @@ enum
 	MENU_DEBUG_ALT_PWR_CTRL,
 	MENU_DEBUG_ALT_PWR_CTRL_VOL,
 	MENU_DEBUG_IMPROV_IQ_ADJ,
+	CONFIG_TX_REVERB_GAIN,
+	CONFIG_TX_REVERB_DELAY,
     MAX_RADIO_CONFIG_ITEM   // Number of radio configuration menu items - This must ALWAYS remain as the LAST item!
 };
 

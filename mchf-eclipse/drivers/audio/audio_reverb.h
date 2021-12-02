@@ -17,8 +17,8 @@
 #include "uhsdr_types.h"
 
 extern void AudioReverb_Init(void);
-extern void AudioReverb_SetDelay(float32_t x);
-extern void AudioReverb_SetWet(float32_t x);
+extern void AudioReverb_SetDelay();
+extern void AudioReverb_SetWet();
 float32_t AudioReverb_Calc(float32_t in);
 
 #endif /* AUDIO_AUDIO_REVERB_H_ */

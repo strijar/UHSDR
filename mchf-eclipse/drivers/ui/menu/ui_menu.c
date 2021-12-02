@@ -40,6 +40,7 @@
 
 #include "audio_nr.h"
 #include "audio_agc.h"
+#include "audio_reverb.h"
 
 #include "fm_subaudible_tone_table.h"
 #include "tx_processor.h"
@@ -4031,6 +4032,34 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
         }
 //        break;
 	}
+    else if(select==CONFIG_TX_REVERB_GAIN)
+    {
+       var_change = UiDriverMenuItemChangeUInt8(var, mode, &ts.reverb_gain,
+                                           0,
+                                           100,
+                                           0,
+                                           1
+                                          );
+       if(var_change)
+       {
+           AudioReverb_SetWet();
+       }
+       snprintf(options, 32, "  %u%%", ts.reverb_gain);
+    }
+    else if(select==CONFIG_TX_REVERB_DELAY)
+    {
+       var_change = UiDriverMenuItemChangeUInt8(var, mode, &ts.reverb_delay,
+                                           25,
+                                           100,
+                                           25,
+                                           1
+                                          );
+       if(var_change)
+       {
+           AudioReverb_SetDelay();
+       }
+       snprintf(options, 32, "  %u%%", ts.reverb_delay);
+    }
 //        case CONFIG_TUNE_TONE_MODE: // set power for antenne tuning
 	else if(select==CONFIG_TUNE_TONE_MODE)
 	{

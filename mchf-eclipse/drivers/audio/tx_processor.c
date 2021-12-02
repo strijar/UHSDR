@@ -151,6 +151,7 @@ void TxProcessor_Init()
     CwGen_Init(); // TX
 
     TxProcessor_FM_Init(&ads.fm_conf);
+    AudioReverb_Init();
  }
 
 
@@ -460,9 +461,9 @@ static void TxProcessor_PrepareVoice(audio_block_t a_buffer, AudioSample_t* src,
 //  if (!ts.tune)
     if (!ts.tune)
     {
-        for (int i = 0; i < blockSize; i++) {
-            a_buffer[i] = AudioReverb_Calc(a_buffer[i]);
-        }
+        if (ts.reverb_gain > 0)
+            for (int i = 0; i < blockSize; i++)
+                a_buffer[i] = AudioReverb_Calc(a_buffer[i]);
 
         TxProcessor_FilterAudio(runFilter, ts.tx_audio_source != TX_AUDIO_DIG, a_buffer, a_buffer, blockSize);
     }
