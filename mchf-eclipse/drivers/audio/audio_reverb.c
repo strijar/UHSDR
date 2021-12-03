@@ -14,14 +14,16 @@
 #include "uhsdr_board.h"
 #include "audio_reverb.h"
 
-#define CF0 2595
-#define CF1 2241
-#define CF2 2911
-#define CF3 3234
+#define DECIM   5
 
-#define AP0 480
-#define AP1 161
-#define AP2 46
+#define CF0 (3460 / DECIM)
+#define CF1 (2988 / DECIM)
+#define CF2 (3882 / DECIM)
+#define CF3 (4312 / DECIM)
+
+#define AP0 (480 / DECIM)
+#define AP1 (161 / DECIM)
+#define AP2 (46 / DECIM)
 
 static float32_t    cfbuf0[CF0];
 static float32_t    cfbuf1[CF1];
@@ -41,6 +43,8 @@ typedef struct {
 
 static float32_t    wet0 = 1.0f;
 static float32_t    wet1 = 0.0f;
+static float32_t    result = 0.0f;
+static uint8_t      decim_count = 0;
 
 static item_t       cf0, cf1, cf2, cf3;
 static item_t       ap0, ap1, ap2;
@@ -83,6 +87,8 @@ void AudioReverb_Init(void) {
 
     wet0 = 1.0f;
     wet1 = 0.0f;
+    result = 0.0f;
+    decim_count = 0;
 
     AudioReverb_SetDelay();
     AudioReverb_SetWet();
@@ -109,11 +115,17 @@ void AudioReverb_SetWet() {
 }
 
 float32_t AudioReverb_Calc(float32_t in) {
-    float32_t   new = (CalcComb(in, &cf0) + CalcComb(in, &cf1) + CalcComb(in, &cf2) + CalcComb(in, &cf3)) / 4.0f;
+    decim_count++;
 
-    new = CalcAllPass(new, &ap0);
-    new = CalcAllPass(new, &ap1);
-    new = CalcAllPass(new, &ap2);
+    if (decim_count >= DECIM) {
+        result = (CalcComb(in, &cf0) + CalcComb(in, &cf1) + CalcComb(in, &cf2) + CalcComb(in, &cf3)) / 4.0f;
 
-    return wet0 * new + wet1 * in;
+        result = CalcAllPass(result, &ap0);
+        result = CalcAllPass(result, &ap1);
+        result = CalcAllPass(result, &ap2);
+
+        decim_count = 0;
+    }
+
+    return wet0 * result + wet1 * in;
 }
