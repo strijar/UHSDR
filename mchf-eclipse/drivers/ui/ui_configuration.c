@@ -219,8 +219,13 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
 	{ ConfigEntry_Int32_16, EEPROM_BASS_GAIN,&ts.dsp.bass_gain,2,-20,20}, // INT DEFAULT PROBLEM,see above
     { ConfigEntry_Int32_16, EEPROM_TREBLE_GAIN,&ts.dsp.treble_gain,0,-20,20},  // MINOR INT DEFAULT PROBLEM,see above
     { ConfigEntry_UInt8, EEPROM_TX_FILTER,&ts.tx_filter,0,0,TX_FILTER_ESSB_6k},
-	{ ConfigEntry_Int32_16, EEPROM_TX_BASS_GAIN,&ts.dsp.tx_bass_gain,4,-20,6}, // INT DEFAULT PROBLEM,see above
-    { ConfigEntry_Int32_16, EEPROM_TX_TREBLE_GAIN,&ts.dsp.tx_treble_gain,4,-20,6}, // INT DEFAULT PROBLEM,see above
+
+	{ ConfigEntry_Int32_16, EEPROM_TX_EQ0_GAIN,&ts.dsp.tx_eq_gain[0],4, MIN_TX_EQ, MAX_TX_EQ}, // INT DEFAULT PROBLEM,see above
+    { ConfigEntry_Int32_16, EEPROM_TX_EQ1_GAIN,&ts.dsp.tx_eq_gain[1],4, MIN_TX_EQ, MAX_TX_EQ}, // INT DEFAULT PROBLEM,see above
+    { ConfigEntry_Int32_16, EEPROM_TX_EQ2_GAIN,&ts.dsp.tx_eq_gain[2],4, MIN_TX_EQ, MAX_TX_EQ}, // INT DEFAULT PROBLEM,see above
+    { ConfigEntry_Int32_16, EEPROM_TX_EQ3_GAIN,&ts.dsp.tx_eq_gain[3],4, MIN_TX_EQ, MAX_TX_EQ}, // INT DEFAULT PROBLEM,see above
+    { ConfigEntry_Int32_16, EEPROM_TX_EQ4_GAIN,&ts.dsp.tx_eq_gain[4],4, MIN_TX_EQ, MAX_TX_EQ}, // INT DEFAULT PROBLEM,see above
+
     { ConfigEntry_Int32_16, EEPROM_SAM_PLL_LOCKING_RANGE,&ads.pll_fmax_int,2500,50,8000}, // NO INT DEFAULT PROBLEM
     { ConfigEntry_Int32_16, EEPROM_SAM_PLL_STEP_RESPONSE,&ads.zeta_int,65,1,100},  // NO INT DEFAULT PROBLEM
     { ConfigEntry_Int32_16, EEPROM_SAM_PLL_BANDWIDTH,&ads.omegaN_int, 250,15,1000}, // NO INT DEFAULT PROBLEM

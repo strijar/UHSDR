@@ -375,6 +375,12 @@ const MenuDescriptor filterGroup[] =
     { MENU_FILTER, MENU_ITEM, CONFIG_TX_REVERB_GAIN, NULL,"TX Reverb gain", UiMenuDesc("") },
     { MENU_FILTER, MENU_ITEM, CONFIG_TX_REVERB_DELAY, NULL,"TX Reverb delay", UiMenuDesc("") },
 
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ0, NULL,"TX EQ 160 Hz", UiMenuDesc("") },
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ1, NULL,"TX EQ 325 Hz", UiMenuDesc("") },
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ2, NULL,"TX EQ 750 Hz", UiMenuDesc("") },
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ3, NULL,"TX EQ 1.5 kHz", UiMenuDesc("") },
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ4, NULL,"TX EQ 3 kHz", UiMenuDesc("") },
+
     { MENU_FILTER, MENU_STOP, 0, NULL, NULL, UiMenuDesc("") }
 };
 

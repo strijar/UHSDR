@@ -4060,6 +4060,40 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
        }
        snprintf(options, 32, "  %u%%", ts.reverb_delay);
     }
+    else if(select==CONFIG_TX_EQ0 || select==CONFIG_TX_EQ1 || select==CONFIG_TX_EQ2 || select==CONFIG_TX_EQ3 || select==CONFIG_TX_EQ4)
+    {
+       uint8_t n = 0;
+
+       switch (select) {
+       case CONFIG_TX_EQ0:
+           n = 0;
+           break;
+       case CONFIG_TX_EQ1:
+           n = 1;
+           break;
+       case CONFIG_TX_EQ2:
+           n = 2;
+           break;
+       case CONFIG_TX_EQ3:
+           n = 3;
+           break;
+       case CONFIG_TX_EQ4:
+           n = 4;
+           break;
+       };
+
+       var_change = UiDriverMenuItemChangeInt(var, mode, &ts.dsp.tx_eq_gain[n],
+                                           MIN_TX_EQ,
+                                           MAX_TX_EQ,
+                                           0,
+                                           1
+                                          );
+       if(var_change)
+       {
+           AudioDriver_SetProcessingChain(ts.dmod_mode, false);
+       }
+       snprintf(options, 32, "  %ddb", ts.dsp.tx_eq_gain[n]);
+    }
 //        case CONFIG_TUNE_TONE_MODE: // set power for antenne tuning
 	else if(select==CONFIG_TUNE_TONE_MODE)
 	{

@@ -543,8 +543,8 @@ void		UiConfiguration_UpdateMacroCap(void);
 #define EEPROM_TREBLE_GAIN					361		// treble gain highShelf filter
 //#define	EEPROM_S_METER						362		// S-Meter configuration
 #define EEPROM_TX_FILTER					363		// TX_Filter configuration
-#define EEPROM_TX_BASS_GAIN					364		// TX bass gain lowShelf filter
-#define EEPROM_TX_TREBLE_GAIN				365		// TX treble gain highShelf filter
+#define EEPROM_TX_EQ0_GAIN					364		// TX bass EQ filter
+#define EEPROM_TX_EQ4_GAIN				    365		// TX treble EQ filter
 #define EEPROM_SAM_PLL_LOCKING_RANGE        366     //
 #define EEPROM_SAM_PLL_STEP_RESPONSE        367     //
 #define EEPROM_SAM_PLL_BANDWIDTH            368     //
@@ -688,8 +688,11 @@ void		UiConfiguration_UpdateMacroCap(void);
 
 #define EEPROM_TX_REVERB_GAIN                        499
 #define EEPROM_TX_REVERB_DELAY                       500
+#define EEPROM_TX_EQ1_GAIN                           501
+#define EEPROM_TX_EQ2_GAIN                           502
+#define EEPROM_TX_EQ3_GAIN                           503
 
-#define EEPROM_FIRST_UNUSED                          501  // change this if new value ids are introduced, must be correct at any time
+#define EEPROM_FIRST_UNUSED                          504  // change this if new value ids are introduced, must be correct at any time
 
 #define MAX_VAR_ADDR (EEPROM_FIRST_UNUSED - 1) // Max 511
 

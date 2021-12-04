@@ -5035,14 +5035,14 @@ static void UiDriver_CheckEncoderTwo(void)
 				switch(ts.enc_two_mode)
 				{
 				case ENC_TWO_MODE_BASS_GAIN:
-					ts.dsp.tx_bass_gain = change_and_limit_int(ts.dsp.tx_bass_gain,pot_diff_step,MIN_TX_BASS,MAX_TX_BASS);
+					ts.dsp.tx_eq_gain[0] = change_and_limit_int(ts.dsp.tx_eq_gain[0],pot_diff_step,MIN_TX_EQ,MAX_TX_EQ);
 					// set filter instance
 					AudioDriver_SetProcessingChain(ts.dmod_mode, false);
 					// display bass gain
 					UiDriver_DisplayTone(true);
 					break;
 				case ENC_TWO_MODE_TREBLE_GAIN:
-					ts.dsp.tx_treble_gain = change_and_limit_int(ts.dsp.tx_treble_gain,pot_diff_step,MIN_TX_TREBLE,MAX_TX_TREBLE);
+					ts.dsp.tx_eq_gain[4] = change_and_limit_int(ts.dsp.tx_eq_gain[4],pot_diff_step,MIN_TX_EQ,MAX_TX_EQ);
 					// set filter instance
 					AudioDriver_SetProcessingChain(ts.dmod_mode, false);
 					// display treble gain
@@ -5713,10 +5713,10 @@ static void UiDriver_DisplayTone(bool encoder_active)
 	char temp[5];
 	int bas,tre;
 
-	if(ts.txrx_mode == TRX_MODE_TX) // if in TX_mode, display TX bass gain instead of RX_bass gain!
+	if(ts.txrx_mode == TRX_MODE_TX) // if in TX_mode, display TX EQ gain instead of RX_bass gain!
 	{
-		bas = ts.dsp.tx_bass_gain;
-		tre = ts.dsp.tx_treble_gain;
+		bas = ts.dsp.tx_eq_gain[0];
+		tre = ts.dsp.tx_eq_gain[4];
 	}
 	else
 	{

@@ -218,8 +218,7 @@ typedef struct
 
     int     bass_gain;              // gain of the low shelf EQ filter
     int     treble_gain;            // gain of the high shelf EQ filter
-    int     tx_bass_gain;           // gain of the TX low shelf EQ filter
-    int     tx_treble_gain;         // gain of the TX high shelf EQ filter
+    int     tx_eq_gain[5];          // gain of the TX 5-bands EQ filter
 
 } dsp_params_t;
 
@@ -318,10 +317,8 @@ typedef struct SMeter
 #define MIN_BASS 			-20
 #define MAX_TREBLE 			20
 #define MIN_TREBLE			-20
-#define MAX_TX_BASS		 	5
-#define MIN_TX_BASS			-20
-#define MAX_TX_TREBLE 		5
-#define MIN_TX_TREBLE		-20
+#define MAX_TX_EQ		 	20
+#define MIN_TX_EQ			-20
 
 #define MIN_PEAK_NOTCH_FREQ 200
 //
@@ -670,6 +667,7 @@ void AudioDriver_I2SCallback(AudioSample_t *audio, IqSample_t *iq, AudioSample_t
 
 void AudioDriver_CalcLowShelf(float32_t coeffs[5], float32_t f0, float32_t S, float32_t gain, float32_t FS);
 void AudioDriver_CalcHighShelf(float32_t coeffs[5], float32_t f0, float32_t S, float32_t gain, float32_t FS);
+void AudioDriver_CalcPeakEQ(float32_t coeffs[5], float32_t f0, float32_t q, float32_t gain, float32_t FS);
 void AudioDriver_CalcBandpass(float32_t coeffs[5], float32_t f0, float32_t FS);
 void AudioDriver_SetBiquadCoeffs(float32_t* coeffsTo,const float32_t* coeffsFrom);
 

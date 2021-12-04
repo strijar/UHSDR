@@ -387,6 +387,11 @@ enum
 	MENU_DEBUG_IMPROV_IQ_ADJ,
 	CONFIG_TX_REVERB_GAIN,
 	CONFIG_TX_REVERB_DELAY,
+    CONFIG_TX_EQ0,
+    CONFIG_TX_EQ1,
+    CONFIG_TX_EQ2,
+    CONFIG_TX_EQ3,
+    CONFIG_TX_EQ4,
     MAX_RADIO_CONFIG_ITEM   // Number of radio configuration menu items - This must ALWAYS remain as the LAST item!
 };
 

@@ -931,6 +931,25 @@ void AudioDriver_CalcHighShelf(float32_t coeffs[5], float32_t f0, float32_t S, f
     AudioDriver_ScaleBiquadCoeffs(coeffs,scaling, DCgain);
 }
 
+void AudioDriver_CalcPeakEQ(float32_t coeffs[5], float32_t f0, float32_t q, float32_t gain, float32_t FS)
+{
+    float32_t w0 = 2 * PI * f0 / FS;
+    float32_t A = pow10f(gain/40.0);
+    float32_t alpha = sinf(w0) / (2 * q);
+    float32_t cosw0 = cosf(w0);
+
+    coeffs[B0] = 1 + alpha * A;
+    coeffs[B1] = -2 * cosw0;
+    coeffs[B2] = 1 - alpha * A;
+    float32_t scaling = 1 + alpha / A;
+    coeffs[A1] = 2 * cosw0;
+    coeffs[A2] = alpha/A - 1;
+
+    float32_t DCgain = 1.0 * scaling;
+
+    AudioDriver_ScaleBiquadCoeffs(coeffs,scaling, DCgain);
+}
+
 /**
  * @brief Biquad Filter Init Helper function to calculate a bass adjustment filter aka low shelf filter
  */
