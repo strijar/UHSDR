@@ -338,6 +338,7 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
 	{ ConfigEntry_UInt8, EEPROM_BAND_REGION, &bandinfo_idx, BAND_INFO_SET_DEFAULT, 0, 0x7f}, // we need to validate the range later as we cannot do it here due to C shortcomings
     { ConfigEntry_UInt8, EEPROM_TX_REVERB_GAIN, &ts.reverb_gain, 0, 0, 100},
     { ConfigEntry_UInt8, EEPROM_TX_REVERB_DELAY, &ts.reverb_delay, 25, 25, 100},
+    { ConfigEntry_Int32_16, EEPROM_IQ_FREQ_DELTA, &ts.iq_freq_delta, 1000, -18000, 18000},
     // the entry below MUST be the last entry, and only at the last position Stop is allowed
     {
         ConfigEntry_Stop

@@ -371,7 +371,6 @@ void TransceiverStateInit(void)
 #ifdef FAST_FREQ_ENC
     ts.freq_enc_timer = 0;
 #endif
-    ts.iq_freq_delta = 0;
 }
 
 // #include "Trace.h"

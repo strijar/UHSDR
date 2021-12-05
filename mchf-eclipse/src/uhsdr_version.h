@@ -14,7 +14,7 @@
 
 #define 	UHSDR_VER_MAJOR			"2"
 #define 	UHSDR_VER_MINOR			"12"
-#define 	UHSDR_VER_RELEASE		"2m3"
+#define 	UHSDR_VER_RELEASE		"2m5"
 
 
 #define		UHSDR_BOOT_VERS			"5.0.4m"

@@ -692,7 +692,9 @@ void		UiConfiguration_UpdateMacroCap(void);
 #define EEPROM_TX_EQ2_GAIN                           502
 #define EEPROM_TX_EQ3_GAIN                           503
 
-#define EEPROM_FIRST_UNUSED                          504  // change this if new value ids are introduced, must be correct at any time
+#define EEPROM_IQ_FREQ_DELTA                         504
+
+#define EEPROM_FIRST_UNUSED                          505  // change this if new value ids are introduced, must be correct at any time
 
 #define MAX_VAR_ADDR (EEPROM_FIRST_UNUSED - 1) // Max 511
 

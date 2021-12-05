@@ -4044,7 +4044,11 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
        {
            AudioReverb_SetWet();
        }
-       snprintf(options, 32, "  %u%%", ts.reverb_gain);
+       if (ts.reverb_gain) {
+           snprintf(options, 32, "  %u%%", ts.reverb_gain);
+       } else {
+           txt_ptr = " OFF";
+       }
     }
     else if(select==CONFIG_TX_REVERB_DELAY)
     {

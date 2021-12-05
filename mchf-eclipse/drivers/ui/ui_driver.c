@@ -852,8 +852,8 @@ void UiDriver_SpectrumChangeLayoutParameters()
 {
 	UiSpectrum_WaterfallClearData();
 	AudioDriver_SetProcessingChain(ts.dmod_mode, false);
-	ts.iq_freq_delta = 0;
 
+    ts.iq_freq_delta = 0;
 
 	if (ts.menu_mode == false)
 	{
@@ -4662,7 +4662,7 @@ static bool UiDriver_CheckFrequencyEncoder()
 
 		if (ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE) {
 		    int32_t    freq_delta = ts.iq_freq_delta;
-		    int32_t    max = 12000 / (1 << sd.magnify);
+		    int32_t    max = 18000 / (1 << sd.magnify);
 
 		    if (pot_diff>0) {
                 freq_delta -= (df.tuning_step * enc_multiplier);

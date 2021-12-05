@@ -250,7 +250,7 @@ static void UiSpectrum_UpdateSpectrumPixelParameters(void)
     static uint16_t old_cw_sidetone_freq = 0;
     static uint16_t old_rtty_shift = 0;
     static uint8_t old_digital_mode = 0xFF;
-    static int32_t old_iq_freq_delta = 0;
+    static int32_t old_iq_freq_delta = -20000;
 
     static bool force_update = true;
 
