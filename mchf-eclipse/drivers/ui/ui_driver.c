@@ -1978,6 +1978,7 @@ void UiAction_CopyVfoAB()
 	vfo_store->dial_value = df.tune_new;
 	vfo_store->decod_mode = ts.dmod_mode;                   // copy active VFO settings into other VFO
 	vfo_store->digital_mode = ts.digital_mode;
+	vfo_store->dial_delta = ts.iq_freq_delta;
 
 	UiDriver_FrequencyUpdateLOandDisplay(true);
 
@@ -3498,6 +3499,7 @@ static void UiDriver_InitFrequency()
 		vfo[VFO_B].band[i].dial_value = 0xFFFFFFFF;  // clear dial values
 		vfo[VFO_B].band[i].decod_mode = DEMOD_USB;   // clear decode mode
         vfo[VFO_B].band[i].digital_mode = DigitalMode_None;   // clear digital mode
+        vfo[VFO_B].band[i].dial_delta = 0;
 	}
 
 	// Lower bands default to LSB mode
@@ -4455,6 +4457,7 @@ void UiDriver_SelectBandMemory(uint16_t vfo_sel, uint8_t new_band_index)
 
 		// TODO: There is a strong similarity to code in UiDriverProcessFunctionKeyClick around line 2053
 		df.tune_new = vfo[vfo_sel].band[new_band_index].dial_value;	// Load value from VFO
+		ts.iq_freq_delta = vfo[vfo_sel].band[new_band_index].dial_delta;
 
 		bool new_lsb = RadioManagement_CalculateCWSidebandMode();
 
@@ -4513,9 +4516,10 @@ static void UiDriver_ChangeBand(bool is_up)
 		if(curr_band_index < (MAX_BANDS) && ts.cat_band_index == 255)
 		{
 			// Save dial, but only if we are not in "CAT mode"
-			vfo[vfo_sel].band[curr_band_index].dial_value = df.tune_old;
+			vfo[vfo_sel].band[curr_band_index].dial_value = df.tune_new;
 			vfo[vfo_sel].band[curr_band_index].decod_mode = ts.dmod_mode;
 			vfo[vfo_sel].band[curr_band_index].digital_mode = ts.digital_mode;
+			vfo[vfo_sel].band[curr_band_index].dial_delta = ts.iq_freq_delta;
 		}
 		else
 		{

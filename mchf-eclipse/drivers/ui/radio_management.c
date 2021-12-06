@@ -2150,11 +2150,13 @@ void RadioManagement_ToggleVfoAB()
         vfo_new = VFO_B;
         vfo_active = VFO_A;
     }
-    vfo[vfo_active].band[ts.band->band_mode].dial_value = df.tune_old; //band_dial_value[ts.band];     // save "VFO B" settings
+    vfo[vfo_active].band[ts.band->band_mode].dial_value = df.tune_new; //band_dial_value[ts.band];     // save "VFO B" settings
     vfo[vfo_active].band[ts.band->band_mode].decod_mode = ts.dmod_mode;    //band_decod_mode[ts.band];
     vfo[vfo_active].band[ts.band->band_mode].digital_mode = ts.digital_mode;
+    vfo[vfo_active].band[ts.band->band_mode].dial_delta = ts.iq_freq_delta;
 
     df.tune_new = vfo[vfo_new].band[ts.band->band_mode].dial_value;
+    ts.iq_freq_delta = vfo[vfo_new].band[ts.band->band_mode].dial_delta;
 
     bool digitalModeDiffers = ts.digital_mode != vfo[vfo_new].band[ts.band->band_mode].digital_mode;
     bool newIsDigitalMode = vfo[vfo_new].band[ts.band->band_mode].decod_mode == DEMOD_DIGI;

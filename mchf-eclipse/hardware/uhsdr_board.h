@@ -264,6 +264,7 @@ typedef struct vfo_reg_s
     uint32_t dial_value;
     uint8_t  decod_mode;
     uint8_t  digital_mode;
+    int32_t  dial_delta;
 //    uint32_t filter_mode;
 } VfoReg;
 
