@@ -4064,31 +4064,25 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
        }
        snprintf(options, 32, "  %u%%", ts.reverb_delay);
     }
-    else if(select==CONFIG_TX_EQ0 || select==CONFIG_TX_EQ1 || select==CONFIG_TX_EQ2 || select==CONFIG_TX_EQ3 || select==CONFIG_TX_EQ4)
+    else if(select==CONFIG_TX_EQ0_GAIN || select==CONFIG_TX_EQ1_GAIN || select==CONFIG_TX_EQ2_GAIN)
     {
        uint8_t n = 0;
 
        switch (select) {
-       case CONFIG_TX_EQ0:
+       case CONFIG_TX_EQ0_GAIN:
            n = 0;
            break;
-       case CONFIG_TX_EQ1:
+       case CONFIG_TX_EQ1_GAIN:
            n = 1;
            break;
-       case CONFIG_TX_EQ2:
+       case CONFIG_TX_EQ2_GAIN:
            n = 2;
-           break;
-       case CONFIG_TX_EQ3:
-           n = 3;
-           break;
-       case CONFIG_TX_EQ4:
-           n = 4;
            break;
        };
 
        var_change = UiDriverMenuItemChangeInt(var, mode, &ts.dsp.tx_eq_gain[n],
-                                           MIN_TX_EQ,
-                                           MAX_TX_EQ,
+                                           MIN_TX_EQ_GAIN,
+                                           MAX_TX_EQ_GAIN,
                                            0,
                                            1
                                           );
@@ -4096,7 +4090,76 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
        {
            AudioDriver_SetProcessingChain(ts.dmod_mode, false);
        }
-       snprintf(options, 32, "  %ddb", ts.dsp.tx_eq_gain[n]);
+       if (ts.dsp.tx_eq_gain[n]) {
+           snprintf(options, 32, "   %ddb", ts.dsp.tx_eq_gain[n]);
+       } else {
+           txt_ptr = "  OFF";
+       }
+
+    }
+    else if(select==CONFIG_TX_EQ0_WIDTH || select==CONFIG_TX_EQ1_WIDTH || select==CONFIG_TX_EQ2_WIDTH)
+    {
+       uint8_t n = 0;
+
+       switch (select) {
+       case CONFIG_TX_EQ0_WIDTH:
+           n = 0;
+           break;
+       case CONFIG_TX_EQ1_WIDTH:
+           n = 1;
+           break;
+       case CONFIG_TX_EQ2_WIDTH:
+           n = 2;
+           break;
+       };
+
+       var_change = UiDriverMenuItemChangeInt(var, mode, &ts.dsp.tx_eq_width[n],
+                                           MIN_TX_EQ_WIDTH,
+                                           MAX_TX_EQ_WIDTH,
+                                           MIN_TX_EQ_WIDTH,
+                                           1
+                                          );
+       if(var_change)
+       {
+           AudioDriver_SetProcessingChain(ts.dmod_mode, false);
+       }
+       snprintf(options, 32, " %d", ts.dsp.tx_eq_width[n]);
+    }
+    else if(select==CONFIG_TX_EQ0_FREQ || select==CONFIG_TX_EQ1_FREQ || select==CONFIG_TX_EQ2_FREQ)
+    {
+       uint8_t  n = 0;
+       uint16_t min = 0;
+       uint16_t max = 0;
+
+       switch (select) {
+       case CONFIG_TX_EQ0_FREQ:
+           n = 0;
+           min = 100;
+           max = 700;
+           break;
+       case CONFIG_TX_EQ1_FREQ:
+           n = 1;
+           min = 700;
+           max = 1500;
+           break;
+       case CONFIG_TX_EQ2_FREQ:
+           n = 2;
+           min = 1500;
+           max = 3200;
+           break;
+       };
+
+       var_change = UiDriverMenuItemChangeInt(var, mode, &ts.dsp.tx_eq_freq[n],
+                                           min,
+                                           max,
+                                           min,
+                                           10
+                                          );
+       if(var_change)
+       {
+           AudioDriver_SetProcessingChain(ts.dmod_mode, false);
+       }
+       snprintf(options, 32, "   %dHz", ts.dsp.tx_eq_freq[n]);
     }
 //        case CONFIG_TUNE_TONE_MODE: // set power for antenne tuning
 	else if(select==CONFIG_TUNE_TONE_MODE)

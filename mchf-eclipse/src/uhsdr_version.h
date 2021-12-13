@@ -13,8 +13,8 @@
  ************************************************************************************/
 
 #define 	UHSDR_VER_MAJOR			"2"
-#define 	UHSDR_VER_MINOR			"12"
-#define 	UHSDR_VER_RELEASE		"2m6"
+#define 	UHSDR_VER_MINOR			"13"
+#define 	UHSDR_VER_RELEASE		"0"
 
 
 #define		UHSDR_BOOT_VERS			"5.0.4m"
@@ -32,4 +32,4 @@
 #define	    UHSDR_VERSION           "fwv-"UHSDR_VER_MAJOR"."UHSDR_VER_MINOR"."UHSDR_VER_RELEASE
 #define	    UHSDR_BUILD_DAT         "fwt-"__DATE__ " - " __TIME__
 #define	    UHSDR_LICENCE           "GNU GPLv3"
-#define     UHSDR_REPO              "github.com/df8oe/UHSDR"
+#define     UHSDR_REPO              "github.com/strijar/UHSDR"

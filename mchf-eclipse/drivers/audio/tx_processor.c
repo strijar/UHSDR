@@ -78,20 +78,10 @@ void TxProcessor_Set(uint8_t dmod_mode)
 
     // coefficient calculation for TX EQ adjustment
 
-    AudioDriver_CalcPeakEQ(coeffs, 175, 0.7071, ts.dsp.tx_eq_gain[0], AUDIO_SAMPLE_RATE);
-    AudioDriver_SetBiquadCoeffs(&IIR_TX_biquad.pCoeffs[0*5],coeffs);
-
-    AudioDriver_CalcPeakEQ(coeffs, 350, 0.7071, ts.dsp.tx_eq_gain[1], AUDIO_SAMPLE_RATE);
-    AudioDriver_SetBiquadCoeffs(&IIR_TX_biquad.pCoeffs[1*5],coeffs);
-
-    AudioDriver_CalcPeakEQ(coeffs, 700, 0.7071, ts.dsp.tx_eq_gain[2], AUDIO_SAMPLE_RATE);
-    AudioDriver_SetBiquadCoeffs(&IIR_TX_biquad.pCoeffs[2*5],coeffs);
-
-    AudioDriver_CalcPeakEQ(coeffs, 1400, 0.7071, ts.dsp.tx_eq_gain[3], AUDIO_SAMPLE_RATE);
-    AudioDriver_SetBiquadCoeffs(&IIR_TX_biquad.pCoeffs[3*5],coeffs);
-
-    AudioDriver_CalcPeakEQ(coeffs, 2800.0, 0.7071, ts.dsp.tx_eq_gain[4], AUDIO_SAMPLE_RATE);
-    AudioDriver_SetBiquadCoeffs(&IIR_TX_biquad.pCoeffs[4*5],coeffs);
+    for (int i = 0; i < 3; i++) {
+        AudioDriver_CalcPeakEQ(coeffs, ts.dsp.tx_eq_freq[i], ts.dsp.tx_eq_width[i] / 2.0f, ts.dsp.tx_eq_gain[i], AUDIO_SAMPLE_RATE);
+        AudioDriver_SetBiquadCoeffs(&IIR_TX_biquad.pCoeffs[i*5],coeffs);
+    }
 
     // Init TX audio filter - Do so "manually" since built-in init functions don't work with CONST coefficients
     const arm_iir_lattice_instance_f32* IIR_TXFilterSelected_ptr;

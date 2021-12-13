@@ -218,8 +218,9 @@ typedef struct
 
     int     bass_gain;              // gain of the low shelf EQ filter
     int     treble_gain;            // gain of the high shelf EQ filter
-    int     tx_eq_gain[5];          // gain of the TX 5-bands EQ filter
-
+    int     tx_eq_gain[3];          // gain of the TX 3-bands EQ filter
+    int     tx_eq_freq[3];          // freq of the TX 3-bands EQ filter
+    int     tx_eq_width[3];         // width of the TX 3-bands EQ filter
 } dsp_params_t;
 
 // Audio driver publics
@@ -317,8 +318,12 @@ typedef struct SMeter
 #define MIN_BASS 			-20
 #define MAX_TREBLE 			20
 #define MIN_TREBLE			-20
-#define MAX_TX_EQ		 	20
-#define MIN_TX_EQ			-20
+
+#define MAX_TX_EQ_GAIN   	10
+#define MIN_TX_EQ_GAIN		-20
+
+#define MAX_TX_EQ_WIDTH     10
+#define MIN_TX_EQ_WIDTH     1
 
 #define MIN_PEAK_NOTCH_FREQ 200
 //

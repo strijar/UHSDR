@@ -220,11 +220,17 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
     { ConfigEntry_Int32_16, EEPROM_TREBLE_GAIN,&ts.dsp.treble_gain,0,-20,20},  // MINOR INT DEFAULT PROBLEM,see above
     { ConfigEntry_UInt8, EEPROM_TX_FILTER,&ts.tx_filter,0,0,TX_FILTER_ESSB_6k},
 
-	{ ConfigEntry_Int32_16, EEPROM_TX_EQ0_GAIN,&ts.dsp.tx_eq_gain[0],4, MIN_TX_EQ, MAX_TX_EQ}, // INT DEFAULT PROBLEM,see above
-    { ConfigEntry_Int32_16, EEPROM_TX_EQ1_GAIN,&ts.dsp.tx_eq_gain[1],4, MIN_TX_EQ, MAX_TX_EQ}, // INT DEFAULT PROBLEM,see above
-    { ConfigEntry_Int32_16, EEPROM_TX_EQ2_GAIN,&ts.dsp.tx_eq_gain[2],4, MIN_TX_EQ, MAX_TX_EQ}, // INT DEFAULT PROBLEM,see above
-    { ConfigEntry_Int32_16, EEPROM_TX_EQ3_GAIN,&ts.dsp.tx_eq_gain[3],4, MIN_TX_EQ, MAX_TX_EQ}, // INT DEFAULT PROBLEM,see above
-    { ConfigEntry_Int32_16, EEPROM_TX_EQ4_GAIN,&ts.dsp.tx_eq_gain[4],4, MIN_TX_EQ, MAX_TX_EQ}, // INT DEFAULT PROBLEM,see above
+	{ ConfigEntry_Int32_16, EEPROM_TX_EQ0_GAIN,&ts.dsp.tx_eq_gain[0],4, MIN_TX_EQ_GAIN, MAX_TX_EQ_GAIN}, // INT DEFAULT PROBLEM,see above
+    { ConfigEntry_Int32_16, EEPROM_TX_EQ1_GAIN,&ts.dsp.tx_eq_gain[1],4, MIN_TX_EQ_GAIN, MAX_TX_EQ_GAIN}, // INT DEFAULT PROBLEM,see above
+    { ConfigEntry_Int32_16, EEPROM_TX_EQ2_GAIN,&ts.dsp.tx_eq_gain[2],4, MIN_TX_EQ_GAIN, MAX_TX_EQ_GAIN}, // INT DEFAULT PROBLEM,see above
+
+    { ConfigEntry_Int32_16, EEPROM_TX_EQ0_WIDTH,&ts.dsp.tx_eq_width[0],1, MIN_TX_EQ_WIDTH, MAX_TX_EQ_WIDTH}, // INT DEFAULT PROBLEM,see above
+    { ConfigEntry_Int32_16, EEPROM_TX_EQ1_WIDTH,&ts.dsp.tx_eq_width[1],1, MIN_TX_EQ_WIDTH, MAX_TX_EQ_WIDTH}, // INT DEFAULT PROBLEM,see above
+    { ConfigEntry_Int32_16, EEPROM_TX_EQ2_WIDTH,&ts.dsp.tx_eq_width[2],1, MIN_TX_EQ_WIDTH, MAX_TX_EQ_WIDTH}, // INT DEFAULT PROBLEM,see above
+
+    { ConfigEntry_Int32_16, EEPROM_TX_EQ0_FREQ,&ts.dsp.tx_eq_freq[0],100, 100, 700},        // INT DEFAULT PROBLEM,see above
+    { ConfigEntry_Int32_16, EEPROM_TX_EQ1_FREQ,&ts.dsp.tx_eq_freq[1],700, 700, 1500},       // INT DEFAULT PROBLEM,see above
+    { ConfigEntry_Int32_16, EEPROM_TX_EQ2_FREQ,&ts.dsp.tx_eq_freq[2],1500, 1500, 3200},     // INT DEFAULT PROBLEM,see above
 
     { ConfigEntry_Int32_16, EEPROM_SAM_PLL_LOCKING_RANGE,&ads.pll_fmax_int,2500,50,8000}, // NO INT DEFAULT PROBLEM
     { ConfigEntry_Int32_16, EEPROM_SAM_PLL_STEP_RESPONSE,&ads.zeta_int,65,1,100},  // NO INT DEFAULT PROBLEM

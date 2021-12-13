@@ -329,16 +329,12 @@ static void UiSpectrum_UpdateSpectrumPixelParameters(void)
             case DigitalMode_RTTY:
                 mode_marker[0] = 915; // Mark Frequency
                 mode_marker[1] = mode_marker[0] + rtty_shifts[rtty_ctrl_config.shift_idx].value;
-//                sd.marker_num = 2;
-                mode_marker[2] = 0;
-                sd.marker_num = 3;
+                sd.marker_num = 2;
                 break;
             case DigitalMode_BPSK:
                 mode_marker[0] = PSK_OFFSET - psk_speeds[psk_ctrl_config.speed_idx].value / 2;
                 mode_marker[1] = PSK_OFFSET + psk_speeds[psk_ctrl_config.speed_idx].value / 2;
-//                sd.marker_num = 2;
-                mode_marker[2] = 0;
-                sd.marker_num = 3;
+                sd.marker_num = 2;
             	break;
             default:
                 mode_marker[0] = 0;

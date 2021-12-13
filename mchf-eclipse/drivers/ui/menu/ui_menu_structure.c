@@ -375,11 +375,17 @@ const MenuDescriptor filterGroup[] =
     { MENU_FILTER, MENU_ITEM, CONFIG_TX_REVERB_GAIN, NULL,"TX Reverb gain", UiMenuDesc("") },
     { MENU_FILTER, MENU_ITEM, CONFIG_TX_REVERB_DELAY, NULL,"TX Reverb delay", UiMenuDesc("") },
 
-    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ0, NULL,"TX EQ 175 Hz", UiMenuDesc("") },
-    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ1, NULL,"TX EQ 350 Hz", UiMenuDesc("") },
-    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ2, NULL,"TX EQ 700 Hz", UiMenuDesc("") },
-    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ3, NULL,"TX EQ 1.4 kHz", UiMenuDesc("") },
-    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ4, NULL,"TX EQ 2.8 kHz", UiMenuDesc("") },
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ0_FREQ,  NULL,"TX EQ1 Freq", UiMenuDesc("") },
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ0_GAIN,  NULL,"TX EQ1 Gain", UiMenuDesc("") },
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ0_WIDTH, NULL,"TX EQ1 Quality", UiMenuDesc("") },
+
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ1_FREQ,  NULL,"TX EQ2 Freq", UiMenuDesc("") },
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ1_GAIN,  NULL,"TX EQ2 Gain", UiMenuDesc("") },
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ1_WIDTH, NULL,"TX EQ2 Quality", UiMenuDesc("") },
+
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ2_FREQ,  NULL,"TX EQ3 Freq", UiMenuDesc("") },
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ2_GAIN,  NULL,"TX EQ3 Gain", UiMenuDesc("") },
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ2_WIDTH, NULL,"TX EQ3 Quality", UiMenuDesc("") },
 
     { MENU_FILTER, MENU_STOP, 0, NULL, NULL, UiMenuDesc("") }
 };
@@ -666,6 +672,7 @@ const MenuDescriptor hall_of_fameGroup[] =
     { MENU_HALL_OF_FAME, MENU_TEXT, 0, NULL,"HB9GND (Dimce)", UiMenuDesc("") },
     { MENU_HALL_OF_FAME, MENU_TEXT, 0, NULL,"MM0MZW (Mike)", UiMenuDesc("") },
     { MENU_HALL_OF_FAME, MENU_TEXT, 0, NULL,"UB8JDC (Yuri)", UiMenuDesc("") },
+    { MENU_HALL_OF_FAME, MENU_TEXT, 0, NULL,"R1CBU  (Oleg)", UiMenuDesc("") },
     { MENU_HALL_OF_FAME, MENU_TEXT, 0, NULL,"RV9YW  (Max)", UiMenuDesc("") },
     { MENU_HALL_OF_FAME, MENU_TEXT, 0, NULL,"M0LNG  (Martin)", UiMenuDesc("") },
     { MENU_HALL_OF_FAME, MENU_TEXT, 0, NULL,"KB3CS  (Chris)", UiMenuDesc("") },

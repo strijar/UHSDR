@@ -126,13 +126,13 @@
 //#define DDC_AXIS				// ********************************** Russian clone from UB8JDC (DDC/DUC)
 //#define OVI40_DISP_320_240    // ********************************** UHSDR don't love displays 320*240 now. Why?
 //#define OVI40_MOD_480_320		// ********************************** Interface like Amber 480x320
+//#define USE_FREEDV            // ********************************** FreeDV disabled by default
 #define FAST_FREQ_ENC           // ********************************** The freq encoder is polled more often than 10ms.
 
 #if !defined(IS_SMALL_BUILD)
     #define USE_8bit_FONT
     #define USE_PREDEFINED_WINDOW_DATA
     // OPTION with IS_SMALL_BUILD we are not automatically including USE_FREEDV as it uses lot of memory, both RAM and flash
-	#define USE_FREEDV			// ********************************** Small build (512k) Var. 2
 #endif // IS_SMALL_BUILD
 
 #ifdef SDR_AMBER_4INCH
