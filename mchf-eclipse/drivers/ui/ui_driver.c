@@ -4575,9 +4575,9 @@ static bool UiDriver_CheckFrequencyEncoder()
 	if (pot_diff != 0 &&
 			ts.txrx_mode == TRX_MODE_RX
 			&& ks.button_just_pressed == false
-			&& ts.frequency_lock == false)
+			&& (ts.frequency_lock == false || ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE))
 	{
-		// allow tuning only if in rx mode, no freq lock,
+		// allow tuning only if in rx mode and allow freq lock only in RX Slide mode,
 
 #ifdef FAST_FREQ_ENC
 	    delta_t *= 0.2; // pooling interval 2 ms instead of 10 ms
@@ -4664,38 +4664,58 @@ static bool UiDriver_CheckFrequencyEncoder()
 
 		// Finally convert to frequency incr/decr
 
+		int32_t tune_step = df.tuning_step * enc_multiplier;
+
 		if (ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE) {
 		    int32_t    freq_delta = ts.iq_freq_delta;
 		    int32_t    max = 18000 / (1 << sd.magnify);
 
-		    if (pot_diff>0) {
-                freq_delta -= (df.tuning_step * enc_multiplier);
+		    if (ts.frequency_lock) {
+		        if (pot_diff>0) {
+                    freq_delta += tune_step;
 
-                if (freq_delta < -max) {
-                    freq_delta = -max;
-                }
-                df.tune_new += df.tuning_step * enc_multiplier;
+                    if (freq_delta < max) {
+                        ts.iq_freq_delta = freq_delta;
+                        df.tune_old += tune_step;
+                    }
+		        } else {
+                    freq_delta -= tune_step;
+
+                    if (freq_delta > -max) {
+                        ts.iq_freq_delta = freq_delta;
+                        df.tune_old -= tune_step;
+                    }
+		        }
 		    } else {
-                freq_delta += (df.tuning_step * enc_multiplier);
+                if (pot_diff>0) {
+                    freq_delta -= tune_step;
 
-                if (freq_delta > max) {
-                    freq_delta = max;
+                    if (freq_delta < -max) {
+                        freq_delta = -max;
+                    }
+                    df.tune_new += tune_step;
+                } else {
+                    freq_delta += tune_step;
+
+                    if (freq_delta > max) {
+                        freq_delta = max;
+                    }
+                    df.tune_new -= tune_step;
                 }
-                df.tune_new -= df.tuning_step * enc_multiplier;
-		    }
 
-		    ts.iq_freq_delta = freq_delta;
+                ts.iq_freq_delta = freq_delta;
+		    }
 		} else {
             if(pot_diff>0)
             {
-                df.tune_new += (df.tuning_step * enc_multiplier);
+                df.tune_new += tune_step;
                 //itoa(enc_speed,num,6);
                 //UiSpectrumClearDisplay();			// clear display under spectrum scope
                 //UiLcdHy28_PrintText(110,156,num,Cyan,Black,0);
             }
             else
             {
-                df.tune_new -= (df.tuning_step * enc_multiplier);
+                df.tune_new -= tune_step;
             }
 
             if (enc_multiplier != 1)
