@@ -160,7 +160,6 @@ static void UiDriver_StoreXVTR3(void);
 static void UiDriver_StoreXVTR4(void);
 static void UiAction_ToggleListXVTR(void);
 static void UiAction_OffXVTR(void);
-static uint8_t UiDriver_GetModeCode(void);
 static void UiDriver_LoadBwData(void);
 static void UiDriver_ChoiceKeyer(void);
 static void UiDriver_ChoiceExt(void);
@@ -1112,31 +1111,31 @@ void UiDriver_EncoderDisplay(const uint8_t row, const uint8_t column, const char
     }
 }
 
-static uint8_t UiDriver_GetModeCode()
+uint8_t UiDriver_GetModeCode()
 {
     uint8_t mode;
 
     switch(ts.dmod_mode)
     {
-    case DEMOD_USB: mode = 0; break;
-    case DEMOD_LSB: mode = 0; break;
-    case DEMOD_SAM: mode = 2; break;
-    case DEMOD_AM:  mode = 1; break;
-    case DEMOD_FM:  mode = 4; break;
-    case DEMOD_CW:  mode = 3; break;
+    case DEMOD_USB: mode = CODE_SSB; break;
+    case DEMOD_LSB: mode = CODE_SSB; break;
+    case DEMOD_SAM: mode = CODE_SAM; break;
+    case DEMOD_AM:  mode = CODE_AM; break;
+    case DEMOD_FM:  mode = CODE_FM; break;
+    case DEMOD_CW:  mode = CODE_CW; break;
     case DEMOD_DIGI:
         switch(ts.digital_mode)
         {
-        case DigitalMode_RTTY:   mode = 5; break;
-        case DigitalMode_BPSK:   mode = 6; break;
+        case DigitalMode_RTTY:   mode = CODE_RTTY; break;
+        case DigitalMode_BPSK:   mode = CODE_BPSK; break;
 #ifdef USE_FREEDV
-        case DigitalMode_FreeDV: mode = 7; break;
+        case DigitalMode_FreeDV: mode = CODE_FREEDV; break;
 #endif
         }
         break;
 #ifdef USE_TWO_CHANNEL_AUDIO
-    case DEMOD_IQ:        mode = 8; break;
-    case DEMOD_SSBSTEREO: mode = 9; break;
+    case DEMOD_IQ:        mode = CODE_IQ; break;
+    case DEMOD_SSBSTEREO: mode = CODE_SSB_STEREO; break;
 #endif
         default:
             break;
@@ -1373,6 +1372,7 @@ static void UiDriver_LoadMemData(uint8_t mem_cell)
     {
         ts.mem_disp = false;
     }
+    df.tuning_step  = tune_steps[df.selected_idx[UiDriver_GetModeCode()]];
     UiDriver_UpdateDisplayAfterParamChange();
     UiSpectrum_Init();
 }
@@ -2173,6 +2173,9 @@ void UiDriver_UpdateDisplayAfterParamChange()
 
 	if (UiDriver_IsDemodModeChange())
 	{
+	    uint8_t mode = UiDriver_GetModeCode();
+
+	    df.tuning_step  = tune_steps[df.selected_idx[mode]];
 	    UiDriver_UpdateDemodSpecificDisplayAfterParamChange();
 	}
 
@@ -2217,8 +2220,9 @@ void UiDriver_UpdateDisplayAfterParamChange()
 static void UiDriver_PressHoldStep(uchar is_up)
 {
 	ulong	minus_idx, plus_idx;
+	uint8_t mode = UiDriver_GetModeCode();
 
-	switch(df.selected_idx)	 		// select appropriate "alternate" step size based on current step size
+	switch(df.selected_idx[mode])	 		// select appropriate "alternate" step size based on current step size
 	{
 	case T_STEP_1HZ_IDX:	// 1Hz step size
 	case T_STEP_5HZ_IDX:	// 10Hz step size
@@ -2252,17 +2256,17 @@ static void UiDriver_PressHoldStep(uchar is_up)
 	if(!is_up)	 		// temporary decrease of step size
 	{
 		ts.tune_step = STEP_PRESS_MINUS;
-		ts.tune_step_idx_holder = df.selected_idx;
-		if(df.selected_idx)
+		ts.tune_step_idx_holder = df.selected_idx[mode];
+		if(df.selected_idx[mode])
 			df.tuning_step	= tune_steps[minus_idx];
-		df.selected_idx = minus_idx;
+		df.selected_idx[mode] = minus_idx;
 	}
 	else	 			// temporary increase of step size
 	{
 		ts.tune_step = STEP_PRESS_PLUS;
-		ts.tune_step_idx_holder = df.selected_idx;
+		ts.tune_step_idx_holder = df.selected_idx[mode];
 		df.tuning_step	= tune_steps[plus_idx];
-		df.selected_idx = plus_idx;
+		df.selected_idx[mode] = plus_idx;
 	}
 	//
 	UiDriver_DisplayFreqStepSize();		// update display
@@ -3513,8 +3517,11 @@ static void UiDriver_InitFrequency()
 	// Init frequency publics(set diff values so update on LCD will be done)
 	df.tune_old 	= 0;
 	df.tune_new 	= 3500001;
-	df.selected_idx = T_STEP_1KHZ_IDX; 		// 1 Khz startup step
-	df.tuning_step	= tune_steps[df.selected_idx];
+
+	for (int i = 0; i < DEMOD_NUM_MODE; i++)
+	    df.selected_idx[i] = T_STEP_1KHZ_IDX; 		// 1 Khz startup step
+
+	df.tuning_step	= tune_steps[df.selected_idx[0]];
 	df.temp_factor	= 0;
 	df.temp_factor_changed = false;
 	df.temp_enabled = 0;		// startup state of TCXO
@@ -3854,8 +3861,9 @@ static void UiDriver_UpdateLcdFreq(uint32_t dial_freq, uint16_t color, uint16_t 
 void UiDriver_ChangeTuningStep(uchar is_up)
 {
     const int8_t step = is_up ? +1 : -1;
+    uint8_t mode = UiDriver_GetModeCode();
 
-	int32_t idx = df.selected_idx;
+	int32_t idx = df.selected_idx[mode];
 
 	int8_t idx_limit = T_STEP_MAX_STEPS;
 
@@ -3874,7 +3882,7 @@ void UiDriver_ChangeTuningStep(uchar is_up)
 	}
 
 	df.tuning_step	= tune_steps[idx];
-	df.selected_idx = idx;
+	df.selected_idx[mode] = idx;
 
 	// Update step on screen
 	UiDriver_DisplayFreqStepSize();
@@ -4084,9 +4092,11 @@ void UiDriver_KeyboardProcessOldClicks()
         //
         if((ts.tune_step != STEP_PRESS_OFF) && (!ks.press_hold))     // are we in press-and-hold step size mode and did the button get released?
         {
+            uint8_t mode = UiDriver_GetModeCode();
+
             ts.tune_step = STEP_PRESS_OFF;                        // yes, cancel offset
-            df.selected_idx = ts.tune_step_idx_holder;            // restore previous setting
-            df.tuning_step    = tune_steps[df.selected_idx];
+            df.selected_idx[mode] = ts.tune_step_idx_holder;            // restore previous setting
+            df.tuning_step    = tune_steps[df.selected_idx[mode]];
             UiDriver_DisplayFreqStepSize();
         }
     }

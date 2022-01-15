@@ -65,7 +65,7 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
 
     { ConfigEntry_UInt16, EEPROM_FLAGS2,&ts.flags2,0,0,0xff},
     { ConfigEntry_UInt8, EEPROM_SPEC_SCOPE_SPEED,&ts.scope_speed,SPECTRUM_SCOPE_SPEED_DEFAULT,0,SPECTRUM_SCOPE_SPEED_MAX},
-    { ConfigEntry_UInt32_16, EEPROM_FREQ_STEP,&df.selected_idx,3,0,T_STEP_MAX_STEPS-2},
+    { ConfigEntry_UInt32_16, EEPROM_FREQ_STEP,&df.selected_idx[0],3,0,T_STEP_MAX_STEPS-2},  // FIXME
     { ConfigEntry_UInt8, EEPROM_TX_AUDIO_SRC,&ts.tx_audio_source,0,0,TX_AUDIO_MAX_ITEMS},
     { ConfigEntry_UInt8, EEPROM_TCXO_STATE,&df.temp_enabled,TCXO_ON,0,TCXO_MODE_MASK|TCXO_UNIT_MASK}, // we use
     { ConfigEntry_UInt8, EEPROM_AUDIO_GAIN,&ts.rx_gain[RX_AUDIO_SPKR].value,AUDIO_GAIN_DEFAULT,0,AUDIO_GAIN_MAX},
@@ -1029,7 +1029,9 @@ void UiConfiguration_LoadEepromValues(bool load_freq_mode_defaults, bool load_ee
     UiConfiguration_UpdateMacroCap();
 
     // post configuration loading actions below
-    df.tuning_step  = tune_steps[df.selected_idx];
+    uint8_t mode = UiDriver_GetModeCode();
+
+    df.tuning_step  = tune_steps[df.selected_idx[mode]];
     ts.tx_gain[TX_AUDIO_LINEIN_R] = ts.tx_gain[TX_AUDIO_LINEIN_L];
 
     // this fixes an issue with bad initialization which happens if you had version 2.9.85 installed.

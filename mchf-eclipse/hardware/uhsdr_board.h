@@ -57,6 +57,25 @@ typedef enum {
     DEMOD_NUM_MODE
 } DemodModes_t;
 
+typedef enum {
+    CODE_SSB        =   0,
+    CODE_AM         =   1,
+    CODE_SAM        =   2,
+    CODE_CW         =   3,
+    CODE_FM         =   4,
+    CODE_RTTY       =   5,
+    CODE_BPSK       =   6,
+#ifdef USE_FREEDV
+    CODE_FREEDV     =   7,
+#endif
+
+#ifdef USE_TWO_CHANNEL_AUDIO
+    CODE_IQ         =   8,
+    CODE_SSB_STEREO =   9,
+#endif
+    CODE_NUM_MODE
+} ModeCodes_t;
+
 #define DEMOD_MAX_MODE (DEMOD_NUM_MODE-1)
 
 // codec x demod

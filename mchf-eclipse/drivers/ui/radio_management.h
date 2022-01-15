@@ -34,13 +34,13 @@ typedef struct DialFrequency
     // user visible frequency AKA dial frequency
     // NOT the always LO frequency since we have an IQ TRX which
     // uses frequency translation in many cases.
-    ulong   tune_old;           // current value
-    ulong   tune_new;           // requested value
+    ulong   tune_old;                       // current value
+    ulong   tune_new;                       // requested value
 
     // Current tuning step
-    ulong   tuning_step;        // selected step by user
-    ulong   selected_idx;       // id of step
-    ulong   step_new;           // Eth driver req step
+    ulong   tuning_step;                    // selected step by user
+    ulong   selected_idx[CODE_NUM_MODE];    // id of step for each mode
+    ulong   step_new;                       // Eth driver req step
 
     ulong   update_skip;
 

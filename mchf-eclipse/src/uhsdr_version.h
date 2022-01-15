@@ -13,7 +13,7 @@
  ************************************************************************************/
 
 #define 	UHSDR_VER_MAJOR			"2"
-#define 	UHSDR_VER_MINOR			"13"
+#define 	UHSDR_VER_MINOR			"14"
 #define 	UHSDR_VER_RELEASE		"0"
 
 

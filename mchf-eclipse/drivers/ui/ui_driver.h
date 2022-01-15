@@ -252,6 +252,7 @@ bool UiDriver_CheckTouchRegion(const UiArea_t* tr_p);
 void UiDriver_Power2String(char* txt, size_t txt_len,uint32_t power_mW);
 
 uint32_t UiDriver_GetNBColor(void);
+uint8_t UiDriver_GetModeCode();
 
 void UiDriver_InitBandSet(void);
 void UiDriver_SelectBandMemory(uint16_t vfo_sel, uint8_t new_band_index);
