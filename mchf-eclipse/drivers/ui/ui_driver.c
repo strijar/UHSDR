@@ -4703,6 +4703,7 @@ static bool UiDriver_CheckFrequencyEncoder()
                     if (freq_delta < -max) {
                         freq_delta = -max;
                     }
+                    df.tune_new -= df.tune_new % df.tuning_step;
                     df.tune_new += tune_step;
                 } else {
                     freq_delta += tune_step;
@@ -4710,6 +4711,7 @@ static bool UiDriver_CheckFrequencyEncoder()
                     if (freq_delta > max) {
                         freq_delta = max;
                     }
+                    df.tune_new -= df.tune_new % df.tuning_step;
                     df.tune_new -= tune_step;
                 }
 

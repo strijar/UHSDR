@@ -159,7 +159,7 @@ void		UiConfiguration_UpdateMacroCap(void);
 #define EEPROM_BAND_MODE					1
 #define EEPROM_FREQ_HIGH					2
 #define EEPROM_FREQ_LOW						3
-#define EEPROM_FREQ_STEP					4
+#define EEPROM_FREQ_STEP_SSB    			4
 #define EEPROM_TX_AUDIO_SRC					5
 #define EEPROM_TCXO_STATE					6
 #define EEPROM_PA_BIAS						7
@@ -702,7 +702,14 @@ void		UiConfiguration_UpdateMacroCap(void);
 #define EEPROM_TX_EQ1_FREQ                           509
 #define EEPROM_TX_EQ2_FREQ                           510
 
-#define EEPROM_FIRST_UNUSED                          511  // change this if new value ids are introduced, must be correct at any time
+#define EEPROM_FREQ_STEP_AM                          511
+#define EEPROM_FREQ_STEP_SAM                         512
+#define EEPROM_FREQ_STEP_CW                          513
+#define EEPROM_FREQ_STEP_FM                          514
+#define EEPROM_FREQ_STEP_RTTY                        515
+#define EEPROM_FREQ_STEP_BPSK                        516
+
+#define EEPROM_FIRST_UNUSED                          517  // change this if new value ids are introduced, must be correct at any time
 
 #define MAX_VAR_ADDR (EEPROM_FIRST_UNUSED - 1) // Max 511
 

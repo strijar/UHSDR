@@ -65,7 +65,13 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
 
     { ConfigEntry_UInt16, EEPROM_FLAGS2,&ts.flags2,0,0,0xff},
     { ConfigEntry_UInt8, EEPROM_SPEC_SCOPE_SPEED,&ts.scope_speed,SPECTRUM_SCOPE_SPEED_DEFAULT,0,SPECTRUM_SCOPE_SPEED_MAX},
-    { ConfigEntry_UInt32_16, EEPROM_FREQ_STEP,&df.selected_idx[0],3,0,T_STEP_MAX_STEPS-2},  // FIXME
+    { ConfigEntry_UInt32_16, EEPROM_FREQ_STEP_SSB,&df.selected_idx[CODE_SSB],3,0,T_STEP_MAX_STEPS-2},
+    { ConfigEntry_UInt32_16, EEPROM_FREQ_STEP_AM,&df.selected_idx[CODE_AM],3,0,T_STEP_MAX_STEPS-2},
+    { ConfigEntry_UInt32_16, EEPROM_FREQ_STEP_SAM,&df.selected_idx[CODE_SAM],3,0,T_STEP_MAX_STEPS-2},
+    { ConfigEntry_UInt32_16, EEPROM_FREQ_STEP_CW,&df.selected_idx[CODE_CW],3,0,T_STEP_MAX_STEPS-2},
+    { ConfigEntry_UInt32_16, EEPROM_FREQ_STEP_FM,&df.selected_idx[CODE_FM],3,0,T_STEP_MAX_STEPS-2},
+    { ConfigEntry_UInt32_16, EEPROM_FREQ_STEP_RTTY,&df.selected_idx[CODE_RTTY],3,0,T_STEP_MAX_STEPS-2},
+    { ConfigEntry_UInt32_16, EEPROM_FREQ_STEP_BPSK,&df.selected_idx[CODE_BPSK],3,0,T_STEP_MAX_STEPS-2},
     { ConfigEntry_UInt8, EEPROM_TX_AUDIO_SRC,&ts.tx_audio_source,0,0,TX_AUDIO_MAX_ITEMS},
     { ConfigEntry_UInt8, EEPROM_TCXO_STATE,&df.temp_enabled,TCXO_ON,0,TCXO_MODE_MASK|TCXO_UNIT_MASK}, // we use
     { ConfigEntry_UInt8, EEPROM_AUDIO_GAIN,&ts.rx_gain[RX_AUDIO_SPKR].value,AUDIO_GAIN_DEFAULT,0,AUDIO_GAIN_MAX},
