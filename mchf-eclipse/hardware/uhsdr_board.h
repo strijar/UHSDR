@@ -117,13 +117,17 @@ enum
     RX_IQ_NUM
 };
 // Audio sources for TX modulation
-#define TX_AUDIO_MIC			0
-#define TX_AUDIO_LINEIN_L		1
-#define TX_AUDIO_LINEIN_R		2
-#define TX_AUDIO_DIG			3
-#define TX_AUDIO_DIGIQ			4
-#define TX_AUDIO_MAX_ITEMS		4
-#define TX_AUDIO_NUM			(TX_AUDIO_MAX_ITEMS +1)
+
+enum {
+    TX_AUDIO_MIC = 0,
+    TX_AUDIO_LINEIN_L,
+    TX_AUDIO_LINEIN_R,
+    TX_AUDIO_DIG,
+    TX_AUDIO_DIGIQ,
+    TX_AUDIO_NUM
+};
+#define TX_AUDIO_MAX_ITEMS      (TX_AUDIO_NUM-1)
+
 //
 #define	LINE_GAIN_MIN			3
 #define	LINE_GAIN_MAX			31

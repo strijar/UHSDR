@@ -456,14 +456,13 @@ static void TxProcessor_PrepareVoice(audio_block_t a_buffer, AudioSample_t* src,
 {
     TxProcessor_AudioBufferFill(a_buffer, src,blockSize);
 
-//  if (!ts.tune)
     if (!ts.tune)
     {
-        if (ts.reverb_gain > 0)
+        if (ts.reverb_gain > 0 && ts.tx_audio_source == TX_AUDIO_MIC)
             for (int i = 0; i < blockSize; i++)
                 a_buffer[i] = AudioReverb_Calc(a_buffer[i]);
 
-        TxProcessor_FilterAudio(runFilter, ts.tx_audio_source != TX_AUDIO_DIG, a_buffer, a_buffer, blockSize);
+        TxProcessor_FilterAudio(runFilter, ts.tx_audio_source == TX_AUDIO_MIC, a_buffer, a_buffer, blockSize);
     }
 
     TxProcessor_VoiceCompressor(a_buffer, blockSize, gain);  // Do the TX ALC and speech compression/processing
