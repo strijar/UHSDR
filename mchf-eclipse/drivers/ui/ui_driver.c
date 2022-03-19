@@ -75,12 +75,11 @@
 static void     UiDriver_CreateMeters(void);
 static void     UiDriver_DeleteMeters(void);
 static void 	UiDriver_DrawSMeter(ushort color);
-//
+
 static void 	UiDriver_UpdateTopMeterA(uchar val);
 static void 	UiDriver_UpdateBtmMeter(float val, uchar warn);
 
 static void 	UiDriver_InitFrequency(void);
-//
 
 static void     UiDriver_UpdateLcdFreq(ulong dial_freq,ushort color,ushort mode);
 static bool 	UiDriver_IsButtonPressed(ulong button_num);
@@ -90,27 +89,19 @@ static void 	UiDriver_ChangeBand(bool is_up);
 static bool 	UiDriver_CheckFrequencyEncoder(void);
 
 static void     UiDriver_DisplayBand(const BandInfo* band);
-//static void     UiDriver_DisplayBandForFreq(uint32_t freq);
 static void     UiDriver_DisplayBandForFreq(uint32_t freq, bool force);
 
-static void     UiDriver_DisplayEncoderOneMode(void);
-static void     UiDriver_DisplayEncoderTwoMode(void);
-static void     UiDriver_DisplayEncoderThreeMode(void);
+static void     UiDriver_DisplayEncoderMode(uint8_t enc);
 
-static void 	UiDriver_DisplayNoiseBlanker(bool encoder_active);
-static void 	UiDriver_DisplayDSPMode(bool encoder_active);
-static void 	UiDriver_DisplayTone(bool encoder_active);
-static void 	UiDriver_DisplayRit(bool encoder_active);
-static void     UiDriver_DisplayAfGain(bool encoder_active);
-static void     UiDriver_DisplayRfGain(bool encoder_active);
-static void     UiDriver_DisplaySidetoneGain(bool encoder_active);
-static void     UiDriver_DisplayCmpLevel(bool encoder_active);
-static void     UiDriver_DisplayKeyerSpeed(bool encoder_active);
-static void     UiDriver_DisplayLineInModeAndGain(bool encoder_active);
-static void     UiDriver_DisplayPWRGain(bool encoder_active);
-
-//static void     UiDriver_DisplayMemoryLabel();
-
+static void     UiDriver_DisplayAfGain(uint8_t enc, uint8_t style);
+static void     UiDriver_DisplayRfGain(uint8_t enc, uint8_t style);
+static void     UiDriver_DisplayRit(uint8_t enc, uint8_t style);
+static void     UiDriver_DisplayRttySpeed(uint8_t enc, uint8_t style);
+static void     UiDriver_DisplayRttyShift(uint8_t enc, uint8_t style);
+static void     UiDriver_DisplayPskSpeed(uint8_t enc, uint8_t style);
+static void     UiDriver_DisplayRfGain(uint8_t enc, uint8_t style);
+static void     UiDriver_DisplayRit(uint8_t enc, uint8_t style);
+static void     UiDriver_DisplayPWRGain(uint8_t enc, uint8_t style);
 
 static void 	UiDriver_DisplayModulationType(void);
 static void 	UiDriver_DisplayPowerLevel(void);
@@ -121,13 +112,9 @@ static void 	UiDriver_HandleSMeter(void);
 static void 	UiDriver_HandleTXMeters(void);
 static bool     UiDriver_HandleVoltage(void);
 
-#if 0
-static void 	UiDriverUpdateLoMeter(uchar val,uchar active);
-#endif
 static void     UiDriver_CreateVoltageDisplay(void);
 
 static void 	UiDriver_HandleLoTemperature(void);
-
 
 static bool	    UiDriver_LoadSavedConfigurationAtStartup(void);
 static bool	    UiDriver_TouchscreenCalibration(void);
@@ -141,9 +128,7 @@ static void UiDriver_KeyTestScreen(void);
 
 static bool UiDriver_SaveConfiguration(void);
 
-static void UiDriver_DisplayRttySpeed(bool encoder_active);
-static void UiDriver_DisplayRttyShift(bool encoder_active);
-static void UiDriver_DisplayPskSpeed(bool encoder_active);
+
 static inline void UiDriver_FButton_F4ActiveVFO(void);
 static inline void UiDriver_FButton_F5Tune(void);
 static void UiAction_ShowMems(void);
@@ -167,38 +152,39 @@ static void UiAction_ChoiceMems(void);
 static void UiDriver_ChoiceXvtr(void);
 static void UiDriver_ChoiceNormal(void);
 
-// encoder one
 typedef enum {
-    ENC_ONE_MODE_AUDIO_GAIN  = 0,
-    ENC_ONE_MODE_RTTY_SPEED,
-    ENC_ONE_MODE_ST_GAIN,
-    ENC_ONE_MODE_CMP_LEVEL,
-    ENC_ONE_MODE_PWR_GAIN,
-    ENC_ONE_NUM_MODES
-} EncoderOneModes;
-//
-// encoder two
-typedef enum {
-    ENC_TWO_MODE_RF_GAIN =      0,
-    ENC_TWO_MODE_RTTY_SHIFT,
-    ENC_TWO_MODE_SIG_PROC,
-    ENC_TWO_MODE_NR,
-    ENC_TWO_MODE_NOTCH_F,
-    ENC_TWO_MODE_PEAK_F,
-    ENC_TWO_MODE_BASS_GAIN,
-    ENC_TWO_MODE_TREBLE_GAIN,
-    ENC_TWO_NUM_MODES
-} EncoderTwoModes;
-//
-// encoder three
-typedef enum {
-    ENC_THREE_MODE_RIT =            0,
-    ENC_THREE_MODE_CW_SPEED,
-    ENC_THREE_MODE_INPUT_CTRL,
-    ENC_THREE_MODE_PSK_SPEED,
-    ENC_THREE_NUM_MODES
-} EncoderThreeModes;
+    ENC_MODE_AUDIO_GAIN = 0,
+    ENC_MODE_PWR_GAIN,
+    /*
+    ENC_MODE_RTTY_SPEED,
+    ENC_MODE_ST_GAIN,
+    ENC_MODE_CMP_LEVEL,
+    */
 
+    ENC_MODE_RF_GAIN,
+    /*
+    ENC_MODE_RTTY_SHIFT,
+    ENC_MODE_SIG_PROC,
+    ENC_MODE_NR,
+    ENC_MODE_NOTCH_F,
+    ENC_MODE_PEAK_F,
+    ENC_MODE_BASS_GAIN,
+    ENC_MODE_TREBLE_GAIN,
+    */
+
+    ENC_MODE_RIT,
+    /*
+    ENC_MODE_CW_SPEED,
+    ENC_MODE_INPUT_CTRL,
+    ENC_MODE_PSK_SPEED,
+    */
+    ENC_NUM_MODES
+} EncoderModes;
+
+enum {
+    ENC_STYLE_NORM  = (0 << 6),
+    ENC_STYLE_SET   = (1 << 6)
+} EncoderStyles;
 
 // Tuning steps
 const ulong tune_steps[T_STEP_MAX_STEPS] =
@@ -975,9 +961,41 @@ static void UiDriver_DspModeMaskInit(void)
 void UiDriver_Init()
 {
     // set the encoders to their default values
-    ts.enc_one_mode     = ENC_ONE_MODE_AUDIO_GAIN;
-    ts.enc_two_mode     = ENC_TWO_MODE_RF_GAIN;
-    ts.enc_thr_mode     = ENC_THREE_MODE_RIT;
+
+    memset((void *) &ts.enc_state, 0, sizeof(ts.enc_state));
+
+    ts.enc_mode[ENC1][0] = ENC_MODE_AUDIO_GAIN;
+    ts.enc_mode[ENC1][1] = ENC_MODE_RF_GAIN;
+    ts.enc_mode[ENC1][2] = ENC_MODE_PWR_GAIN;
+
+    /*
+    ts.enc_mode[0][1] = ENC_MODE_RTTY_SPEED;
+    ts.enc_mode[0][2] = ENC_MODE_ST_GAIN;
+    ts.enc_mode[0][3] = ENC_MODE_CMP_LEVEL;
+    ts.enc_mode[0][4] = ENC_MODE_PWR_GAIN;
+    */
+
+    ts.enc_mode[ENC2][0] = ENC_MODE_RF_GAIN;
+    ts.enc_mode[ENC2][1] = ENC_MODE_RIT;
+    ts.enc_mode[ENC2][2] = ENC_MODE_AUDIO_GAIN;
+
+    /*
+    ts.enc_mode[1][1] = ENC_MODE_RTTY_SHIFT;
+    ts.enc_mode[1][2] = ENC_MODE_NR;
+    ts.enc_mode[1][3] = ENC_MODE_PEAK_F;
+    ts.enc_mode[1][4] = ENC_MODE_BASS_GAIN;
+    */
+
+    ts.enc_mode[ENC3][0] = ENC_MODE_RIT;
+    ts.enc_mode[ENC3][1] = ENC_MODE_AUDIO_GAIN;
+    ts.enc_mode[ENC3][2] = ENC_MODE_RF_GAIN;
+
+    /*
+    ts.enc_mode[2][1] = ENC_MODE_CW_SPEED;
+    ts.enc_mode[2][2] = ENC_MODE_INPUT_CTRL;
+    ts.enc_mode[2][3] = ENC_MODE_PSK_SPEED;
+    ts.enc_mode[2][4] = ENC_MODE_TREBLE_GAIN;
+    */
 
 	// Driver publics init
 	UiDriver_PublicsInit();
@@ -1071,15 +1089,31 @@ void UiDriver_DrawFButtonLabel(uint8_t button_num, const char* label, uint32_t l
             label_color, Black, 0);
 }
 
-void UiDriver_EncoderDisplay(const uint8_t row, const uint8_t column, const char *label, bool encoder_active,
+void UiDriver_EncoderDisplay(const uint8_t row, const uint8_t column, const char *label, uint8_t style,
 		const char temp[5], uint32_t color)
 {
 
-	uint32_t label_color = encoder_active?Black:Grey1;
+	uint32_t label_color, bg_color, brdr_color;
 
-	// max visibility of active element
-	uint32_t bg_color = encoder_active?Orange:Grey;
-	uint32_t brdr_color = encoder_active?Orange:Grey;
+	switch (style) {
+	    case ENC_STYLE_NORM:
+	        label_color = Black;
+	        bg_color = Orange;
+	        brdr_color = Orange;
+	        break;
+
+	    case ENC_STYLE_SET:
+            label_color = Black;
+            bg_color = Orange;
+            brdr_color = Orange;
+	        break;
+
+	    default:
+            label_color = Grey1;
+            bg_color = Grey;
+            brdr_color = Grey;
+            break;
+	}
 
 	if(ts.Layout->ENCODER_MODE==MODE_HORIZONTAL)
 	{
@@ -1089,7 +1123,6 @@ void UiDriver_EncoderDisplay(const uint8_t row, const uint8_t column, const char
 		UiLcdHy28_PrintTextRight((ts.Layout->ENCODER_IND.x + ENC_COL_W - 4 + ENC_COL_W * 2 * column+ row *ENC_COL_W+column*Xspacing), (ts.Layout->ENCODER_IND.y + 1 + ENC_ROW_2ND_OFF), temp,
 				color, Black, 0);
 	}
-//	else
 	else if(!ts.show_wide_spectrum)
 	{
 		UiLcdHy28_DrawEmptyRect(ts.Layout->ENCODER_IND.x + ENC_COL_W * column, ts.Layout->ENCODER_IND.y + row * ENC_ROW_H, ENC_ROW_H - 2, ENC_COL_W - 2, brdr_color);
@@ -1906,16 +1939,28 @@ UiDriver_DrawFButtonLabel(7, cap, color);
 #endif
 }
 
-void UiDriver_EncoderDisplaySimple(const uint8_t column, const uint8_t row, const char *label, bool encoder_active,
-		uint32_t value)
+void UiDriver_EncoderDisplaySimple(const uint8_t row, const uint8_t column, const char *label, uint8_t style, uint32_t value)
 {
 
-	char temp[5];
-	uint32_t color = encoder_active?White:Grey;
+	char        temp[5];
+	uint32_t    color;
+
+	switch (style) {
+	    case ENC_STYLE_NORM:
+            color = White;
+            break;
+
+	    case ENC_STYLE_SET:
+	        color = White;
+	        break;
+
+	    default:
+	        color = Grey;
+	        break;
+	}
 
 	snprintf(temp,5," %2lu",value);
-	UiDriver_EncoderDisplay(column, row, label, encoder_active,
-			temp, color);
+	UiDriver_EncoderDisplay(row, column, label, style, temp, color);
 }
 
 void UiDriver_DisplaySplitFreqLabels()
@@ -2043,9 +2088,9 @@ void UiDriver_SetSplitMode(bool mode_active)
  */
 void UiDriver_RefreshEncoderDisplay()
 {
-	UiDriver_DisplayEncoderOneMode();
-	UiDriver_DisplayEncoderTwoMode();
-	UiDriver_DisplayEncoderThreeMode();
+	UiDriver_DisplayEncoderMode(ENC1);
+	UiDriver_DisplayEncoderMode(ENC2);
+	UiDriver_DisplayEncoderMode(ENC3);
 }
 
 /**
@@ -4114,43 +4159,12 @@ enum TRX_States_t
 
 static void UiDriver_TxRxUiSwitch(enum TRX_States_t state)
 {
-	static uchar enc_one_mode =     ENC_ONE_MODE_AUDIO_GAIN;  // stores modes of encoder when we enter TX
-	static uchar enc_two_mode =     ENC_TWO_MODE_RF_GAIN;    // stores modes of encoder when we enter TX
-	static uchar enc_three_mode =   ENC_THREE_MODE_CW_SPEED;    // stores modes of encoder when we enter TX
-
-
 	{
 		if(state == TRX_STATE_RX_TO_TX)
 		{
 
 			UiDriver_DeleteSMeterLabels();
 			UiDriver_DrawPowerMeterLabels();
-
-			if((ts.flags1 & FLAGS1_TX_AUTOSWITCH_UI_DISABLE) == false)                // If auto-switch on TX/RX is enabled
-			{
-				// change display related to encoder one to TX mode (e.g. Sidetone gain or Compression level)
-				enc_one_mode = ts.enc_one_mode;
-				enc_two_mode = ts.enc_two_mode;
-				enc_three_mode = ts.enc_thr_mode;
-
-				// we reconfigure the encoders according to the currently selected mode
-				// for now this is only relevant for CW
-				if (ts.dmod_mode == DEMOD_CW)
-				{
-					ts.enc_one_mode = ENC_ONE_MODE_ST_GAIN;
-					ts.enc_thr_mode = ENC_THREE_MODE_CW_SPEED;
-				}
-				else if (ts.dmod_mode == DEMOD_DIGI && ts.digital_mode == DigitalMode_BPSK)
-				{
-					ts.enc_one_mode = ENC_ONE_MODE_ST_GAIN;
-					ts.enc_thr_mode = ENC_THREE_MODE_PSK_SPEED;
-				}
-				else // for all other modes we activate the compressor setting and input gain control
-				{
-					ts.enc_one_mode = ENC_ONE_MODE_CMP_LEVEL;
-					ts.enc_thr_mode = ENC_THREE_MODE_INPUT_CTRL;
-				}
-			}
 
 			// force redisplay of Encoder boxes and values
 			UiDriver_RefreshEncoderDisplay();
@@ -4161,15 +4175,8 @@ static void UiDriver_TxRxUiSwitch(enum TRX_States_t state)
 		}
 		else if (state == TRX_STATE_TX_TO_RX)
 		{
-
 			UiDriver_DeleteSMeterLabels();
 			UiDriver_DrawSMeterLabels();
-			if((ts.flags1 & FLAGS1_TX_AUTOSWITCH_UI_DISABLE) == false)                // If auto-switch on TX/RX is enabled
-			{
-				ts.enc_one_mode = enc_one_mode;
-				ts.enc_two_mode = enc_two_mode;
-				ts.enc_thr_mode = enc_three_mode;
-			}
 
 			// force redisplay of Encoder boxes and values
 			UiDriver_RefreshEncoderDisplay();
@@ -4341,7 +4348,7 @@ static void UiDriver_TimeScheduler()
 	{
 		startup_done_flag = true;                  // set flag so that we do this only once
 
-		UiDriver_DisplayEncoderTwoMode();
+		// UiDriver_DisplayEncoderTwoMode(); FIXME
 
 		audio_spkr_volume_update_request = 1;      // set unmute flag to force audio to be un-muted - just in case it starts up muted!
 		Codec_MuteDAC(false);                      // make sure that audio is un-muted
@@ -4372,65 +4379,28 @@ typedef struct
 void UiDriver_SetDemodMode(uint8_t new_mode)
 {
 	RadioManagement_SetDemodMode(new_mode);
-#if 0
-	static encoder_mode_store_t demod_modes[] =
-	{
-			{ ENC_ONE_MODE_AUDIO_GAIN, ENC_TWO_MODE_RF_GAIN, ENC_THREE_MODE_RIT }, // USB, LSB,(S)AM,FM,FreeDV
-			{ ENC_ONE_MODE_ST_GAIN, -1, ENC_THREE_MODE_CW_SPEED }, // CW
-			{ ENC_ONE_MODE_RTTY_SPEED, ENC_TWO_MODE_RTTY_SHIFT, -1 }, // RTTY
-	};
-#endif
 
 	DigiModes_TxBufferReset();
-	switch(ts.dmod_mode)
-	{
-	case DEMOD_DIGI:
-	{
-		switch(ts.digital_mode)
-		{
-		case DigitalMode_RTTY:
-		    DigiModes_Set_BufferConsumer( RTTY );
-			if (ts.enc_one_mode != ENC_ONE_MODE_AUDIO_GAIN)
-			{
-				ts.enc_one_mode = ENC_ONE_MODE_RTTY_SPEED;
-			}
 
-			if (ts.enc_two_mode != ENC_TWO_MODE_RF_GAIN)
-			{
-				ts.enc_two_mode = ENC_TWO_MODE_RTTY_SHIFT;
-			}
-			break;
+	switch(ts.dmod_mode) {
+	    case DEMOD_DIGI:
+	        switch(ts.digital_mode) {
+	            case DigitalMode_RTTY:
+	                DigiModes_Set_BufferConsumer( RTTY );
+	                break;
 
-		case DigitalMode_BPSK:
-		    DigiModes_Set_BufferConsumer( BPSK );
-			if (ts.enc_thr_mode != ENC_THREE_MODE_RIT)
-			{
-				ts.enc_thr_mode = ENC_THREE_MODE_PSK_SPEED;
-			}
-			break;
-		}
-	}
-	break;
+	            case DigitalMode_BPSK:
+	                DigiModes_Set_BufferConsumer( BPSK );
+	                break;
+	        }
+	        break;
 
-	case DEMOD_CW:
-	{
-	    DigiModes_Set_BufferConsumer( CW );
-		if (ts.enc_one_mode != ENC_ONE_MODE_AUDIO_GAIN)
-		{
-			ts.enc_one_mode = ENC_ONE_MODE_ST_GAIN;
-		}
-		if (ts.enc_thr_mode != ENC_THREE_MODE_RIT)
-		{
-			ts.enc_thr_mode = ENC_THREE_MODE_CW_SPEED;
-		}
-	}
-	break;
-	default:
-		if (ts.enc_thr_mode != ENC_THREE_MODE_RIT)
-		{
-			ts.enc_thr_mode = ENC_THREE_MODE_INPUT_CTRL;
-		}
-		break;
+	    case DEMOD_CW:
+	        DigiModes_Set_BufferConsumer( CW );
+	        break;
+
+	    default:
+	        break;
 	}
 	UiDriver_UpdateDisplayAfterParamChange();
 }
@@ -4742,713 +4712,400 @@ static bool UiDriver_CheckFrequencyEncoder()
 }
 
 
+static void UiDriver_CheckEncoder(int8_t pot_diff, uint8_t enc) {
+    int8_t  pot_diff_step = (pot_diff < 0) ? -1 : 1;
+    const   BandInfo* band = RadioManagement_GetBand(df.tune_old);
+    uint8_t mode = ts.enc_mode[enc][ts.enc_state[enc]];
 
-//*----------------------------------------------------------------------------
-//* Function Name       : UiDriverCheckEncoderOne
-//* Object              :
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
+    // used for notch and peak
+    float32_t MAX_FREQ = 5000.0;
+
+    if (ts.filters_p->sample_rate_dec == RX_DECIMATION_RATE_24KHZ) {
+        MAX_FREQ = 10000.0;
+    } else if (ts.filters_p->sample_rate_dec == RX_DECIMATION_RATE_12KHZ) {
+        MAX_FREQ = 5000.0;
+    }
+
+    if (filter_path_change) { // ??? R1CBU
+        AudioFilter_NextApplicableFilterPath(PATH_ALL_APPLICABLE | (pot_diff < 0 ? PATH_DOWN:PATH_UP), AudioFilter_GetFilterModeFromDemodMode(ts.dmod_mode), ts.filter_path);
+        // we store the new filter in the current active filter location
+        AudioDriver_SetProcessingChain(ts.dmod_mode, false);
+        // we activate it (in fact the last used one, which is the newly selected one);
+        UiDriver_UpdateDisplayAfterParamChange();
+    }
+
+    switch(mode) {
+        case ENC_MODE_AUDIO_GAIN:
+            ts.rx_gain[RX_AUDIO_SPKR].value = change_and_limit_uint(ts.rx_gain[RX_AUDIO_SPKR].value,pot_diff_step,0,ts.rx_gain[RX_AUDIO_SPKR].max);
+            UiDriver_DisplayAfGain(enc, ENC_STYLE_NORM);
+            break;
+
+        case ENC_MODE_RF_GAIN:
+            if (ts.dmod_mode != DEMOD_FM) {
+                agc_wdsp_conf.thresh = change_and_limit_int(agc_wdsp_conf.thresh,pot_diff_step,-20,120);
+                AudioDriver_AgcWdsp_Set();
+            } else {
+                ts.fm_sql_threshold = change_and_limit_uint(ts.fm_sql_threshold,pot_diff_step,0,FM_SQUELCH_MAX);
+            }
+            UiDriver_DisplayRfGain(enc, ENC_STYLE_NORM);
+            break;
+
+        case ENC_MODE_RIT:
+            if (ts.txrx_mode == TRX_MODE_RX) {
+                int16_t old_rit_value = ts.rit_value;
+
+                ts.rit_value = change_and_limit_int(ts.rit_value,pot_diff_step,MIN_RIT_VALUE,MAX_RIT_VALUE);
+                ts.dial_moved = ts.rit_value != old_rit_value;
+
+                UiDriver_DisplayRit(enc, ENC_STYLE_NORM);
+                UiDriver_FrequencyUpdateLOandDisplay(false);
+            }
+            break;
+
+        case ENC_MODE_PWR_GAIN:
+            if (ts.band_index != 17) { // not GEN-band
+                ts.pwr_adj[ts.power_level == PA_LEVEL_FULL?ADJ_FULL_POWER:ADJ_REF_PWR][band->band_mode] = change_and_limit_uint(ts.pwr_adj[ts.power_level == PA_LEVEL_FULL?ADJ_FULL_POWER:ADJ_REF_PWR][band->band_mode],pot_diff_step,3,RadioManagement_IsPowerFactorReduce(df.tune_old)?TX_POWER_FACTOR_MAX:TX_POWER_FACTOR_MAX/4);
+            } else { // GEN-band
+                if((ts.power_level == PA_LEVEL_FULL) && RadioManagement_CBFullPwrEnabled()) {
+                    ts.power_scale_gen_full = change_and_limit_uint(ts.power_scale_gen_full,pot_diff_step,3,250);
+                } else {
+                    ts.power_scale_gen = change_and_limit_uint(ts.power_scale_gen,pot_diff_step,3,200);
+                }
+            }
+
+            RadioManagement_SetPowerLevel(band, ts.power_level);
+            UiDriver_DisplayPWRGain(enc, ENC_STYLE_NORM);
+            break;
+
+/*
+        case ENC_MODE_RTTY_SPEED:
+            // Convert to Audio Gain incr/decr
+            rtty_ctrl_config.speed_idx = change_and_limit_int(rtty_ctrl_config.speed_idx,pot_diff_step,0,RTTY_SPEED_NUM-1);
+            Rtty_Modem_Init(ts.samp_rate);
+            UiDriver_DisplayRttySpeed(true);
+            break;
+
+
+        case ENC_MODE_ST_GAIN:
+            ts.cw_sidetone_gain = change_and_limit_uint(ts.cw_sidetone_gain,pot_diff_step,0,SIDETONE_MAX_GAIN);
+
+            // we only set a side tone if it would have an effect in the current mode
+            // TODO: Should we even disable changes or at least display the box differently if  side tone is not support in currently
+            // active mode?
+            if (RadioManagement_UsesTxSidetone()) {
+                Codec_TxSidetoneSetgain(ts.txrx_mode);
+            }
+            UiDriver_DisplaySidetoneGain(true);
+            break;
+
+        case ENC_MODE_CMP_LEVEL:
+            ts.tx_comp_level = change_and_limit_int(ts.tx_comp_level,pot_diff_step,TX_AUDIO_COMPRESSION_MIN,TX_AUDIO_COMPRESSION_MAX);
+            AudioManagement_CalcTxCompLevel();      // calculate values for selection compression level
+            UiDriver_DisplayCmpLevel(true);         // update on-screen display
+            break;
+
+        case ENC_MODE_RTTY_SHIFT:
+            rtty_ctrl_config.shift_idx = change_and_limit_int(rtty_ctrl_config.shift_idx,pot_diff_step,0,RTTY_SHIFT_NUM-1);
+            Rtty_Modem_Init(ts.samp_rate);
+            UiDriver_DisplayRttyShift(1);
+            break;
+
+
+            // Update DSP/NB setting
+        case ENC_MODE_SIG_PROC:
+            // Signal processor setting
+            // this is AGC setting OR noise blanker setting
+            if (is_dsp_nb()) {
+                ts.dsp.nb_setting = change_and_limit_uint(ts.dsp.nb_setting,pot_diff_step,0,MAX_NB_SETTING);
+            } else {
+                agc_wdsp_conf.mode = change_and_limit_uint(agc_wdsp_conf.mode,pot_diff_step,0,5);
+                agc_wdsp_conf.switch_mode = 1; // set flag, so that mode switching really takes place in AGC_prep
+                AudioDriver_AgcWdsp_Set();
+            }
+            UiDriver_DisplayNoiseBlanker(1);
+            break;
+
+        case ENC_MODE_NR:
+            if (is_dsp_nr()) {
+                uint8_t nr_step = DSP_NR_STRENGTH_STEP;
+
+                if(ts.dsp.nr_strength >= 190 || ts.dsp.nr_strength <= 10) {
+                    nr_step = 1;
+                }
+
+                ts.dsp.nr_strength = change_and_limit_uint(ts.dsp.nr_strength,pot_diff_step * nr_step,DSP_NR_STRENGTH_MIN,DSP_NR_STRENGTH_MAX);
+
+                if(ts.dsp.nr_strength == 189) {
+                    ts.dsp.nr_strength = 185;
+                }
+
+                if(ts.dsp.nr_strength == 11) {
+                    ts.dsp.nr_strength = 15;
+                }
+
+                // this causes considerable noise
+                //AudioDriver_SetRxAudioProcessing(ts.dmod_mode, false);
+                // we do this instead
+                nr_params.alpha = 0.799 + ((float32_t)ts.dsp.nr_strength / 1000.0);
+            }
+            UiDriver_DisplayDSPMode(1);
+            break;
+
+        case ENC_MODE_NOTCH_F:
+            if (is_dsp_mnotch()) {
+                ts.dsp.notch_frequency = ts.dsp.notch_frequency - 5.0 * pot_diff_step;
+
+                if(ts.dsp.notch_frequency > MAX_FREQ) {
+                    ts.dsp.notch_frequency = MAX_FREQ;
+                }
+
+                if(ts.dsp.notch_frequency < MIN_PEAK_NOTCH_FREQ) {
+                    ts.dsp.notch_frequency = MIN_PEAK_NOTCH_FREQ;
+                }
+
+                AudioDriver_SetProcessingChain(ts.dmod_mode, false);
+                UiDriver_DisplayDSPMode(1);
+            }
+            break;
+
+        case ENC_MODE_BASS_GAIN:
+            ts.dsp.bass_gain = change_and_limit_int(ts.dsp.bass_gain,pot_diff_step,MIN_BASS,MAX_BASS);
+            AudioDriver_SetProcessingChain(ts.dmod_mode, false);
+            UiDriver_DisplayTone(true);
+            break;
+
+        case ENC_MODE_TREBLE_GAIN:
+            ts.dsp.treble_gain = change_and_limit_int(ts.dsp.treble_gain,pot_diff_step,MIN_TREBLE,MAX_TREBLE);
+            // set filter instance
+            AudioDriver_SetProcessingChain(ts.dmod_mode, false);
+            // display treble gain
+            UiDriver_DisplayTone(true);
+            break;
+
+        case ENC_MODE_PEAK_F:
+            if (is_dsp_mpeak()) {
+                ts.dsp.peak_frequency = ts.dsp.peak_frequency - 5.0 * pot_diff_step;
+
+                if(ts.dsp.peak_frequency > MAX_FREQ) {
+                    ts.dsp.peak_frequency = MAX_FREQ;
+                }
+
+                if(ts.dsp.peak_frequency < MIN_PEAK_NOTCH_FREQ) {
+                    ts.dsp.peak_frequency = MIN_PEAK_NOTCH_FREQ;
+                }
+
+                AudioDriver_SetProcessingChain(ts.dmod_mode, false);
+                UiDriver_DisplayDSPMode(1);
+            }
+            break;
+
+
+        case ENC_MODE_CW_SPEED:
+            ts.cw_keyer_speed = change_and_limit_int(ts.cw_keyer_speed, pot_diff_step, CW_KEYER_SPEED_MIN, CW_KEYER_SPEED_MAX);
+            CwGen_SetSpeed();
+            ts.cw_keyer_speed_bak = ts.cw_keyer_speed;
+            UiDriver_DisplayKeyerSpeed(1);
+            break;
+
+        case ENC_MODE_PSK_SPEED:
+            psk_ctrl_config.speed_idx = change_and_limit_int(psk_ctrl_config.speed_idx,pot_diff_step,0,PSK_SPEED_NUM-1);
+            UiDriver_TextMsgClear();
+            Psk_Modem_Init(ts.samp_rate);
+            UiDriver_DisplayPskSpeed(true);
+            break;
+
+        case ENC_MODE_INPUT_CTRL: {
+            uint16_t gain_max = (ts.tx_audio_source == TX_AUDIO_MIC) ? MIC_GAIN_MAX : LINE_GAIN_MAX;
+            uint16_t gain_min = (ts.tx_audio_source == TX_AUDIO_MIC) ? MIC_GAIN_MIN : LINE_GAIN_MIN;
+
+            ts.tx_gain[ts.tx_audio_source] = change_and_limit_int(ts.tx_gain[ts.tx_audio_source], pot_diff_step, gain_min, gain_max);
+
+            if (ts.tx_audio_source == TX_AUDIO_MIC) {
+                Codec_SwitchMicTxRxMode(ts.txrx_mode);
+            }
+            UiDriver_DisplayLineInModeAndGain(1);
+        }
+        break;
+*/
+        default:
+            break;
+    }
+}
+
 static void UiDriver_CheckEncoderOne(void)
 {
 	int32_t pot_diff = UiDriverEncoderRead(ENC1);
 
-	if (pot_diff)
-	{
-		int8_t pot_diff_step = pot_diff < 0?-1:1;
-        const BandInfo* band = RadioManagement_GetBand(df.tune_old);
-
-		UiDriver_LcdBlankingStartTimer();	// calculate/process LCD blanking timing
-		// Take appropriate action
-		switch(ts.enc_one_mode)
-		{
-		case ENC_ONE_MODE_RTTY_SPEED:
-			// Convert to Audio Gain incr/decr
-			rtty_ctrl_config.speed_idx = change_and_limit_int(rtty_ctrl_config.speed_idx,pot_diff_step,0,RTTY_SPEED_NUM-1);
-			Rtty_Modem_Init(ts.samp_rate);
-			UiDriver_DisplayRttySpeed(true);
-			break;
-			// Update audio volume
-		case ENC_ONE_MODE_AUDIO_GAIN:
-			ts.rx_gain[RX_AUDIO_SPKR].value = change_and_limit_uint(ts.rx_gain[RX_AUDIO_SPKR].value,pot_diff_step,0,ts.rx_gain[RX_AUDIO_SPKR].max);
-			UiDriver_DisplayAfGain(1);
-			break;
-		case ENC_ONE_MODE_ST_GAIN:
-			ts.cw_sidetone_gain = change_and_limit_uint(ts.cw_sidetone_gain,pot_diff_step,0,SIDETONE_MAX_GAIN);
-
-			// we only set a side tone if it would have an effect in the current mode
-			// TODO: Should we even disable changes or at least display the box differently if  side tone is not support in currently
-			// active mode?
-			if (RadioManagement_UsesTxSidetone())
-			{
-			    Codec_TxSidetoneSetgain(ts.txrx_mode);
-			}
-			UiDriver_DisplaySidetoneGain(true);
-			break;
-		case ENC_ONE_MODE_CMP_LEVEL:
-			ts.tx_comp_level = change_and_limit_int(ts.tx_comp_level,pot_diff_step,TX_AUDIO_COMPRESSION_MIN,TX_AUDIO_COMPRESSION_MAX);
-			AudioManagement_CalcTxCompLevel();		// calculate values for selection compression level
-			UiDriver_DisplayCmpLevel(true);	// update on-screen display
-			break;
-			// Update TX power adj.
-		case ENC_ONE_MODE_PWR_GAIN:
-		    if (ts.band_index != 17) // not GEN-band
-		    {
-                ts.pwr_adj[ts.power_level == PA_LEVEL_FULL?ADJ_FULL_POWER:ADJ_REF_PWR][band->band_mode] = change_and_limit_uint(ts.pwr_adj[ts.power_level == PA_LEVEL_FULL?ADJ_FULL_POWER:ADJ_REF_PWR][band->band_mode],pot_diff_step,3,RadioManagement_IsPowerFactorReduce(df.tune_old)?TX_POWER_FACTOR_MAX:TX_POWER_FACTOR_MAX/4);
-//				RadioManagement_SetPowerLevel(band, ts.power_level);
-		    }
-		    else // GEN-band
-		    {
-		        if((ts.power_level == PA_LEVEL_FULL) && RadioManagement_CBFullPwrEnabled())
-		        {
-		            ts.power_scale_gen_full = change_and_limit_uint(ts.power_scale_gen_full,pot_diff_step,3,250);
-		        }
-		        else
-		        {
-		            ts.power_scale_gen = change_and_limit_uint(ts.power_scale_gen,pot_diff_step,3,200);
-		        }
-		    }
-		    RadioManagement_SetPowerLevel(band, ts.power_level);
-			UiDriver_DisplayPWRGain(1);
-			break;
-		default:
-			break;
-		}
+	if (pot_diff) {
+		UiDriver_LcdBlankingStartTimer();
+		UiDriver_CheckEncoder(pot_diff, ENC1);
 	}
 }
-//
-//*----------------------------------------------------------------------------
-//* Function Name       : UiDriverCheckEncoderTwo
-//* Object              :
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
+
 static void UiDriver_CheckEncoderTwo(void)
 {
 	int32_t pot_diff = UiDriverEncoderRead(ENC2);
 
-	if (pot_diff != 0)
-	{
-		UiDriver_LcdBlankingStartTimer();	// calculate/process LCD blanking timing
+	if (pot_diff != 0) {
+		UiDriver_LcdBlankingStartTimer();
 
-		if(ts.menu_mode)
-		{
+		if (ts.menu_mode) {
 			UiMenu_RenderChangeItem(pot_diff);
-		}
-		else
-		{
-			int8_t pot_diff_step = pot_diff < 0?-1:1;
-
-
-			if(ts.txrx_mode == TRX_MODE_RX)
-			{
-
-				// dynamic encoder speed , used for notch and peak
-				static float    enc_speed_avg = 0.0;  //keeps the averaged encoder speed
-				int     delta_t, enc_speed;
-				float32_t   enc_multiplier;
-
-				delta_t = ts.audio_int_counter;  // get ticker difference since last enc. change
-				ts.audio_int_counter = 0;        //reset tick counter
-
-				if (delta_t > 300)
-				{
-					enc_speed_avg = 0;    //when leaving speedy turning set avg_speed to 0
-				}
-
-				enc_speed = div(4000,delta_t).quot*pot_diff;  // app. 4000 tics per second -> calc. enc. speed.
-
-				if (enc_speed > 500)
-				{
-					enc_speed = 500;    //limit calculated enc. speed
-				}
-				if (enc_speed < -500)
-				{
-					enc_speed = -500;
-				}
-
-				enc_speed_avg = 0.1*enc_speed + 0.9*enc_speed_avg; // averaging to smooth encoder speed
-
-				enc_multiplier = 1; //set standard speed
-
-				if (!(ts.expflags1 & EXPFLAGS1_SMOOTH_DYNAMIC_TUNE))        // Smooth dynamic tune is OFF
-				{
-					if ((enc_speed_avg > 80) || (enc_speed_avg < (-80)))
-					{
-						enc_multiplier = 10;    // turning medium speed -> increase speed by 10
-					}
-					if ((enc_speed_avg > 150) || (enc_speed_avg < (-150)))
-					{
-						enc_multiplier = 30;    //turning fast speed -> increase speed by 100
-					}
-					if ((enc_speed_avg > 300) || (enc_speed_avg < (-300)))
-					{
-						enc_multiplier = 100;    //turning fast speed -> increase speed by 100
-					}
-				}
-                else
-                {
-                    if      ((enc_speed_avg > 350) || (enc_speed_avg < (-350)))
-                    {
-                        enc_multiplier = 100;    // turning medium speed -> increase speed by 100
-                    }
-                    else if ((enc_speed_avg > 250) || (enc_speed_avg < (-250)))
-                    {
-                        enc_multiplier =  50;    //turning fast speed -> increase speed by 50
-                    }
-                    else if ((enc_speed_avg > 180) || (enc_speed_avg < (-180)))
-                    {
-                        enc_multiplier =  12;    //turning fast speed -> increase speed by 12
-                    }
-                    else if ((enc_speed_avg >  90) || (enc_speed_avg < (- 90)))
-                    {
-                        enc_multiplier =   6;    //turning fast speed -> increase speed by 6
-                    }
-                    else if ((enc_speed_avg >  45) || (enc_speed_avg < (- 45)))
-                    {
-                        enc_multiplier =   3;    //turning fast speed -> increase speed by 3
-                    }
-                    else if ((enc_speed_avg >  30) || (enc_speed_avg < (- 30)))
-                    {
-                        enc_multiplier =   2;    //turning fast speed -> increase speed by 2
-                    }
-				}
-
-				// used for notch and peak
-				float32_t MAX_FREQ = 5000.0;
-
-				if (ts.filters_p->sample_rate_dec == RX_DECIMATION_RATE_24KHZ)
-				{
-					MAX_FREQ = 10000.0;
-				}
-				else if (ts.filters_p->sample_rate_dec == RX_DECIMATION_RATE_12KHZ)
-				{
-					MAX_FREQ = 5000.0;
-				}
-
-
-
-				switch(ts.enc_two_mode)
-				{
-				case ENC_TWO_MODE_RTTY_SHIFT:
-					rtty_ctrl_config.shift_idx = change_and_limit_int(rtty_ctrl_config.shift_idx,pot_diff_step,0,RTTY_SHIFT_NUM-1);
-					Rtty_Modem_Init(ts.samp_rate);
-					UiDriver_DisplayRttyShift(1);
-					break;
-				case ENC_TWO_MODE_RF_GAIN:
-					if(ts.dmod_mode != DEMOD_FM)	 	// is this *NOT* FM?  Change RF gain
-					{
-
-							agc_wdsp_conf.thresh = change_and_limit_int(agc_wdsp_conf.thresh,pot_diff_step,-20,120);
-							AudioDriver_AgcWdsp_Set();
-					}
-					else	 		// it is FM - change squelch setting
-					{
-						ts.fm_sql_threshold = change_and_limit_uint(ts.fm_sql_threshold,pot_diff_step,0,FM_SQUELCH_MAX);
-					}
-
-					UiDriver_DisplayRfGain(1);    // change on screen
-					break;
-
-					// Update DSP/NB setting
-				case ENC_TWO_MODE_SIG_PROC:
-						// Signal processor setting
-						// this is AGC setting OR noise blanker setting
-						if(is_dsp_nb()) // noise blanker is active (ts.nb_setting > 0)
-						{
-							ts.dsp.nb_setting = change_and_limit_uint(ts.dsp.nb_setting,pot_diff_step,0,MAX_NB_SETTING);
-						}
-						else // AGC mode setting
-						{
-							//                    ts.agc_wdsp.tau_decay = change_and_limit_int(ts.agc_wdsp.tau_decay,pot_diff_step * 100,100,5000);
-							agc_wdsp_conf.mode = change_and_limit_uint(agc_wdsp_conf.mode,pot_diff_step,0,5);
-							agc_wdsp_conf.switch_mode = 1; // set flag, so that mode switching really takes place in AGC_prep
-							AudioDriver_AgcWdsp_Set();
-						}
-					UiDriver_DisplayNoiseBlanker(1);
-					break;
-				case ENC_TWO_MODE_NR:
-					if (is_dsp_nr())        // only allow adjustment if DSP NR is active
-					{	//
-				    	uint8_t nr_step = DSP_NR_STRENGTH_STEP;
-				    	if(ts.dsp.nr_strength >= 190 || ts.dsp.nr_strength <= 10)
-				    	{
-				    		nr_step = 1;
-				    	}
-						ts.dsp.nr_strength = change_and_limit_uint(ts.dsp.nr_strength,pot_diff_step * nr_step,DSP_NR_STRENGTH_MIN,DSP_NR_STRENGTH_MAX);
-			        	if(ts.dsp.nr_strength == 189)
-			        	{
-			        		ts.dsp.nr_strength = 185;
-			        	}
-			        	if(ts.dsp.nr_strength == 11)
-			        	{
-			        		ts.dsp.nr_strength = 15;
-			        	}
-
-						// this causes considerable noise
-						//AudioDriver_SetRxAudioProcessing(ts.dmod_mode, false);
-						// we do this instead
-					    nr_params.alpha = 0.799 + ((float32_t)ts.dsp.nr_strength / 1000.0);
-					}
-					// Signal processor setting
-					UiDriver_DisplayDSPMode(1);
-					break;
-				case ENC_TWO_MODE_NOTCH_F:
-					if (is_dsp_mnotch())   // notch f is only adjustable when notch is enabled
-					{
-						if(pot_diff < 0)
-						{
-							ts.dsp.notch_frequency = ts.dsp.notch_frequency - 5.0 * enc_multiplier;
-						}
-						if(pot_diff > 0)
-						{
-							ts.dsp.notch_frequency = ts.dsp.notch_frequency + 5.0 * enc_multiplier;
-						}
-
-						if(ts.dsp.notch_frequency > MAX_FREQ)
-						{
-							ts.dsp.notch_frequency = MAX_FREQ;
-						}
-						if(ts.dsp.notch_frequency < MIN_PEAK_NOTCH_FREQ)
-						{
-							ts.dsp.notch_frequency = MIN_PEAK_NOTCH_FREQ;
-						}
-						// display notch frequency
-						// set notch filter instance
-						AudioDriver_SetProcessingChain(ts.dmod_mode, false);
-						UiDriver_DisplayDSPMode(1);
-					}
-					break;
-				case ENC_TWO_MODE_BASS_GAIN:
-					ts.dsp.bass_gain = change_and_limit_int(ts.dsp.bass_gain,pot_diff_step,MIN_BASS,MAX_BASS);
-					// set filter instance
-					AudioDriver_SetProcessingChain(ts.dmod_mode, false);
-					// display bass gain
-					UiDriver_DisplayTone(true);
-					break;
-				case ENC_TWO_MODE_TREBLE_GAIN:
-					ts.dsp.treble_gain = change_and_limit_int(ts.dsp.treble_gain,pot_diff_step,MIN_TREBLE,MAX_TREBLE);
-					// set filter instance
-					AudioDriver_SetProcessingChain(ts.dmod_mode, false);
-					// display treble gain
-					UiDriver_DisplayTone(true);
-					break;
-
-				case ENC_TWO_MODE_PEAK_F:
-					if (is_dsp_mpeak())   // peak f is only adjustable when peak is enabled
-					{
-						if(pot_diff < 0)
-						{
-							ts.dsp.peak_frequency = ts.dsp.peak_frequency - 5.0 * enc_multiplier;
-						}
-						if(pot_diff > 0)
-						{
-							ts.dsp.peak_frequency = ts.dsp.peak_frequency + 5.0 * enc_multiplier;
-						}
-						if(ts.dsp.peak_frequency > MAX_FREQ)
-						{
-							ts.dsp.peak_frequency = MAX_FREQ;
-						}
-						if(ts.dsp.peak_frequency < MIN_PEAK_NOTCH_FREQ)
-						{
-							ts.dsp.peak_frequency = MIN_PEAK_NOTCH_FREQ;
-						}
-						// set notch filter instance
-						AudioDriver_SetProcessingChain(ts.dmod_mode, false);
-						// display peak frequency
-						UiDriver_DisplayDSPMode(1);
-					}
-					break;
-				default:
-					break;
-				}
-			}
-			else { // in TX case only bass & treble gain can be adjusted with encoder TWO
-
-				// Take appropriate action
-				switch(ts.enc_two_mode)
-				{
-				case ENC_TWO_MODE_BASS_GAIN:
-					ts.dsp.tx_eq_gain[0] = change_and_limit_int(ts.dsp.tx_eq_gain[0],pot_diff_step,MIN_TX_EQ_GAIN,MAX_TX_EQ_GAIN);
-					// set filter instance
-					AudioDriver_SetProcessingChain(ts.dmod_mode, false);
-					// display bass gain
-					UiDriver_DisplayTone(true);
-					break;
-				case ENC_TWO_MODE_TREBLE_GAIN:
-					ts.dsp.tx_eq_gain[2] = change_and_limit_int(ts.dsp.tx_eq_gain[2],pot_diff_step,MIN_TX_EQ_GAIN,MAX_TX_EQ_GAIN);
-					// set filter instance
-					AudioDriver_SetProcessingChain(ts.dmod_mode, false);
-					// display treble gain
-					UiDriver_DisplayTone(true);
-					break;
-				default:
-					break;
-				}
-			}
+		} else {
+	        UiDriver_CheckEncoder(pot_diff, ENC2);
 		}
 	}
 }
 
-//
-//*----------------------------------------------------------------------------
-//* Function Name       : UiDriverCheckEncoderThree
-//* Object              :
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
 static void UiDriver_CheckEncoderThree(void)
 {
-	int 	pot_diff;
+	int32_t 	pot_diff = UiDriverEncoderRead(ENC3);
 
-	pot_diff = UiDriverEncoderRead(ENC3);
+	if (pot_diff != 0) {
+		UiDriver_LcdBlankingStartTimer();
 
-
-	if (pot_diff)
-	{
-		int8_t pot_diff_step = pot_diff < 0?-1:1;
-
-		UiDriver_LcdBlankingStartTimer();	// calculate/process LCD blanking timing
-		if (filter_path_change)
-		{
-			AudioFilter_NextApplicableFilterPath(PATH_ALL_APPLICABLE | (pot_diff < 0?PATH_DOWN:PATH_UP),AudioFilter_GetFilterModeFromDemodMode(ts.dmod_mode),ts.filter_path);
-			// we store the new filter in the current active filter location
-			AudioDriver_SetProcessingChain(ts.dmod_mode, false);
-			// we activate it (in fact the last used one, which is the newly selected one);
-
-			UiDriver_UpdateDisplayAfterParamChange();
-		}
-		else  if(ts.menu_mode)
-		{
+		if (ts.menu_mode) {
 			UiMenu_RenderChangeItemValue(pot_diff);
-		}
-		else
-		{
-			// Take appropriate action
-			switch(ts.enc_thr_mode)
-			{
-			// Update RIT value
-			case ENC_THREE_MODE_RIT:
-				if(ts.txrx_mode == TRX_MODE_RX)
-				{
-					int16_t old_rit_value = ts.rit_value;
-					ts.rit_value = change_and_limit_int(ts.rit_value,pot_diff_step,MIN_RIT_VALUE,MAX_RIT_VALUE);
-
-					ts.dial_moved = ts.rit_value != old_rit_value;
-
-					// Update RIT
-					UiDriver_DisplayRit(1);
-					// Change frequency
-					UiDriver_FrequencyUpdateLOandDisplay(false);
-				}
-				break;
-				// Keyer speed
-			case ENC_THREE_MODE_CW_SPEED:
-				// Convert to Audio Gain incr/decr
-				ts.cw_keyer_speed = change_and_limit_int(ts.cw_keyer_speed,pot_diff_step,CW_KEYER_SPEED_MIN,CW_KEYER_SPEED_MAX);
-				CwGen_SetSpeed();
-				ts.cw_keyer_speed_bak = ts.cw_keyer_speed;
-				UiDriver_DisplayKeyerSpeed(1);
-				break;
-			case ENC_THREE_MODE_PSK_SPEED:
-				psk_ctrl_config.speed_idx = change_and_limit_int(psk_ctrl_config.speed_idx,pot_diff_step,0,PSK_SPEED_NUM-1);
-				UiDriver_TextMsgClear();
-				Psk_Modem_Init(ts.samp_rate);
-				UiDriver_DisplayPskSpeed(true);
-				break;
-				// Update audio volume
-			case ENC_THREE_MODE_INPUT_CTRL:
-				// in voice mode, adjust audio input gain
-			{
-				uint16_t gain_max = ts.tx_audio_source == TX_AUDIO_MIC?MIC_GAIN_MAX:LINE_GAIN_MAX;
-				uint16_t gain_min = ts.tx_audio_source == TX_AUDIO_MIC?MIC_GAIN_MIN:LINE_GAIN_MIN;
-
-				ts.tx_gain[ts.tx_audio_source] = change_and_limit_int(ts.tx_gain[ts.tx_audio_source],pot_diff_step,gain_min,gain_max);
-
-				if (ts.tx_audio_source == TX_AUDIO_MIC)
-				{
-					Codec_SwitchMicTxRxMode(ts.txrx_mode);
-				}
-				UiDriver_DisplayLineInModeAndGain(1);
-			}
-			break;
-			default:
-				break;
-			}
+		} else {
+            UiDriver_CheckEncoder(pot_diff, ENC3);
 		}
 	}
 }
 
-static bool UiDriver_IsApplicableEncoderOneMode(uint8_t mode)
-{
-	bool retval = true;
-	switch(mode)
-	{
-	case ENC_ONE_MODE_AUDIO_GAIN:
-		retval = !(ts.txrx_mode == TRX_MODE_TX);
-		break;
-	case ENC_ONE_MODE_RTTY_SPEED:
-		// only switch to rtty adjustment, if rtty enabled!
-		retval = is_demod_rtty();
-		break;
-	case ENC_ONE_MODE_ST_GAIN:
-		retval = RadioManagement_UsesTxSidetone();
-		break;
-	case ENC_ONE_MODE_CMP_LEVEL:
-		retval = ts.dmod_mode != DEMOD_CW && ts.dmod_mode != DEMOD_DIGI;
-		break;
-	case ENC_ONE_MODE_PWR_GAIN:
-		retval = (ts.txrx_mode == TRX_MODE_TX);
-		break;
-	}
-	return retval;
-}
+static void UiDriver_DisplayEncoderMode(uint8_t enc) {
+    uint8_t enc_mode = ts.enc_mode[enc][ts.enc_state[enc]];
+    uint8_t style = ts.enc_state[enc] >> 6;
+
+	switch (enc_mode) {
+	    case ENC_MODE_AUDIO_GAIN:
+	        UiDriver_DisplayAfGain(enc, style);
+	        break;
+
+	    case ENC_MODE_RF_GAIN:
+            UiDriver_DisplayRfGain(enc, style);
+            break;
+
+	    case ENC_MODE_RIT:
+            UiDriver_DisplayRit(enc, style);
+            break;
+
+	    case ENC_MODE_PWR_GAIN:
+	        UiDriver_DisplayPWRGain(enc, style);
+	        break;
+
+/*
+
+	    case ENC_MODE_RTTY_SPEED:
+	        UiDriver_DisplayRttySpeed(enc, style);
+	        break;
+
+	    case ENC_MODE_ST_GAIN:
+	        UiDriver_DisplaySidetoneGain(enc, style);
+	        break;
+
+	    case ENC_MODE_CMP_LEVEL:
+	        UiDriver_DisplayCmpLevel(enc, style);
+	        break;
+
+	    case ENC_MODE_SIG_PROC:
+	        UiDriver_DisplayNoiseBlanker(enc, style);
+	        break;
+
+	    case ENC_MODE_PEAK_F:
+	    case ENC_MODE_NOTCH_F:
+	    case ENC_MODE_NR:
+	        UiDriver_DisplayDSPMode(enc, style);
+	        break;
+
+	    case ENC_MODE_BASS_GAIN:
+	        UiDriver_DisplayTone(enc, style);
+	        break;
+
+	    case ENC_MODE_TREBLE_GAIN:
+	        UiDriver_DisplayTone(enc, style);
+	        break;
+
+	    case ENC_MODE_RTTY_SHIFT:
+	        UiDriver_DisplayRttyShift(enc, style);
+	        break;
 
 
-static void UiDriver_DisplayEncoderOneMode()
-{
-	// upper box
-	if(ts.txrx_mode != TRX_MODE_TX)
-	{
-		UiDriver_DisplayAfGain(ts.enc_one_mode == ENC_ONE_MODE_AUDIO_GAIN);
-	}
-	else
-	{
-		UiDriver_DisplayPWRGain(ts.enc_one_mode == ENC_ONE_MODE_PWR_GAIN);
-	}
+	    case ENC_MODE_CW_SPEED:
+	        UiDriver_DisplayKeyerSpeed(enc, style);
+	        break;
 
-	// lower box
-	switch(ts.enc_one_mode)
-	{
-	case ENC_ONE_MODE_RTTY_SPEED:
-		UiDriver_DisplayRttySpeed(1);
-		break;
-	case ENC_ONE_MODE_ST_GAIN:
-		UiDriver_DisplaySidetoneGain(1);
-		break;
-	case ENC_ONE_MODE_CMP_LEVEL:
-		UiDriver_DisplayCmpLevel(1);
-		break;
-	default:
-		// what to display if lower box is not active
-        if ( RadioManagement_UsesTxSidetone())
-        {
-            UiDriver_DisplaySidetoneGain( false );
-            if ( is_demod_rtty())
-            {
-                UiDriver_DisplayRttySpeed( false );
-            }
-        }
-        else
-        {
-            UiDriver_DisplayCmpLevel( false );
-        }
-	}
-}
+	    case ENC_MODE_PSK_SPEED:
+	        UiDriver_DisplayPskSpeed(enc, style);
+	        break;
 
-static bool UiDriver_IsApplicableEncoderTwoMode(uint8_t mode)
-{
-	bool retval = true;
-	switch(mode)
-	{
-	case ENC_TWO_MODE_RTTY_SHIFT:
-		// only switch to rtty adjustment, if rtty enabled!
-		retval = is_demod_rtty();
-		break;
-	case ENC_TWO_MODE_NOTCH_F:
-		retval = is_dsp_mnotch();
-		break;
-	case ENC_TWO_MODE_PEAK_F:
-		retval = is_dsp_mpeak();
-		break;
-	}
-	return retval;
-}
-
-
-static void UiDriver_DisplayEncoderTwoMode()
-{
-
-	uint8_t inactive = ts.menu_mode?0:1;
-	// we use this to disable all active displays once in menu mode
-	switch(ts.enc_two_mode)
-	{
-	case ENC_TWO_MODE_RF_GAIN:
-		UiDriver_DisplayRfGain(inactive);
-		UiDriver_DisplayNoiseBlanker(0);
-		UiDriver_DisplayDSPMode(0);
-		break;
-	case ENC_TWO_MODE_SIG_PROC:
-		UiDriver_DisplayRfGain(0);
-		//		UiDriver_DisplayNoiseBlanker(inactive);
-		UiDriver_DisplayNoiseBlanker(1);
-		UiDriver_DisplayDSPMode(0);
-		break;
-	case ENC_TWO_MODE_PEAK_F:
-	case ENC_TWO_MODE_NOTCH_F:
-	case ENC_TWO_MODE_NR:
-		UiDriver_DisplayRfGain(0);
-		UiDriver_DisplayNoiseBlanker(0);
-		UiDriver_DisplayDSPMode(inactive);
-		break;
-	case ENC_TWO_MODE_BASS_GAIN:
-		UiDriver_DisplayDSPMode(0);
-		UiDriver_DisplayTone(inactive);
-		break;
-	case ENC_TWO_MODE_TREBLE_GAIN:
-		UiDriver_DisplayDSPMode(0);
-		UiDriver_DisplayTone(inactive);
-		break;
-	case ENC_TWO_MODE_RTTY_SHIFT:
-		UiDriver_DisplayRfGain(0);
-		UiDriver_DisplayDSPMode(0);
-		UiDriver_DisplayRttyShift(1);
-		break;
-	default:
-		UiDriver_DisplayRfGain(0);
-		UiDriver_DisplayNoiseBlanker(0);
-		UiDriver_DisplayDSPMode(0);
-		break;
-	}
-
-}
-
-
-static bool UiDriver_IsApplicableEncoderThreeMode(uint8_t mode)
-{
-	bool retval = true;
-	switch(mode)
-	{
-	case ENC_THREE_MODE_CW_SPEED:
-		retval = ts.dmod_mode == DEMOD_CW;
-		break;
-	case ENC_THREE_MODE_PSK_SPEED:
-		retval = is_demod_psk();
-		break;
-	case ENC_THREE_MODE_INPUT_CTRL:
-		retval = ts.dmod_mode != DEMOD_DIGI || ts.digital_mode != DigitalMode_BPSK;
-		//retval = ts.dmod_mode != DEMOD_DIGI || (ts.digital_mode != DigitalMode_BPSK && ts.digital_mode != DigitalMode_RTTY);
-		break;
-	}
-	return retval;
-}
-
-
-static void UiDriver_DisplayEncoderThreeMode()
-{
-	// upper box
-	UiDriver_DisplayRit(ts.enc_thr_mode == ENC_THREE_MODE_RIT);
-
-	// lower box
-	switch(ts.enc_thr_mode)
-	{
-	case ENC_THREE_MODE_CW_SPEED:
-		UiDriver_DisplayKeyerSpeed(1);
-		break;
-	case ENC_THREE_MODE_PSK_SPEED:
-		UiDriver_DisplayPskSpeed(1);
-		break;
-	case ENC_THREE_MODE_INPUT_CTRL:
-		UiDriver_DisplayLineInModeAndGain(1);
-		break;
-	default:
-		// this defines what is shown if the lower box is not actively selected
-		if (ts.dmod_mode == DEMOD_CW)
-		{
-			UiDriver_DisplayKeyerSpeed(0);
-		}
-		else if (ts.dmod_mode == DEMOD_DIGI && ts.digital_mode == DigitalMode_BPSK)
-		{
-			UiDriver_DisplayPskSpeed(0);
-		}
-		else
-		{
-			UiDriver_DisplayLineInModeAndGain(0);
-		}
-		break;
-
+	    case ENC_MODE_INPUT_CTRL:
+	        UiDriver_DisplayLineInModeAndGain(enc, style);
+	        break;
+*/
+	    default:
+	        break;
 	}
 }
 
+static void UiDriver_ChangeEncoderOneMode(void) {
+    if (ts.menu_mode) return;
 
-/**
- * Handles the execution of the change encoder logic for the 3 encoders
- */
-
-static void UiDriver_ChangeEncoderMode(volatile uint8_t* mode_ptr, uint8_t num_modes, bool (*is_applicable_f)(uint8_t), void(*display_encoder_f)())
-{
-	if(ts.menu_mode == false)   // changes only when not in menu mode
-	{
-		uint8_t new_enc_mode = *mode_ptr;
-		do
-		{
-			new_enc_mode++;
-			new_enc_mode %= num_modes;
-		} while ((*is_applicable_f)(new_enc_mode)  == false && new_enc_mode != *mode_ptr );
-		if (new_enc_mode != *mode_ptr)
-		{
-			*mode_ptr = new_enc_mode;
-			(*display_encoder_f)();
-		}
-	}
+    ts.enc_state[ENC1] = (ts.enc_state[ENC1] + 1) % ENC_STATE_NUM;
+	UiDriver_DisplayEncoderMode(ENC1);
 }
 
-static void UiDriver_ChangeEncoderOneMode(void)
-{
-	UiDriver_ChangeEncoderMode(&ts.enc_one_mode, ENC_ONE_NUM_MODES, UiDriver_IsApplicableEncoderOneMode, UiDriver_DisplayEncoderOneMode);
+static void UiDriver_ChangeEncoderTwoMode(void) {
+    if (ts.menu_mode) return;
+
+    ts.enc_state[ENC2] = (ts.enc_state[ENC2] + 1) % ENC_STATE_NUM;
+    UiDriver_DisplayEncoderMode(ENC2);
 }
 
-static void UiDriver_ChangeEncoderTwoMode(void)
-{
-	UiDriver_ChangeEncoderMode(&ts.enc_two_mode, ENC_TWO_NUM_MODES, UiDriver_IsApplicableEncoderTwoMode, UiDriver_DisplayEncoderTwoMode);
-}
+static void UiDriver_ChangeEncoderThreeMode(void) {
+    if (ts.menu_mode) return;
 
-static void UiDriver_ChangeEncoderThreeMode(void)
-{
-	UiDriver_ChangeEncoderMode(&ts.enc_thr_mode, ENC_THREE_NUM_MODES, UiDriver_IsApplicableEncoderThreeMode, UiDriver_DisplayEncoderThreeMode);
+    ts.enc_state[ENC3] = (ts.enc_state[ENC3] + 1) % ENC_STATE_NUM;
+    UiDriver_DisplayEncoderMode(ENC3);
 }
 
 /**
  * @brief Displays audio speaker volume
  */
-static void UiDriver_DisplayAfGain(bool encoder_active)
+static void UiDriver_DisplayAfGain(uint8_t enc, uint8_t style)
 {
-	UiDriver_EncoderDisplaySimple(0,0,"AFG", encoder_active, ts.rx_gain[RX_AUDIO_SPKR].value);
+	UiDriver_EncoderDisplaySimple(0, enc, "AFG", style, ts.rx_gain[RX_AUDIO_SPKR].value);
 }
 
 /**
  * @brief Displays power volume
  */
-static void UiDriver_DisplayPWRGain(bool encoder_active)
+static void UiDriver_DisplayPWRGain(uint8_t enc, uint8_t style)
 {
 	if (ts.band_index != 17) // not GEN-band
 	{
 		const BandInfo* band = RadioManagement_GetBand(df.tune_old);
-		UiDriver_EncoderDisplaySimple(0,0,"PWR", encoder_active, ts.pwr_adj[ts.power_level == PA_LEVEL_FULL?ADJ_FULL_POWER:ADJ_REF_PWR][band->band_mode]);
+		UiDriver_EncoderDisplaySimple(0, enc, "PWR", style, ts.pwr_adj[ts.power_level == PA_LEVEL_FULL?ADJ_FULL_POWER:ADJ_REF_PWR][band->band_mode]);
 	}
 	else // GEN-band
 	{
-		UiDriver_EncoderDisplaySimple(0,0,"PWR", encoder_active, ((ts.power_level == PA_LEVEL_FULL && RadioManagement_CBFullPwrEnabled())? ts.power_scale_gen_full : ts.power_scale_gen));
+		UiDriver_EncoderDisplaySimple(0, enc, "PWR", style, ((ts.power_level == PA_LEVEL_FULL && RadioManagement_CBFullPwrEnabled())? ts.power_scale_gen_full : ts.power_scale_gen));
 	}
 }
 
 /**
  * @brief Display CW Sidetone gain (used during CW TX or training)
  */
-static void UiDriver_DisplaySidetoneGain(bool encoder_active)
+static void UiDriver_DisplaySidetoneGain(uint8_t enc, uint8_t style)
 {
-	UiDriver_EncoderDisplaySimple(1,0,"STG", encoder_active, ts.cw_sidetone_gain);
+	UiDriver_EncoderDisplaySimple(1,0,"STG", style, ts.cw_sidetone_gain);
 }
 
 /**
  * @brief Display TX Compressor Level
  */
-static void UiDriver_DisplayCmpLevel(bool encoder_active)
+static void UiDriver_DisplayCmpLevel(uint8_t enc, uint8_t style)
 {
-	ushort 	color = encoder_active?White:Grey;
+	ushort 	color = White;
 	char	temp[5];
 	const char* outs;
 
@@ -5467,7 +5124,7 @@ static void UiDriver_DisplayCmpLevel(bool encoder_active)
 		outs ="CUS";
 	}
 
-	UiDriver_EncoderDisplay(1,0,"CMP" , encoder_active, outs, color);
+	UiDriver_EncoderDisplay(1,0,"CMP" , style, outs, color);
 }
 
 uint32_t UiDriver_GetActiveDSPFunctions()
@@ -5475,12 +5132,8 @@ uint32_t UiDriver_GetActiveDSPFunctions()
 	return ts.dsp.active & (DSP_NOTCH_ENABLE|DSP_NR_ENABLE|DSP_ANR_ENABLE|DSP_MNOTCH_ENABLE|DSP_MPEAK_ENABLE);
 }
 
-static void UiDriver_DisplayDSPMode(bool encoder_active)
+static void UiDriver_DisplayDSPMode(uint8_t enc, uint8_t style)
 {
-//    if(ts.show_wide_spectrum)
-//    {
-//        return;
-//    }
 	uint32_t clr = White;
 	uint32_t clr_val = White;
 
@@ -5488,7 +5141,6 @@ static void UiDriver_DisplayDSPMode(bool encoder_active)
 	bool txt_is_value = false;
 	const char* txt[2] = { "DSP", NULL };
 
-	//uint32_t dsp_functions_active = ts.dsp.active & (DSP_NOTCH_ENABLE|DSP_NR_ENABLE|DSP_MNOTCH_ENABLE|DSP_MPEAK_ENABLE);
 	uint32_t dsp_functions_active =UiDriver_GetActiveDSPFunctions();
 
 	UiVk_Redraw();			//virtual keypads call (refresh purpose)
@@ -5535,44 +5187,39 @@ static void UiDriver_DisplayDSPMode(bool encoder_active)
 		break;
 	}
 
-	UiDriver_LeftBoxDisplay(0,txt[0],encoder_active,txt[1],clr,clr_val,txt_is_value);
+	UiDriver_LeftBoxDisplay(0, txt[0], style, txt[1], clr, clr_val, txt_is_value);
 }
 
 
-static void UiDriver_DisplayKeyerSpeed(bool encoder_active)
+static void UiDriver_DisplayKeyerSpeed(uint8_t enc, uint8_t style)
 {
-	uint16_t 	color = encoder_active?White:Grey;
 	const char* txt;
 	char  txt_buf[5];
 
 	txt = "WPM";
 	snprintf(txt_buf,5,"%3d",ts.cw_keyer_speed);
 
-	UiDriver_EncoderDisplay(1,2,txt, encoder_active, txt_buf, color);
+	UiDriver_EncoderDisplay(1,2,txt, style, txt_buf, White);
 }
 
-static void UiDriver_DisplayRttySpeed(bool encoder_active)
+static void UiDriver_DisplayRttySpeed(uint8_t enc, uint8_t style)
 {
-	uint16_t  color = encoder_active?White:Grey;
-	UiDriver_EncoderDisplay(1,0,"BD", encoder_active, rtty_speeds[rtty_ctrl_config.speed_idx].label, color);
+	UiDriver_EncoderDisplay(1,0,"BD", style, rtty_speeds[rtty_ctrl_config.speed_idx].label, White);
 }
 
-static void UiDriver_DisplayPskSpeed(bool encoder_active)
+static void UiDriver_DisplayPskSpeed(uint8_t enc, uint8_t style)
 {
-	uint16_t  color = encoder_active?White:Grey;
-	UiDriver_EncoderDisplay(1,2,"PSK", encoder_active, psk_speeds[psk_ctrl_config.speed_idx].label, color);
+	UiDriver_EncoderDisplay(1,2,"PSK", style, psk_speeds[psk_ctrl_config.speed_idx].label, White);
 }
 
-static void UiDriver_DisplayRttyShift(bool encoder_active)
+static void UiDriver_DisplayRttyShift(uint8_t enc, uint8_t style)
 {
-	uint16_t  color = encoder_active?White:Grey;
-	UiDriver_EncoderDisplay(1,1,"SFT", encoder_active, rtty_shifts[rtty_ctrl_config.shift_idx].label, color);
+	UiDriver_EncoderDisplay(1,1,"SFT", style, rtty_shifts[rtty_ctrl_config.shift_idx].label, White);
 }
 
 
-static void UiDriver_DisplayLineInModeAndGain(bool encoder_active)
+static void UiDriver_DisplayLineInModeAndGain(uint8_t enc, uint8_t style)
 {
-	ushort 	color = encoder_active?White:Grey;
 	const char* txt;
 	char  txt_buf[5];
 
@@ -5611,13 +5258,11 @@ static void UiDriver_DisplayLineInModeAndGain(bool encoder_active)
 		snprintf(txt_buf,5,"%3d",ts.tx_gain[ts.tx_audio_source]);
 	}
 
-	UiDriver_EncoderDisplay(1,2,txt, encoder_active, txt_buf, color);
+	UiDriver_EncoderDisplay(1,2,txt, style, txt_buf, White);
 }
 
-static void UiDriver_DisplayRfGain(bool encoder_active)
+static void UiDriver_DisplayRfGain(uint8_t enc, uint8_t style)
 {
-	uint32_t color = encoder_active?White:Grey;
-
 	char	temp[5];
 	const char* label = "???";
 	int32_t value;
@@ -5633,7 +5278,7 @@ static void UiDriver_DisplayRfGain(bool encoder_active)
 	}
 	snprintf(temp,5," %02ld",value);
 
-	UiDriver_EncoderDisplay(0,1,label, encoder_active, temp, color);
+	UiDriver_EncoderDisplay(0, enc, label, style, temp, White);
 
 }
 
@@ -5659,76 +5304,55 @@ uint32_t UiDriver_GetNBColor()
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-static void UiDriver_DisplayNoiseBlanker(bool encoder_active)
+static void UiDriver_DisplayNoiseBlanker(uint8_t enc, uint8_t style)
 {
-//    if(ts.show_wide_spectrum)
-//    {
-//        return;
-//    }
-	uint32_t 	color = encoder_active?White:Grey;
-	char	temp[5];
-	const char *label, *val_txt;
-	int32_t value = 0;
-//	bool is_active = false;
-	//label = "NB";
-	//    label = "DEC";
-//#if 0
-		//
-		// Noise blanker settings display
-		//
-		if(is_dsp_nb())	 	// is noise blanker to be displayed
-		{
-			if(encoder_active)
-			{
-			    color = UiDriver_GetNBColor();
-			}
-			label = "NB";
-			value = ts.dsp.nb_setting;
-//			snprintf(temp,5,"%3ld",value);
-//			val_txt = temp;
-			if(value)
-			{
-				snprintf(temp,5,"%3ld",value);
-				val_txt = temp;
-			}
-			else
-			{
-				val_txt = "OFF";
-			}
-		}
+    uint32_t color = White;
+    char temp[ 5 ];
+    const char *label, *val_txt;
+    int32_t value = 0;
 
-		else
-		{
-//#endif
-			switch(agc_wdsp_conf.mode)
-			{
-			case 0:
-				label = "vLO";
-				break;
-			case 1:
-				label = "LON";
-				break;
-			case 2:
-				label = "SLO";
-				break;
-			case 3:
-				label = "MED";
-				break;
-			case 4:
-				label = "FAS";
-				break;
-			case 5:
-				label = "OFF";
-				break;
-			default:
-				label = "???";
-				break;
-			}
-			value = (int32_t)(agc_wdsp_conf.tau_decay[agc_wdsp_conf.mode] / 10.0);
-			snprintf(temp,5,"%3ld",value);
-			val_txt = temp;
-		}
-		UiDriver_EncoderDisplay(1,1,label, encoder_active, val_txt, color);
+    if (is_dsp_nb ( )) // is noise blanker to be displayed
+    {
+        color = UiDriver_GetNBColor ( );
+        label = "NB";
+        value = ts.dsp.nb_setting;
+
+        if (value) {
+            snprintf ( temp, 5, "%3ld", value );
+            val_txt = temp;
+        } else {
+            val_txt = "OFF";
+        }
+    } else {
+        switch ( agc_wdsp_conf.mode ) {
+        case 0:
+            label = "vLO";
+            break;
+        case 1:
+            label = "LON";
+            break;
+        case 2:
+            label = "SLO";
+            break;
+        case 3:
+            label = "MED";
+            break;
+        case 4:
+            label = "FAS";
+            break;
+        case 5:
+            label = "OFF";
+            break;
+        default:
+            label = "???";
+            break;
+        }
+
+        value = (int32_t) (agc_wdsp_conf.tau_decay[ agc_wdsp_conf.mode ] / 10.0);
+        snprintf(temp, 5, "%3ld", value);
+        val_txt = temp;
+    }
+    UiDriver_EncoderDisplay( 1, 1, label, style, val_txt, color);
 }
 
 #define NOTCH_DELTA_Y (2*ENC_ROW_H)
@@ -5740,11 +5364,10 @@ static void UiDriver_DisplayNoiseBlanker(bool encoder_active)
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-static void UiDriver_DisplayTone(bool encoder_active)
+static void UiDriver_DisplayTone(uint8_t enc, uint8_t style)
 {
 
-	// UiLcdHy28_DrawFullRect(POS_AG_IND_X, POS_AG_IND_Y + NOTCH_DELTA_Y, 16 + 12 , 112, Black);
-
+    /*
 	bool enable = (ts.enc_two_mode == ENC_TWO_MODE_BASS_GAIN);
 	char temp[5];
 	int bas,tre;
@@ -5772,6 +5395,7 @@ static void UiDriver_DisplayTone(bool encoder_active)
 
 	// use 2,2 for placement below existing boxes
 	UiDriver_EncoderDisplay(1,1,"TRB", enable && encoder_active, temp, White);
+	*/
 
 } // end void UiDriverDisplayBass
 
@@ -5783,15 +5407,13 @@ static void UiDriver_DisplayTone(bool encoder_active)
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-static void UiDriver_DisplayRit(bool encoder_active)
+static void UiDriver_DisplayRit(uint8_t enc, uint8_t style)
 {
 	char	temp[5];
 
-	uint32_t color = ts.rit_value? Green : (encoder_active ? White:Grey);
-
 	snprintf(temp,5,ts.rit_value?"%+3i":"%3i", ts.rit_value);
 
-	UiDriver_EncoderDisplay(0,2,"RIT", encoder_active, temp, color);
+	UiDriver_EncoderDisplay(0, enc, "RIT", style, temp, White);
 }
 
 static void UiDriver_DisplayModulationType()
@@ -7641,7 +7263,7 @@ void UiDriver_UpdateDSPmode(uint8_t new_dsp_mode)
 		}
 	}
 
-
+	/*
 	switch (ts.dsp.mode)
 	{
 
@@ -7676,11 +7298,13 @@ void UiDriver_UpdateDSPmode(uint8_t new_dsp_mode)
 	default:
 		break;
 	}
+	*/
 
 	ts.dsp.active_toggle = ts.dsp.active;  // save update in "toggle" variable
 	// reset DSP NR coefficients
 	AudioDriver_SetProcessingChain(ts.dmod_mode, true);        // update DSP/filter settings
-	UiDriver_DisplayEncoderTwoMode();         // DSP control is mapped to column 2
+
+	// UiDriver_DisplayEncoderTwoMode(); FIXME        // DSP control is mapped to column 2
 }
 
 static void UiAction_ChangeToNextDspMode(void)
@@ -7793,11 +7417,11 @@ void UiAction_ChangePowerLevelToFull()
 
 void UiAction_ChangeAudioSource()
 {
-	if(ts.dmod_mode != DEMOD_CW)
+	if (ts.dmod_mode != DEMOD_CW)
 	{
 		incr_wrap_uint8(&ts.tx_audio_source,0,TX_AUDIO_MAX_ITEMS);
 
-		UiDriver_DisplayEncoderThreeMode();
+		// FIXME UiDriver_DisplayEncoderThreeMode();
 	}
 }
 
@@ -8055,7 +7679,7 @@ static void UiAction_ChangeFilterBW(void)
 		}
 		// Change filter
 		UiDriver_UpdateDisplayAfterParamChange();		// re-init for change of filter including display updates
-		UiDriver_DisplayEncoderThreeMode();
+		// FIXME UiDriver_DisplayEncoderThreeMode();
 	}
 }
 
@@ -8113,6 +7737,7 @@ static void UiAction_GoToMainFmenu(void)
 
 static void UiAction_ToggleDspEnable(void)
 {
+    /* FIXME
 	if(ts.dmod_mode != DEMOD_FM)	 		// do not allow change of mode when in FM
 	{
 		if(is_dsp_nr() || is_dsp_anr() || is_dsp_notch() || is_dsp_mnotch() || is_dsp_mpeak())   // is any DSP function active?
@@ -8133,6 +7758,7 @@ static void UiAction_ToggleDspEnable(void)
 		AudioDriver_SetProcessingChain(ts.dmod_mode, false);	// update DSP settings
 		UiDriver_DisplayEncoderTwoMode();
 	}
+	*/
 }
 
 // TODO: Split into separate actions and a composition
@@ -8142,7 +7768,7 @@ static void UiAction_ChangeRxFilterOrFmToneBurst(void)
 	{
 		filter_path_change = true;
 		UiDriver_DisplayFilter();
-		UiDriver_DisplayEncoderThreeMode();
+		// FIXME UiDriver_DisplayEncoderThreeMode();
 	}
 	else if((ts.txrx_mode == TRX_MODE_TX) && (ts.dmod_mode == DEMOD_FM))
 	{
@@ -8460,6 +8086,18 @@ static void UiAction_ToggleMenuMode(void)
 			UiDriver_CreateFunctionButtons(false);
 		}
 	}
+}
+
+static void UiAction_EncoderOneHold(void) {
+
+}
+
+static void UiAction_EncoderTwoHold(void) {
+
+}
+
+static void UiAction_EncoderThreeHold(void) {
+
 }
 
 static void UiAction_ToggleKeyerMode(void)
@@ -8803,9 +8441,9 @@ static const keyaction_descr_t keyactions_normal[] =
 		{ BUTTON_G2_PRESSED, 	UiAction_ChangeToNextDspMode,				UiAction_ToggleDspEnable },
 		{ BUTTON_G3_PRESSED, 	UiAction_ChangePowerLevel,					UiAction_ChangePowerLevelToFull },
 		{ BUTTON_G4_PRESSED, 	UiAction_ChangeFilterBW,					UiAction_ChangeRxFilterOrFmToneBurst },
-		{ BUTTON_M1_PRESSED, 	UiDriver_ChangeEncoderOneMode,				UiAction_ToggleKeyerMode },
-		{ BUTTON_M2_PRESSED, 	UiDriver_ChangeEncoderTwoMode,				UiAction_ToggleNoiseblanker },
-		{ BUTTON_M3_PRESSED, 	UiDriver_ChangeEncoderThreeMode,			UiAction_ChangeAudioSource },
+		{ BUTTON_M1_PRESSED, 	UiDriver_ChangeEncoderOneMode,				UiAction_EncoderOneHold },          // UiAction_ToggleKeyerMode
+		{ BUTTON_M2_PRESSED, 	UiDriver_ChangeEncoderTwoMode,				UiAction_EncoderTwoHold },          // UiAction_ToggleNoiseblanker
+		{ BUTTON_M3_PRESSED, 	UiDriver_ChangeEncoderThreeMode,			UiAction_EncoderThreeHold },        // UiAction_ChangeAudioSource
 		{ BUTTON_STEPM_PRESSED, UiAction_ChangeTuningStepDownOrUp,			UiAction_StepMinusHold },
 		{ BUTTON_STEPP_PRESSED, UiAction_ChangeTuningStepUpOrDown,			UiAction_StepPlusHold },
 		{ BUTTON_BNDM_PRESSED, 	UiAction_ChangeBandDownOrUp,				UiAction_BandMinusHold },

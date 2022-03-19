@@ -89,6 +89,7 @@ typedef enum {
 #define MAX_BANDS               17      // Highest band number:  17 = General coverage (RX only) band
 #define MAX_BAND_NUM            (MAX_BANDS+1)       // Number of Bands
 
+#define ENC_STATE_NUM   3       // Modes per each encoder
 
 // opposed to the RF_BRD_MCHF / RF_BRD_OVI40 which are
 // compile time constants, the FOUND_RF_BOARD_xx is a runtime detected property
@@ -371,10 +372,14 @@ typedef struct TransceiverState
     // Demodulator mode public flag
     uint8_t 	dmod_mode;
 
+    /*
+    ts.enc_one_mode
+    ts.enc_two_mode
+    ts.enc_thr_mode
+    */
 
-    uint8_t 	enc_one_mode;
-    uint8_t 	enc_two_mode;
-    uint8_t 	enc_thr_mode;
+    uint8_t     enc_state[3];
+    uint8_t 	enc_mode[3][ENC_STATE_NUM];
 
     uint8_t	tx_meter_mode;				// meter mode
 
@@ -552,7 +557,7 @@ typedef struct TransceiverState
 
 
     uint16_t	flags1;					// Used to hold individual status flags, stored in EEPROM location "EEPROM_FLAGS1"
-#define FLAGS1_TX_AUTOSWITCH_UI_DISABLE 0x01    // if on-screen AFG/(STG/CMP) and WPM/(MIC/LIN) indicators are changed on TX
+#define FLAGS1_TX_AUTOSWITCH_UI_DISABLE 0x01    // ??? R1CBU if on-screen AFG/(STG/CMP) and WPM/(MIC/LIN) indicators are changed on TX
 #define FLAGS1_SWAP_BAND_BTN			0x02    // if BAND-/BAND+ buttons are to be swapped in their positions
 #define FLAGS1_MUTE_LINEOUT_TX			0x04    // if TX audio output from LINE OUT is to be muted during transmit (audio output only enabled when translate mode is DISABLED
 #define FLAGS1_AM_TX_FILTER_DISABLE		0x08    // if AM TX has transmit filter DISABLED
