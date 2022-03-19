@@ -677,6 +677,10 @@ void Si570_Init()
 	if(UhsdrHw_I2C_ReadRegister(SI570_I2C,os.si570_address, (os.base_reg),1, &dummy) != 0)
 	{
 		os.si570_address = (0x50 << 1);
+		if(UhsdrHw_I2C_ReadRegister(SI570_I2C,os.si570_address, (os.base_reg),1, &dummy) != 0)
+		{
+		    os.si570_address = (0x01 << 1);
+		}
 	}
 
 
