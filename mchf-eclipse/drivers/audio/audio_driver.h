@@ -508,8 +508,6 @@ typedef enum
     DSP_SWITCH_NOTCH_MANUAL,
     DSP_SWITCH_PEAK_FILTER,
     DSP_SWITCH_MAX,				// bass & treble not used here
-    DSP_SWITCH_BASS          =   98,
-    DSP_SWITCH_TREBLE        =   99,
 } dsp_mode_t;
 
 typedef enum

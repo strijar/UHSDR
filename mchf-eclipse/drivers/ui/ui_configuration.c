@@ -1028,6 +1028,7 @@ void UiConfiguration_LoadEepromValues(bool load_freq_mode_defaults, bool load_ee
 
     UiReadSettingEEPROM_Filter(load_eeprom_defaults);
 
+    ConfigStorage_CopySerial2Array(EEPROM_ENCODER_MEMORY_ADDRESS, (uint8_t *)ts.enc_mode, sizeof(ts.enc_mode));
     ConfigStorage_CopySerial2Array(EEPROM_KEYER_MEMORY_ADDRESS, (uint8_t *)ts.keyer_mode.macro, sizeof(ts.keyer_mode.macro));
     ConfigStorage_CopySerial2Array(EEPROM_MEMS_MEMORY_ADDRESS, (uint8_t *)mem_data, sizeof(mem_data));
     ConfigStorage_CopySerial2Array(EEPROM_XVTR_MEMORY_ADDRESS, (uint8_t *)xvtr_data, sizeof(xvtr_data));
@@ -1143,6 +1144,7 @@ uint16_t UiConfiguration_SaveEepromValues(void)
             // write ram cache to EEPROM and switch back to I2C EEPROM use
         }
 
+        retval = ConfigStorage_CopyArray2Serial(EEPROM_ENCODER_MEMORY_ADDRESS, (uint8_t *)ts.enc_mode, sizeof(ts.enc_mode));
         retval = ConfigStorage_CopyArray2Serial(EEPROM_KEYER_MEMORY_ADDRESS, (uint8_t *)ts.keyer_mode.macro, sizeof(ts.keyer_mode.macro));
         retval = ConfigStorage_CopyArray2Serial(EEPROM_MEMS_MEMORY_ADDRESS, (uint8_t *)mem_data, sizeof(mem_data));
         retval = ConfigStorage_CopyArray2Serial(EEPROM_XVTR_MEMORY_ADDRESS, (uint8_t *)xvtr_data, sizeof(xvtr_data));

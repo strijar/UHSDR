@@ -717,6 +717,7 @@ void		UiConfiguration_UpdateMacroCap(void);
 // need to modify virtual EEPROM routines otherwise system may crash
 
 //#define EEPROM_KEYER_MEMORY_ADDRESS		0x1000
+#define EEPROM_ENCODER_MEMORY_ADDRESS   0x3C20
 #define EEPROM_KEYER_MEMORY_ADDRESS		0x3C30
 #define EEPROM_MEMS_MEMORY_ADDRESS		0x3F5C
 #define EEPROM_XVTR_MEMORY_ADDRESS      0x535D

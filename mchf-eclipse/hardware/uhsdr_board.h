@@ -89,7 +89,7 @@ typedef enum {
 #define MAX_BANDS               17      // Highest band number:  17 = General coverage (RX only) band
 #define MAX_BAND_NUM            (MAX_BANDS+1)       // Number of Bands
 
-#define ENC_STATE_NUM   3       // Modes per each encoder
+#define ENC_STATE_NUM   5       // Modes per each encoder
 
 // opposed to the RF_BRD_MCHF / RF_BRD_OVI40 which are
 // compile time constants, the FOUND_RF_BOARD_xx is a runtime detected property
@@ -371,12 +371,6 @@ typedef struct TransceiverState
 
     // Demodulator mode public flag
     uint8_t 	dmod_mode;
-
-    /*
-    ts.enc_one_mode
-    ts.enc_two_mode
-    ts.enc_thr_mode
-    */
 
     uint8_t     enc_state[3];
     uint8_t 	enc_mode[3][ENC_STATE_NUM];
