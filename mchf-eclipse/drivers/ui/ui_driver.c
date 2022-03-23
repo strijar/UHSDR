@@ -92,6 +92,7 @@ static void     UiDriver_DisplayEncoderMode(uint8_t enc);
 
 static void     UiDriver_DisplayAfGain(uint8_t enc, uint8_t style);
 static void     UiDriver_DisplayRfGain(uint8_t enc, uint8_t style);
+static void     UiDriver_DisplaySQL(uint8_t enc, uint8_t style);
 static void     UiDriver_DisplayRit(uint8_t enc, uint8_t style);
 static void     UiDriver_DisplayRttySpeed(uint8_t enc, uint8_t style);
 static void     UiDriver_DisplaySidetoneGain(uint8_t enc, uint8_t style);
@@ -105,8 +106,13 @@ static void     UiDriver_DisplayBas(uint8_t enc, uint8_t style);
 static void     UiDriver_DisplayTreble(uint8_t enc, uint8_t style);
 static void     UiDriver_DisplayKeyerSpeed(uint8_t enc, uint8_t style);
 static void     UiDriver_DisplayNoiseBlanker(uint8_t enc, uint8_t style);
-static void     UiDriver_DisplayDSPMode(uint8_t enc, uint8_t style);
+static void     UiDriver_DisplayNR(uint8_t enc, uint8_t style);
+static void     UiDriver_DisplayAGC(uint8_t enc, uint8_t style);
+static void     UiDriver_DisplayNotch(uint8_t enc, uint8_t style);
+static void     UiDriver_DisplayPeak(uint8_t enc, uint8_t style);
+static void     UiDriver_DisplayInGain(uint8_t enc, uint8_t style);
 
+static void     UiDriver_DisplayDSPMode(void);
 static void 	UiDriver_DisplayModulationType(void);
 static void 	UiDriver_DisplayPowerLevel(void);
 static void     UiDriver_DisplayTemperature(int temp);
@@ -169,14 +175,13 @@ typedef enum {
     ENC_MODE_PSK_SPEED,
     ENC_MODE_RTTY_SPEED,
     ENC_MODE_RTTY_SHIFT,
-    ENC_MODE_SIG_PROC,
-    ENC_MODE_NR,
-
-    /*
+    ENC_MODE_NB,
     ENC_MODE_NOTCH_F,
+    ENC_MODE_NR,
+    ENC_MODE_AGC,
+    ENC_MODE_SQL,
     ENC_MODE_PEAK_F,
-    ENC_MODE_INPUT_CTRL,
-    */
+    ENC_MODE_INPUT_GAIN,
     ENC_NUM_MODES
 } EncoderModes;
 
@@ -994,15 +999,14 @@ void UiDriver_Init()
         ts.enc_mode[ENC2][1] = ENC_MODE_RTTY_SHIFT;
         ts.enc_mode[ENC2][2] = ENC_MODE_BASS_GAIN;
         ts.enc_mode[ENC2][3] = ENC_MODE_NR;
-        ts.enc_mode[ENC2][4] = ENC_MODE_BASS_GAIN;      // ENC_MODE_PEAK_F
+        ts.enc_mode[ENC2][4] = ENC_MODE_NB;
 
         ts.enc_mode[ENC3][0] = ENC_MODE_RIT;
         ts.enc_mode[ENC3][1] = ENC_MODE_CW_SPEED;
         ts.enc_mode[ENC3][2] = ENC_MODE_PSK_SPEED;
         ts.enc_mode[ENC3][3] = ENC_MODE_TREBLE_GAIN;
-        ts.enc_mode[ENC3][4] = ENC_MODE_TREBLE_GAIN;    // ENC_MODE_INPUT_CTRL
+        ts.enc_mode[ENC3][4] = ENC_MODE_INPUT_GAIN;
     }
-
 
 	if(mchf_touchscreen.present)
 	{
@@ -1100,6 +1104,7 @@ void UiDriver_EncoderDisplay(const uint8_t row, const uint8_t column, const char
 
 	    case ENC_STATE_CAROUSEL:
             label_color = White;
+            color = Grey6;
             bg_color = sd.boxes_colour;
             brdr_color = sd.boxes_colour;
             break;
@@ -1107,43 +1112,90 @@ void UiDriver_EncoderDisplay(const uint8_t row, const uint8_t column, const char
 	    case ENC_STATE_TUNE_NORM:
         case ENC_STATE_TUNE_CAROUSEL:
             label_color = Black;
+            color = Grey6;
             bg_color = White;
             brdr_color = White;
             break;
 
 	    default:
             label_color = Grey1;
+            color = Grey;
             bg_color = Grey;
             brdr_color = Grey;
             break;
 	}
 
-	if(ts.Layout->ENCODER_MODE==MODE_HORIZONTAL)
-	{
-		UiLcdHy28_DrawEmptyRect(ts.Layout->ENCODER_IND.x + ENC_COL_W *2 * column + row *ENC_COL_W+column*Xspacing, ts.Layout->ENCODER_IND.y , ENC_ROW_H - 2, ENC_COL_W - 2, brdr_color);
-		UiLcdHy28_PrintTextCentered((ts.Layout->ENCODER_IND.x + 1 + ENC_COL_W * 2 * column + row *ENC_COL_W+column*Xspacing), (ts.Layout->ENCODER_IND.y + 1),ENC_COL_W - 3, label,
-				label_color, bg_color, 0);
-		UiLcdHy28_PrintTextRight((ts.Layout->ENCODER_IND.x + ENC_COL_W - 4 + ENC_COL_W * 2 * column+ row *ENC_COL_W+column*Xspacing), (ts.Layout->ENCODER_IND.y + 1 + ENC_ROW_2ND_OFF), temp,
-				color, Black, 0);
-	}
-	else if(!ts.show_wide_spectrum)
-	{
-		UiLcdHy28_DrawEmptyRect(ts.Layout->ENCODER_IND.x + ENC_COL_W * column, ts.Layout->ENCODER_IND.y + row * ENC_ROW_H, ENC_ROW_H - 2, ENC_COL_W - 2, brdr_color);
-		UiLcdHy28_PrintTextCentered((ts.Layout->ENCODER_IND.x + 1 + ENC_COL_W * column), (ts.Layout->ENCODER_IND.y + 1 + row * ENC_ROW_H),ENC_COL_W - 3, label,
-				label_color, bg_color, 0);
-		UiLcdHy28_PrintTextRight((ts.Layout->ENCODER_IND.x + ENC_COL_W - 4 + ENC_COL_W * column), (ts.Layout->ENCODER_IND.y + 1 + row * ENC_ROW_H + ENC_ROW_2ND_OFF), temp,
-				color, Black, 0);
-	}
-    else
-    {
+	if (ts.Layout->ENCODER_MODE == MODE_HORIZONTAL) {
+		UiLcdHy28_DrawEmptyRect(
+		    ts.Layout->ENCODER_IND.x + ENC_COL_W * 2 * column + row * ENC_COL_W + column * Xspacing,
+		    ts.Layout->ENCODER_IND.y ,
+		    ENC_ROW_H - 2,
+		    ENC_COL_W - 2, brdr_color
+		);
+
+		UiLcdHy28_PrintTextCentered(
+		    ts.Layout->ENCODER_IND.x + 1 + ENC_COL_W * 2 * column + row * ENC_COL_W + column * Xspacing,
+		    ts.Layout->ENCODER_IND.y + 1,
+		    ENC_COL_W - 3,
+		    label,
+		    label_color, bg_color, 0
+		);
+
+		UiLcdHy28_PrintTextRight(
+		    ts.Layout->ENCODER_IND.x + ENC_COL_W - 4 + ENC_COL_W * 2 * column + row * ENC_COL_W + column * Xspacing,
+		    ts.Layout->ENCODER_IND.y + 1 + ENC_ROW_2ND_OFF,
+		    temp,
+		    color, Black, 0
+		);
+	} else if(!ts.show_wide_spectrum) {
+		UiLcdHy28_DrawEmptyRect(
+		    ts.Layout->ENCODER_IND.x + ENC_COL_W * column,
+		    ts.Layout->ENCODER_IND.y + row * ENC_ROW_H,
+		    ENC_ROW_H - 2,
+		    ENC_COL_W - 2,
+		    brdr_color
+		);
+
+		UiLcdHy28_PrintTextCentered(
+		    ts.Layout->ENCODER_IND.x + 1 + ENC_COL_W * column,
+		    ts.Layout->ENCODER_IND.y + 1 + row * ENC_ROW_H,
+		    ENC_COL_W - 3,
+		    label,
+			label_color, bg_color, 0
+		);
+
+		UiLcdHy28_PrintTextRight(
+		    ts.Layout->ENCODER_IND.x + ENC_COL_W - 2 + ENC_COL_W * column,
+		    ts.Layout->ENCODER_IND.y + row * ENC_ROW_H + ENC_ROW_2ND_OFF,
+		    temp,
+			color, Black, 0
+		);
+	} else {
         uint8_t ENC_ROW_H_WS        = 27;
         uint8_t ENC_ROW_2ND_OFF_WS  = 12;
 
-        UiLcdHy28_DrawEmptyRect(ts.Layout->ENCODER_IND.x + ENC_COL_W * column, ts.Layout->ENCODER_IND.y + row * ENC_ROW_H_WS, ENC_ROW_H_WS - 2, ENC_COL_W - 2, brdr_color);
-        UiLcdHy28_PrintTextCentered((ts.Layout->ENCODER_IND.x + 1 + ENC_COL_W * column), (ts.Layout->ENCODER_IND.y + row * ENC_ROW_H_WS),ENC_COL_W - 3, label,
-                label_color, bg_color, 0);
-        UiLcdHy28_PrintTextRight((ts.Layout->ENCODER_IND.x + ENC_COL_W - 4 + ENC_COL_W * column), (ts.Layout->ENCODER_IND.y + 1 + row * ENC_ROW_H_WS + ENC_ROW_2ND_OFF_WS), temp,
-                color, Black, 0);
+        UiLcdHy28_DrawEmptyRect(
+            ts.Layout->ENCODER_IND.x + ENC_COL_W * column,
+            ts.Layout->ENCODER_IND.y + row * ENC_ROW_H_WS,
+            ENC_ROW_H_WS - 2,
+            ENC_COL_W - 2,
+            brdr_color
+        );
+
+        UiLcdHy28_PrintTextCentered(
+            ts.Layout->ENCODER_IND.x + 1 + ENC_COL_W * column,
+            ts.Layout->ENCODER_IND.y + row * ENC_ROW_H_WS,
+            ENC_COL_W - 3,
+            label,
+            label_color, bg_color, 0
+        );
+
+        UiLcdHy28_PrintTextRight(
+            ts.Layout->ENCODER_IND.x + ENC_COL_W - 2 + ENC_COL_W * column,
+            ts.Layout->ENCODER_IND.y + row * ENC_ROW_H_WS + ENC_ROW_2ND_OFF_WS,
+            temp,
+            color, Black, 0
+        );
     }
 }
 
@@ -1961,7 +2013,7 @@ void UiDriver_EncoderDisplaySimple(const uint8_t row, const uint8_t column, cons
 	        break;
 	}
 
-	snprintf(temp,5," %2lu",value);
+	snprintf(temp, 5, "%4lu", value);
 	UiDriver_EncoderDisplay(row, column, label, style, temp, color);
 }
 
@@ -2093,6 +2145,7 @@ void UiDriver_RefreshEncoderDisplay()
 	UiDriver_DisplayEncoderMode(ENC1);
 	UiDriver_DisplayEncoderMode(ENC2);
 	UiDriver_DisplayEncoderMode(ENC3);
+	UiDriver_DisplayDSPMode();
 }
 
 /**
@@ -4350,7 +4403,7 @@ static void UiDriver_TimeScheduler()
 	{
 		startup_done_flag = true;                  // set flag so that we do this only once
 
-		// UiDriver_DisplayEncoderTwoMode(); FIXME
+		UiDriver_DisplayDSPMode();
 
 		audio_spkr_volume_update_request = 1;      // set unmute flag to force audio to be un-muted - just in case it starts up muted!
 		Codec_MuteDAC(false);                      // make sure that audio is un-muted
@@ -4743,13 +4796,14 @@ static void UiDriver_RotateNormalEncoder(int8_t pot_diff, uint8_t enc) {
             break;
 
         case ENC_MODE_RF_GAIN:
-            if (ts.dmod_mode != DEMOD_FM) {
-                agc_wdsp_conf.thresh = change_and_limit_int(agc_wdsp_conf.thresh,pot_diff_step,-20,120);
-                AudioDriver_AgcWdsp_Set();
-            } else {
-                ts.fm_sql_threshold = change_and_limit_uint(ts.fm_sql_threshold,pot_diff_step,0,FM_SQUELCH_MAX);
-            }
+            agc_wdsp_conf.thresh = change_and_limit_int(agc_wdsp_conf.thresh,pot_diff_step,-20,120);
+            AudioDriver_AgcWdsp_Set();
             UiDriver_DisplayRfGain(enc, ENC_STATE_NORM);
+            break;
+
+        case ENC_MODE_SQL:
+            ts.fm_sql_threshold = change_and_limit_uint(ts.fm_sql_threshold,pot_diff_step,0,FM_SQUELCH_MAX);
+            UiDriver_DisplaySQL(enc, ENC_STATE_NORM);
             break;
 
         case ENC_MODE_RIT:
@@ -4835,95 +4889,86 @@ static void UiDriver_RotateNormalEncoder(int8_t pot_diff, uint8_t enc) {
             UiDriver_DisplayPskSpeed(enc, ENC_STATE_NORM);
             break;
 
-        case ENC_MODE_SIG_PROC:
+        case ENC_MODE_NB:
             // Signal processor setting
             // this is AGC setting OR noise blanker setting
-            if (is_dsp_nb()) {
-                ts.dsp.nb_setting = change_and_limit_uint(ts.dsp.nb_setting,pot_diff_step,0,MAX_NB_SETTING);
-            } else {
-                agc_wdsp_conf.mode = change_and_limit_uint(agc_wdsp_conf.mode,pot_diff_step,0,5);
-                agc_wdsp_conf.switch_mode = 1; // set flag, so that mode switching really takes place in AGC_prep
-                AudioDriver_AgcWdsp_Set();
-            }
+            ts.dsp.nb_setting = change_and_limit_uint(ts.dsp.nb_setting,pot_diff_step,0,MAX_NB_SETTING);
             UiDriver_DisplayNoiseBlanker(enc, ENC_STATE_NORM);
             break;
 
-        case ENC_MODE_NR:
-            if (is_dsp_nr()) {
-                uint8_t nr_step = DSP_NR_STRENGTH_STEP;
-
-                if(ts.dsp.nr_strength >= 190 || ts.dsp.nr_strength <= 10) {
-                    nr_step = 1;
-                }
-
-                ts.dsp.nr_strength = change_and_limit_uint(ts.dsp.nr_strength,pot_diff_step * nr_step,DSP_NR_STRENGTH_MIN,DSP_NR_STRENGTH_MAX);
-
-                if(ts.dsp.nr_strength == 189) {
-                    ts.dsp.nr_strength = 185;
-                }
-
-                if(ts.dsp.nr_strength == 11) {
-                    ts.dsp.nr_strength = 15;
-                }
-
-                // this causes considerable noise
-                //AudioDriver_SetRxAudioProcessing(ts.dmod_mode, false);
-                // we do this instead
-                nr_params.alpha = 0.799 + ((float32_t)ts.dsp.nr_strength / 1000.0);
-            }
-            UiDriver_DisplayDSPMode(enc, ENC_STATE_NORM);
+        case ENC_MODE_AGC:
+            agc_wdsp_conf.mode = change_and_limit_uint(agc_wdsp_conf.mode, pot_diff_step, 0, 5);
+            agc_wdsp_conf.switch_mode = 1; // set flag, so that mode switching really takes place in AGC_prep
+            AudioDriver_AgcWdsp_Set();
+            UiDriver_DisplayAGC(enc, ENC_STATE_NORM);
             break;
 
-/*
+        case ENC_MODE_NR:
+            ts.dsp.nr_strength = change_and_limit_uint(
+                    ts.dsp.nr_strength,
+                    pot_diff_step * (ts.dsp.nr_strength >= 190 || ts.dsp.nr_strength <= 10 ? 1 : DSP_NR_STRENGTH_STEP),
+                    DSP_NR_STRENGTH_MIN, DSP_NR_STRENGTH_MAX
+            );
 
+            if(ts.dsp.nr_strength == 189) {
+                ts.dsp.nr_strength = 185;
+            }
+
+            if(ts.dsp.nr_strength == 11) {
+                ts.dsp.nr_strength = 15;
+            }
+
+            // this causes considerable noise
+            //AudioDriver_SetRxAudioProcessing(ts.dmod_mode, false);
+            // we do this instead
+            nr_params.alpha = 0.799 + ((float32_t)ts.dsp.nr_strength / 1000.0);
+            UiDriver_DisplayNR(enc, ENC_STATE_NORM);
+            break;
 
         case ENC_MODE_NOTCH_F:
-            if (is_dsp_mnotch()) {
-                ts.dsp.notch_frequency = ts.dsp.notch_frequency - 5.0 * pot_diff_step;
+            ts.dsp.notch_frequency = ts.dsp.notch_frequency - 5.0 * pot_diff_step;
 
-                if(ts.dsp.notch_frequency > MAX_FREQ) {
-                    ts.dsp.notch_frequency = MAX_FREQ;
-                }
-
-                if(ts.dsp.notch_frequency < MIN_PEAK_NOTCH_FREQ) {
-                    ts.dsp.notch_frequency = MIN_PEAK_NOTCH_FREQ;
-                }
-
-                AudioDriver_SetProcessingChain(ts.dmod_mode, false);
-                UiDriver_DisplayDSPMode(1);
+            if(ts.dsp.notch_frequency > MAX_FREQ) {
+                ts.dsp.notch_frequency = MAX_FREQ;
             }
+
+            if(ts.dsp.notch_frequency < MIN_PEAK_NOTCH_FREQ) {
+                ts.dsp.notch_frequency = MIN_PEAK_NOTCH_FREQ;
+            }
+
+            AudioDriver_SetProcessingChain(ts.dmod_mode, false);
+            UiDriver_DisplayNotch(enc, ENC_STATE_NORM);
             break;
 
         case ENC_MODE_PEAK_F:
-            if (is_dsp_mpeak()) {
-                ts.dsp.peak_frequency = ts.dsp.peak_frequency - 5.0 * pot_diff_step;
+            ts.dsp.peak_frequency = ts.dsp.peak_frequency - 5.0 * pot_diff_step;
 
-                if(ts.dsp.peak_frequency > MAX_FREQ) {
-                    ts.dsp.peak_frequency = MAX_FREQ;
-                }
-
-                if(ts.dsp.peak_frequency < MIN_PEAK_NOTCH_FREQ) {
-                    ts.dsp.peak_frequency = MIN_PEAK_NOTCH_FREQ;
-                }
-
-                AudioDriver_SetProcessingChain(ts.dmod_mode, false);
-                UiDriver_DisplayDSPMode(1);
+            if(ts.dsp.peak_frequency > MAX_FREQ) {
+                ts.dsp.peak_frequency = MAX_FREQ;
             }
+
+            if(ts.dsp.peak_frequency < MIN_PEAK_NOTCH_FREQ) {
+                ts.dsp.peak_frequency = MIN_PEAK_NOTCH_FREQ;
+            }
+
+            AudioDriver_SetProcessingChain(ts.dmod_mode, false);
+            UiDriver_DisplayPeak(enc, ENC_STATE_NORM);
             break;
 
-        case ENC_MODE_INPUT_CTRL: {
-            uint16_t gain_max = (ts.tx_audio_source == TX_AUDIO_MIC) ? MIC_GAIN_MAX : LINE_GAIN_MAX;
-            uint16_t gain_min = (ts.tx_audio_source == TX_AUDIO_MIC) ? MIC_GAIN_MIN : LINE_GAIN_MIN;
-
-            ts.tx_gain[ts.tx_audio_source] = change_and_limit_int(ts.tx_gain[ts.tx_audio_source], pot_diff_step, gain_min, gain_max);
+        case ENC_MODE_INPUT_GAIN:
+            ts.tx_gain[ts.tx_audio_source] = change_and_limit_int(
+                ts.tx_gain[ts.tx_audio_source],
+                pot_diff_step,
+                (ts.tx_audio_source == TX_AUDIO_MIC) ? MIC_GAIN_MIN : LINE_GAIN_MIN,
+                (ts.tx_audio_source == TX_AUDIO_MIC) ? MIC_GAIN_MAX : LINE_GAIN_MAX
+            );
 
             if (ts.tx_audio_source == TX_AUDIO_MIC) {
                 Codec_SwitchMicTxRxMode(ts.txrx_mode);
             }
-            UiDriver_DisplayLineInModeAndGain(1);
-        }
-        break;
-*/
+            UiDriver_DisplayInGain(enc, ENC_STATE_NORM);
+            break;
+
         default:
             break;
     }
@@ -4935,7 +4980,7 @@ static void UiDriver_RotateTuneEncoder(int8_t pot_diff, uint8_t enc) {
 
     if (mode < 0) {
         mode = ENC_NUM_MODES - 1;
-    } else if (mode > ENC_NUM_MODES) {
+    } else if (mode > ENC_NUM_MODES - 1) {
         mode = 0;
     }
 
@@ -5031,6 +5076,10 @@ static void UiDriver_DisplayEncoderMode(uint8_t enc) {
             UiDriver_DisplayRfGain(enc, style);
             break;
 
+	    case ENC_MODE_SQL:
+            UiDriver_DisplaySQL(enc, style);
+            break;
+
 	    case ENC_MODE_RIT:
             UiDriver_DisplayRit(enc, style);
             break;
@@ -5071,28 +5120,30 @@ static void UiDriver_DisplayEncoderMode(uint8_t enc) {
             UiDriver_DisplayPskSpeed(enc, style);
             break;
 
-        case ENC_MODE_SIG_PROC:
+        case ENC_MODE_NB:
             UiDriver_DisplayNoiseBlanker(enc, style);
             break;
 
-        // case ENC_MODE_PEAK_F:
-        // case ENC_MODE_NOTCH_F:
         case ENC_MODE_NR:
-            UiDriver_DisplayDSPMode(enc, style);
+            UiDriver_DisplayNR(enc, style);
             break;
 
-/*
+        case ENC_MODE_AGC:
+            UiDriver_DisplayAGC(enc, style);
+            break;
 
-	    case ENC_MODE_PEAK_F:
-	    case ENC_MODE_NOTCH_F:
-	    case ENC_MODE_NR:
-	        UiDriver_DisplayDSPMode(enc, style);
+        case ENC_MODE_NOTCH_F:
+            UiDriver_DisplayNotch(enc, style);
+            break;
+
+        case ENC_MODE_PEAK_F:
+            UiDriver_DisplayPeak(enc, style);
+            break;
+
+	    case ENC_MODE_INPUT_GAIN:
+	        UiDriver_DisplayInGain(enc, style);
 	        break;
 
-	    case ENC_MODE_INPUT_CTRL:
-	        UiDriver_DisplayLineInModeAndGain(enc, style);
-	        break;
-*/
 	    default:
 	        break;
 	}
@@ -5187,7 +5238,7 @@ static void UiDriver_DisplayCmpLevel(uint8_t enc, uint8_t style)
 	}
 	else if(ts.tx_comp_level < TX_AUDIO_COMPRESSION_MAX)	 	// 	display numbers for all but the highest value
 	{
-		snprintf(temp,5," %02d",ts.tx_comp_level);
+		snprintf(temp,5,"  %02d",ts.tx_comp_level);
 		outs = temp;
 	}
 	else
@@ -5204,7 +5255,7 @@ uint32_t UiDriver_GetActiveDSPFunctions()
 	return ts.dsp.active & (DSP_NOTCH_ENABLE|DSP_NR_ENABLE|DSP_ANR_ENABLE|DSP_MNOTCH_ENABLE|DSP_MPEAK_ENABLE);
 }
 
-static void UiDriver_DisplayDSPMode(uint8_t enc, uint8_t style)
+static void UiDriver_DisplayDSPMode()
 {
 	uint32_t clr = White;
 	uint32_t clr_val = White;
@@ -5259,19 +5310,29 @@ static void UiDriver_DisplayDSPMode(uint8_t enc, uint8_t style)
 		break;
 	}
 
-	UiDriver_LeftBoxDisplay(0, txt[0], style, txt[1], clr, clr_val, txt_is_value);
+	UiDriver_LeftBoxDisplay(0, txt[0], ENC_STATE_NORM, txt[1], clr, clr_val, txt_is_value);
 }
 
+static void UiDriver_DisplayNotch(uint8_t enc, uint8_t style) {
+    char  temp[5];
+
+    snprintf(temp, sizeof(temp), "%4lu", ts.dsp.notch_frequency);
+    UiDriver_EncoderDisplay(0, enc, "NCF", style, temp, White);
+}
+
+static void UiDriver_DisplayPeak(uint8_t enc, uint8_t style) {
+    char  temp[5];
+
+    snprintf(temp, sizeof(temp), "%4lu", ts.dsp.peak_frequency);
+    UiDriver_EncoderDisplay(0, enc, "PKF", style, temp, White);
+}
 
 static void UiDriver_DisplayKeyerSpeed(uint8_t enc, uint8_t style)
 {
-	const char* txt;
-	char  txt_buf[5];
+	char  temp[5];
 
-	txt = "WPM";
-	snprintf(txt_buf,5,"%3d",ts.cw_keyer_speed);
-
-	UiDriver_EncoderDisplay(0, enc,txt, style, txt_buf, White);
+	snprintf(temp, sizeof(temp), "%4d", ts.cw_keyer_speed);
+	UiDriver_EncoderDisplay(0, enc, "WPM", style, temp, White);
 }
 
 static void UiDriver_DisplayRttySpeed(uint8_t enc, uint8_t style)
@@ -5289,23 +5350,21 @@ static void UiDriver_DisplayRttyShift(uint8_t enc, uint8_t style)
 	UiDriver_EncoderDisplay(0, enc, "SFT", style, rtty_shifts[rtty_ctrl_config.shift_idx].label, White);
 }
 
-static void UiDriver_DisplayLineInModeAndGain(uint8_t enc, uint8_t style)
-{
+static void UiDriver_DisplayInGain(uint8_t enc, uint8_t style) {
 	const char* txt;
 	char  txt_buf[5];
 
 	bool gain_external_control = false;
 	// if true, gain is controlled externally and ENC3 encoder does not do anything.
 
-	switch (ts.tx_audio_source)
-	{
+	switch (ts.tx_audio_source) {
 	case TX_AUDIO_MIC:
 		txt = "MIC";
 		break;
-	case TX_AUDIO_LINEIN_L:										// Line gain
+	case TX_AUDIO_LINEIN_L:									// Line gain
 		txt = "L>L";
 		break;
-	case TX_AUDIO_LINEIN_R:										// Line gain
+	case TX_AUDIO_LINEIN_R:									// Line gain
 		txt = "L>R";
 		break;
 	case TX_AUDIO_DIG:										// Line gain
@@ -5320,37 +5379,28 @@ static void UiDriver_DisplayLineInModeAndGain(uint8_t enc, uint8_t style)
 		txt = "???";
 	}
 
-	if (gain_external_control == true)
-	{
-		snprintf(txt_buf,5,"EXT");
-	}
-	else
-	{
-		snprintf(txt_buf,5,"%3d",ts.tx_gain[ts.tx_audio_source]);
+	if (gain_external_control == true) {
+		snprintf(txt_buf, sizeof(txt_buf), " EXT");
+	} else {
+		snprintf(txt_buf,sizeof(txt_buf), "%4d", ts.tx_gain[ts.tx_audio_source]);
 	}
 
 	UiDriver_EncoderDisplay(0, enc, txt, style, txt_buf, White);
 }
 
-static void UiDriver_DisplayRfGain(uint8_t enc, uint8_t style)
-{
+static void UiDriver_DisplayRfGain(uint8_t enc, uint8_t style) {
 	char	temp[5];
-	const char* label = "???";
-	int32_t value;
-	if(ts.dmod_mode != DEMOD_FM) // NOT FM
-	{
-		label = "AGC";
-		value = agc_wdsp_conf.thresh;
-	}
-	else // use SQL for FM
-	{
-		label = "SQL";
-		value = ts.fm_sql_threshold;
-	}
-	snprintf(temp,5," %02ld",value);
 
-	UiDriver_EncoderDisplay(0, enc, label, style, temp, White);
+	snprintf(temp, sizeof(temp),"%4ld", agc_wdsp_conf.thresh);
+	UiDriver_EncoderDisplay(0, enc, "RFG", style, temp, White);
 
+}
+
+static void UiDriver_DisplaySQL(uint8_t enc, uint8_t style) {
+    char    temp[5];
+
+    snprintf(temp, sizeof(temp), "%4ld", ts.fm_sql_threshold);
+    UiDriver_EncoderDisplay(0, enc, "SQL", style, temp, White);
 }
 
 uint32_t UiDriver_GetNBColor()
@@ -5368,62 +5418,53 @@ uint32_t UiDriver_GetNBColor()
 
     return retval;
 }
-//*----------------------------------------------------------------------------
-//* Function Name       : UiDriverChangeSigProc
-//* Object              : Display settings related to signal processing - DSP NR or Noise Blanker strength
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-static void UiDriver_DisplayNoiseBlanker(uint8_t enc, uint8_t style)
-{
-    uint32_t color = White;
-    char temp[ 5 ];
-    const char *label, *val_txt;
-    int32_t value = 0;
 
-    if (is_dsp_nb ( )) // is noise blanker to be displayed
-    {
-        color = UiDriver_GetNBColor ( );
-        label = "NB";
-        value = ts.dsp.nb_setting;
+static void UiDriver_DisplayNoiseBlanker(uint8_t enc, uint8_t style) {
+    uint32_t    color = White;
+    char        temp[5];
+    const char  *val_txt;
+    int32_t     value = ts.dsp.nb_setting;
 
-        if (value) {
-            snprintf ( temp, 5, "%3ld", value );
-            val_txt = temp;
-        } else {
-            val_txt = "OFF";
-        }
+    color = UiDriver_GetNBColor();
+
+    if (value) {
+        snprintf(temp, 5, "%4ld", value);
+        val_txt = temp;
     } else {
-        switch ( agc_wdsp_conf.mode ) {
+        val_txt = " OFF";
+    }
+
+    UiDriver_EncoderDisplay(0, enc, "NB", style, val_txt, color);
+}
+
+static void UiDriver_DisplayAGC(uint8_t enc, uint8_t style) {
+    const char  *val;
+
+    switch (agc_wdsp_conf.mode) {
         case 0:
-            label = "vLO";
+            val = " vLO";
             break;
         case 1:
-            label = "LON";
+            val = " LON";
             break;
         case 2:
-            label = "SLO";
+            val = " SLO";
             break;
         case 3:
-            label = "MED";
+            val = " MED";
             break;
         case 4:
-            label = "FAS";
+            val = " FAS";
             break;
         case 5:
-            label = "OFF";
+            val = " OFF";
             break;
         default:
-            label = "???";
+            val = " ???";
             break;
-        }
-
-        value = (int32_t) (agc_wdsp_conf.tau_decay[ agc_wdsp_conf.mode ] / 10.0);
-        snprintf(temp, 5, "%3ld", value);
-        val_txt = temp;
     }
-    UiDriver_EncoderDisplay(0, enc, label, style, val_txt, color);
+
+    UiDriver_EncoderDisplay(0, enc, "AGC", style, val, White);
 }
 
 #define NOTCH_DELTA_Y (2*ENC_ROW_H)
@@ -5431,15 +5472,22 @@ static void UiDriver_DisplayNoiseBlanker(uint8_t enc, uint8_t style)
 static void UiDriver_DisplayBas(uint8_t enc, uint8_t style) {
     char temp[5];
 
-    snprintf(temp, 5, "%3d", ts.dsp.bass_gain);
+    snprintf(temp, sizeof(temp), "%4d", ts.dsp.bass_gain);
     UiDriver_EncoderDisplay(0, enc, "BAS", style, temp, White);
 }
 
 static void UiDriver_DisplayTreble(uint8_t enc, uint8_t style) {
     char temp[5];
 
-    snprintf(temp, 5, "%3d", ts.dsp.treble_gain);
+    snprintf(temp, sizeof(temp), "%4d", ts.dsp.treble_gain);
     UiDriver_EncoderDisplay(0, enc, "TRB", style, temp, White);
+}
+
+static void UiDriver_DisplayNR(uint8_t enc, uint8_t style) {
+    char temp[5];
+
+    snprintf(temp, sizeof(temp), "%4d", ts.dsp.nr_strength);
+    UiDriver_EncoderDisplay(0, enc, "NR", style, temp, White);
 }
 
 //
@@ -5454,8 +5502,7 @@ static void UiDriver_DisplayRit(uint8_t enc, uint8_t style)
 {
 	char	temp[5];
 
-	snprintf(temp,5,ts.rit_value?"%+3i":"%3i", ts.rit_value);
-
+	snprintf(temp, 5, ts.rit_value ? "%+4i" : "%4i", ts.rit_value);
 	UiDriver_EncoderDisplay(0, enc, "RIT", style, temp, White);
 }
 
@@ -7342,7 +7389,7 @@ void UiDriver_UpdateDSPmode(uint8_t new_dsp_mode)
 	ts.dsp.active_toggle = ts.dsp.active;  // save update in "toggle" variable
 	// reset DSP NR coefficients
 	AudioDriver_SetProcessingChain(ts.dmod_mode, true);        // update DSP/filter settings
-	UiDriver_RefreshEncoderDisplay();
+	UiDriver_DisplayDSPMode();
 }
 
 static void UiAction_ChangeToNextDspMode(void)

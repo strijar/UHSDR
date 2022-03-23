@@ -416,9 +416,9 @@ static float32_t Psk_IirNext(const float32_t bpf_b[], const float32_t bpf_a[], f
 
 const psk_speed_item_t psk_speeds[PSK_SPEED_NUM] =
 {
-		{ .id =PSK_SPEED_31, .value = 31.25,  .bpf_b = PskBndPassB_31, .bpf_a = PskBndPassA_31, .rate = 384, .label = " 31" },
-		{ .id =PSK_SPEED_63, .value = 62.5,   .bpf_b = PskBndPassB_63, .bpf_a = PskBndPassA_63, .rate = 192, .label = " 63"  },
-		{ .id =PSK_SPEED_125, .value = 125.0, .bpf_b = PskBndPassB_125, .bpf_a = PskBndPassA_125, .rate = 96, .label = "125" }
+		{ .id =PSK_SPEED_31, .value = 31.25,  .bpf_b = PskBndPassB_31, .bpf_a = PskBndPassA_31, .rate = 384, .label = "  31" },
+		{ .id =PSK_SPEED_63, .value = 62.5,   .bpf_b = PskBndPassB_63, .bpf_a = PskBndPassA_63, .rate = 192, .label = "  63"  },
+		{ .id =PSK_SPEED_125, .value = 125.0, .bpf_b = PskBndPassB_125, .bpf_a = PskBndPassA_125, .rate = 96, .label = " 125" }
 };
 
 psk_ctrl_t psk_ctrl_config =

@@ -191,12 +191,12 @@ const rtty_speed_item_t rtty_speeds[RTTY_SPEED_NUM] =
 
 const rtty_shift_item_t rtty_shifts[RTTY_SHIFT_NUM] =
 {
-		{ RTTY_SHIFT_85, 85, " 85" },
-		{ RTTY_SHIFT_170, 170, "170" },
-		{ RTTY_SHIFT_200, 200, "200" },
-		{ RTTY_SHIFT_425, 425, "425" },
-		{ RTTY_SHIFT_450, 450, "450" },
-		{ RTTY_SHIFT_850, 850, "850" },
+		{ RTTY_SHIFT_85, 85, "  85" },
+		{ RTTY_SHIFT_170, 170, " 170" },
+		{ RTTY_SHIFT_200, 200, " 200" },
+		{ RTTY_SHIFT_425, 425, " 425" },
+		{ RTTY_SHIFT_450, 450, " 450" },
+		{ RTTY_SHIFT_850, 850, " 850" },
 };
 
 rtty_ctrl_t rtty_ctrl_config =
