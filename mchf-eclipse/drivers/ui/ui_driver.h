@@ -234,7 +234,6 @@ void UiAction_ChangeFrequencyToNextKhz(void);
 void UiAction_ChangeDemodMode(void);
 void UiAction_ChangeDemodModeToAlternativeMode(void);
 void UiAction_ChangePowerLevel(void);
-void UiAction_ChangeAudioSource(void);
 void UiAction_ChangeBandDownOrUp(void);
 void UiAction_ChangeBandUpOrDown(void);
 void UiAction_ChangeDigitalMode(void);

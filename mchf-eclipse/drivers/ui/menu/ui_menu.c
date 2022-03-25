@@ -5520,6 +5520,11 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
             clr = White;
 //            break;
 	}
+    else if(select==CONFIG_ENC_CAROUSEL)
+    {
+            var_change = UiDriverMenuItemChangeEnableOnOffFlag(var, mode, &ts.expflags2, 0, options, &clr, EXPFLAGS2_ENC_CAROUSEL);
+            clr = White;
+	}
 //        case MENU_CW_BEACON_INTERVAL:
 	else if(select==MENU_CW_BEACON_INTERVAL)
 	{

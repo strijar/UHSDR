@@ -398,6 +398,8 @@ enum
     CONFIG_TX_EQ1_WIDTH,
     CONFIG_TX_EQ2_WIDTH,
 
+    CONFIG_ENC_CAROUSEL,
+
     MAX_RADIO_CONFIG_ITEM   // Number of radio configuration menu items - This must ALWAYS remain as the LAST item!
 };
 

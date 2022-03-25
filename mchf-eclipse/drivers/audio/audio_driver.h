@@ -192,6 +192,8 @@ typedef enum
 
 typedef struct
 {
+
+#define DSP_OFF                 0x00    // DSP off
 #define DSP_NR_ENABLE           0x01    // DSP NR mode is on (| 1)
 #define DSP_NR_POSTAGC_ENABLE   0x02    // DSP NR is to occur post AGC (| 2)
 #define DSP_NOTCH_ENABLE        0x04    // DSP Notch mode is on (| 4)

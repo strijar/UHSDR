@@ -164,6 +164,7 @@ const MenuDescriptor confGroup[] =
     { MENU_CONF, MENU_ITEM, CONFIG_ENC2_REVERSE, NULL, "Encoder 2 Reverse", UiMenuDesc("If ON, encoder 2 are reversed.") },
     { MENU_CONF, MENU_ITEM, CONFIG_ENC3_REVERSE, NULL, "Encoder 3 Reverse", UiMenuDesc("If ON, encoder 3 are reversed.") },
     { MENU_CONF, MENU_ITEM, CONFIG_ENC4_REVERSE, NULL, "Encoder 4 Reverse", UiMenuDesc("If ON, encoder 4 are reversed.") },
+    { MENU_CONF, MENU_ITEM, CONFIG_ENC_CAROUSEL, NULL, "Encoder carousel", UiMenuDesc("This happens when you press encoder - next mode or enter info carousel") },
 
 //    // RTC Setup and Settings
 //    { MENU_CONF, MENU_ITEM, CONFIG_RTC_START, &ts.vbat_present,"RTC Start", UiMenuDesc("Start using the RTC and use the modified button layout. Will reboot your mcHF. Please use only if you completed the RTC mod otherwise you will need to disconnect battery and power and reboot to get a working mcHF. This menu is only visible if Backup RAM (VBat) was detected.") },

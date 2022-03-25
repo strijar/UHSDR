@@ -162,7 +162,6 @@ static const touchaction_descr_t R480320_touchactions_normal[] =
 		{ {R480320_TUNE_FREQ_X,R480320_TUNE_FREQ_Y,16*7,24}, UiVk_BndSelVirtualKeys, UiVk_BndFreqSetVirtualKeys }, // Frequency display, first digits :Select the band
 		{ {R480320_DEMOD_MODE_X,R480320_DEMOD_MODE_Y,R480320_DEMOD_MODE_MASK_W,R480320_DEMOD_MODE_MASK_H}, UiVk_ModSelVirtualKeys,                NULL }, // Demod Mode Box: mode switch
 		{ {R480320_PW_IND_X,R480320_PW_IND_Y,64,30},								UiAction_ChangePowerLevel,               NULL }, // Power Box: TX Power Increase
-		{ {R480320_ENCODER_IND_X+ENC_COL_W*5+Xspacing*2,R480320_ENCODER_IND_Y,ENC_COL_W,ENC_ROW_H}, UiAction_ChangeAudioSource,              NULL }, // Audio In Box: Switch Source
 		{ {R480320_BAND_MODE_X,R480320_BAND_MODE_Y,R480320_BAND_MODE_MASK_W/2,R480320_BAND_MODE_MASK_H}, UiAction_ChangeBandDownOrUp,             NULL }, // Left Part Band Display: Band down
 		{ {R480320_BAND_MODE_X+R480320_BAND_MODE_MASK_W*3/4,R480320_BAND_MODE_Y,R480320_BAND_MODE_MASK_W/2,R480320_BAND_MODE_MASK_H}, UiAction_ChangeBandUpOrDown,             NULL }, // Right Part Band Display: Band up
 		{ {R480320_LEFTBOXES_IND_X,R480320_LEFTBOXES_IND_Y,R480320_LEFTBOX_WIDTH,R480320_LEFTBOX_ROW_H}, UiVk_DSPVirtualKeys, Codec_RestartI2S }, // DSP Box: Restart I2S
@@ -182,7 +181,6 @@ static const touchaction_descr_t R480320_touchactions_normal[] =
 		{ {188,0,14,12}, UiAction_ChangeDemodModeToAlternativeMode, NULL }, // Demod Mode Box: sideband switch
 		{ {205,0,56,12}, UiAction_ChangePowerLevel, NULL }, // Power Box: TX Power Increase
 		{ {70,14,42,28}, UiDriver_RIT_Reset,NULL }, // RIT Box: RIT Reset
-		{ {70,45,42,30}, UiAction_ChangeAudioSource, NULL }, // Audio In Box: Switch Source
 		{ {446,88,14,15}, UiAction_ChangeBandDownOrUp, NULL }, // Left Part Band Display: Band down
 		{ {465,88,14,15}, UiAction_ChangeBandUpOrDown, NULL }, // Right Part Band Display: Band up
 		{ {193,30,69,28}, UiVk_DSPVirtualKeys, Codec_RestartI2S }, // DSP Box
@@ -202,7 +200,6 @@ static const touchaction_descr_t R480320_touchactions_normal[] =
 		{ {188,0,14,12}, UiAction_ChangeDemodModeToAlternativeMode, NULL }, // Demod Mode Box: sideband switch
 		{ {205,0,56,12}, UiAction_ChangePowerLevel, NULL }, // Power Box: TX Power Increase
 		{ {70,14,42,28}, UiDriver_RIT_Reset,NULL }, // RIT Box: RIT Reset
-		{ {70,45,42,30}, UiAction_ChangeAudioSource, NULL }, // Audio In Box: Switch Source
 		{ {446,88,14,15}, UiAction_ChangeBandDownOrUp, NULL }, // Left Part Band Display: Band down
 		{ {465,88,14,15}, UiAction_ChangeBandUpOrDown, NULL }, // Right Part Band Display: Band up
 		{ {193,30,69,28}, UiVk_DSPVirtualKeys, Codec_RestartI2S }, // DSP Box
@@ -244,7 +241,6 @@ static const touchaction_descr_t R320240_touchactions_normal[] =
 		{ {R320240_DEMOD_MODE_X,R320240_DEMOD_MODE_Y,R320240_DEMOD_MODE_MASK_W,R320240_DEMOD_MODE_MASK_H}, UiAction_ChangeDemodModeToAlternativeMode,NULL }, // Demod Mode Box: mode switch
 		{ {R320240_PW_IND_X,R320240_PW_IND_Y,64,16},UiAction_ChangePowerLevel,NULL }, // Power Box: TX Power Increase
         { {74,14,37,29}, UiDriver_RIT_Reset,NULL }, // RIT Box: RIT Reset
-		{ {R320240_ENCODER_IND_X+ENC_COL_W*2,R320240_ENCODER_IND_Y+ENC_ROW_H,ENC_COL_W,ENC_ROW_H}, UiAction_ChangeAudioSource,NULL }, // Audio In Box: Switch Source
 		{ {R320240_BAND_MODE_X,R320240_BAND_MODE_Y,R320240_BAND_MODE_MASK_W/2,R320240_BAND_MODE_MASK_H}, UiAction_ChangeBandDownOrUp,NULL }, // Left Part Band Display: Band down
 		{ {R320240_BAND_MODE_X+R320240_BAND_MODE_MASK_W*3/4,R320240_BAND_MODE_Y,R320240_BAND_MODE_MASK_W/2,R320240_BAND_MODE_MASK_H}, UiAction_ChangeBandUpOrDown,NULL }, // Right Part Band Display: Band up
 		{ {R320240_LEFTBOXES_IND_X,R320240_LEFTBOXES_IND_Y,R320240_LEFTBOX_WIDTH,R320240_LEFTBOX_ROW_H}, UiVk_DSPVirtualKeys, Codec_RestartI2S }, // DSP Box: Restart I2S
@@ -271,8 +267,6 @@ static const touchaction_descr_t R320240_touchactions_widespectrum[] =
 		{ {138,71,16,12}, UiAction_ChangeDemodModeToAlternativeMode,NULL }, // Demod Mode Box: sideband switch
 		{ {113,56,41,13},UiAction_ChangePowerLevel,NULL }, // Power Box: TX Power Increase
 		{ {74,14,37,26}, UiDriver_RIT_Reset,NULL }, // RIT Box: RIT Reset
-//		{ {70,36,41,31}, UiAction_ChangeAudioSource,NULL }, // Audio In Box: Switch Source
-		{ {74,41,37,26}, UiAction_ChangeAudioSource,NULL }, // Audio In Box: Switch Source
 		{ {287,108,15,16}, UiAction_ChangeBandDownOrUp,NULL }, // Left Part Band Display: Band down
 		{ {305,108,15,16}, UiAction_ChangeBandUpOrDown,NULL }, // Right Part Band Display: Band up
 		{ {217,56,58,29}, UiVk_DSPVirtualKeys, Codec_RestartI2S }, // DSP Box: Restart I2S
@@ -292,8 +286,6 @@ static const touchaction_descr_t R320240_touchactions_widespectrum[] =
 		{ {138,71,16,12}, UiAction_ChangeDemodModeToAlternativeMode, NULL }, // Demod Mode Box: sideband switch
 		{ {113,56,41,13}, UiAction_ChangePowerLevel, NULL }, // Power Box: TX Power Increase
 		{ {74,14,37,26}, UiDriver_RIT_Reset,NULL }, // RIT Box: RIT Reset
-//		{ {70,36,41,31}, UiAction_ChangeAudioSource, NULL }, // Audio In Box: Switch Source
-		{ {74,41,37,26}, UiAction_ChangeAudioSource,NULL }, // Audio In Box: Switch Source
 		{ {287,108,15,16}, UiAction_ChangeBandDownOrUp, NULL }, // Left Part Band Display: Band down
 		{ {305,108,15,16}, UiAction_ChangeBandUpOrDown, NULL }, // Right Part Band Display: Band up
 		{ {217,56,58,28}, UiVk_DSPVirtualKeys, Codec_RestartI2S }, // DSP Box: Restart I2S

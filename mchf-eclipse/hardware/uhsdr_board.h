@@ -600,7 +600,7 @@ typedef struct TransceiverState
 #define EXPFLAGS2_IMPROV_IQ_ADJ           0x200   // 1 - Improved I/Q adjusting. Added 160, 40, 30, 17, 12m
 #define EXPFLAGS2_ENC2_REVERSE            0x400   // 1 - encoder2 are reversed
 #define EXPFLAGS2_ENC3_REVERSE            0x800   // 1 - encoder3 are reversed
-//#define EXPFLAGS2_BLABLABLA             0x1000  // reserved
+#define EXPFLAGS2_ENC_CAROUSEL            0x1000  // 1 - encoder mode carousel
 //#define EXPFLAGS2_BLABLABLA             0x2000  // reserved
 //#define EXPFLAGS2_BLABLABLA             0x4000  // reserved
 //#define EXPFLAGS2_BLABLABLA             0x8000  // reserved
