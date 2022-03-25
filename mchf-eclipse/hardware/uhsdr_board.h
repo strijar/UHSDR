@@ -207,13 +207,14 @@ typedef struct {
 extern const ColorNameValue MchfColor_Id2ValueName[SPEC_MAX_COLOUR];
 
 // Enumeration of transmit meter modes
-enum
-{
+enum {
     METER_SWR = 0,
     METER_AUDIO,
     METER_ALC,
+    METER_PWR,
     METER_MAX,
 };
+
 //
 #define	BACKLIGHT_BLANK_TIMING_DEFAULT	8		// default number of SECONDS for backlight blanking
 #define LCD_STARTUP_BLANKING_TIME	3000		// number of DECISECONDS (e.g. SECONDS * 100) after power-up before LCD blanking occurs if no buttons are pressed/knobs turned

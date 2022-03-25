@@ -223,7 +223,6 @@ void UiDriver_SetSpectrumMode(SpectrumMode_t mode);
 SpectrumMode_t UiDriver_GetSpectrumMode(void);
 
 //some exports for layout definitions
-void UiAction_ChangeLowerMeterUp(void);
 void UiAction_ToggleWaterfallScopeDisplay(void);
 void UiAction_ChangeSpectrumSize(void);
 void UiAction_ChangeSpectrumZoomLevelDown(void);

@@ -29,7 +29,8 @@
 //#define LEFTBOX_ROW_2ND_OFF  (13)
 
 #define ENC_COL_W (37)
-#define ENC_ROW_H (30)
+#define ENC_ROW_H (32)
+
 #define ENC_ROW_2ND_OFF (14)
 #define Xspacing 5
 #define ui_txt_msg_buffer_size 51		//this defines the buffer size for text line in maximum possible configuration.

@@ -154,7 +154,6 @@ static const touchaction_descr_t R480320_touchactions_normal[] =
 {
 #ifndef SDR_AMBER_480_320
 	#ifndef OVI40_MOD_480_320
-		{ {R480320_SM_IND_X,R480320_SM_IND_Y,R480320_SM_IND_W,R480320_SM_IND_H}, UiAction_ChangeLowerMeterUp,             NULL },  // Lower Meter: Meter Toggle
 		{ {0,110,160,16}, UiAction_ToggleWaterfallScopeDisplay,    UiAction_ChangeSpectrumSize }, // Spectrum Bar Left Part: WaterfallScope Toggle
 		{ {(480/2)-16,110,48,16}, UiAction_ChangeSpectrumZoomLevelDown,    UiAction_CheckSpectrumTouchActions }, // Spectrum Bar Middle Part: Decrease Zoom Level
 		{ {(480/2)+100,110,48,16}, UiAction_ChangeSpectrumZoomLevelUp,      UiAction_CheckSpectrumTouchActions }, // Spectrum Bar Right Part: Increase Zoom Level
@@ -170,7 +169,6 @@ static const touchaction_descr_t R480320_touchactions_normal[] =
 		{ {R480320_TUNE_STEP_X,R480320_TUNE_STEP_Y,R480320_TUNE_STEP_MASK_W,R480320_TUNE_STEP_MASK_H}, UiAction_ChangeDynamicTuning,            NULL }, // Step Box: Dynamic Tuning Toggle
 		{ {R480320_TUNE_STEP_X,R480320_TUNE_STEP_Y,R480320_TUNE_STEP_MASK_W,R480320_TUNE_STEP_MASK_H}, UiAction_ChangeDynamicTuning, NULL }, // Step Box: Dynamic Tuning Toggle
 	#else
-		{ {273,0,203,56}, UiAction_ChangeLowerMeterUp, NULL },  // Lower Meter: Meter Toggle
 		{ {0,124,120,16}, UiAction_ToggleWaterfallScopeDisplay, UiAction_ChangeSpectrumSize }, // Spectrum Bar Left Part: WaterfallScope Toggle
 		{ {180,124,120,16}, UiAction_ChangeSpectrumZoomLevelDown, UiAction_ZoomResetToOne }, // Spectrum Bar Middle Part: Decrease Zoom Level
 		{ {360,124,120,16}, UiAction_ChangeSpectrumZoomLevelUp, UiAction_CheckSpectrumTouchActions }, // Spectrum Bar Right Part: Increase Zoom Level
@@ -189,7 +187,6 @@ static const touchaction_descr_t R480320_touchactions_normal[] =
 	#endif
 #else //SDR_AMBER_480_320
 		//X,Y,W,H
-		{ {273,0,203,56}, UiAction_ChangeLowerMeterUp, NULL },  // Lower Meter: Meter Toggle
 		{ {0,124,120,16}, UiAction_ToggleWaterfallScopeDisplay, UiAction_ChangeSpectrumSize }, // Spectrum Bar Left Part: WaterfallScope Toggle
 		{ {180,124,120,16}, UiAction_ChangeSpectrumZoomLevelDown, UiAction_ZoomResetToOne }, // Spectrum Bar Middle Part: Decrease Zoom Level
 		{ {360,124,120,16}, UiAction_ChangeSpectrumZoomLevelUp, UiAction_CheckSpectrumTouchActions }, // Spectrum Bar Right Part: Increase Zoom Level
@@ -227,7 +224,6 @@ static const touchaction_list_descr_t R480320_touch_regions[] =
 //Touchscreen definitions for 320x240
 static const touchaction_descr_t R320240_touchactions_normal[] =
 {
-		{ {R320240_SM_IND_X,R320240_SM_IND_Y,R320240_SM_IND_W,R320240_SM_IND_H},UiAction_ChangeLowerMeterUp,NULL },  // Lower Meter: Meter Toggle
 //		{ {64,128,60,16}, UiAction_ToggleWaterfallScopeDisplay,UiAction_ChangeSpectrumSize }, // Spectrum Bar Left Part: WaterfallScope Toggle
 		{ {60,128,64,16}, UiAction_ToggleWaterfallScopeDisplay,UiAction_ChangeSpectrumSize }, // Spectrum Bar Left Part: WaterfallScope Toggle
 //		{ {180,128,40,16}, UiAction_ChangeSpectrumZoomLevelDown,UiAction_CheckSpectrumTouchActions }, // Spectrum Bar Middle Part: Decrease Zoom Level
@@ -255,7 +251,6 @@ static const touchaction_descr_t R320240_touchactions_widespectrum[] =
 {
 #ifndef SDR_AMBER // not Amber
 		//{X, Y, W, H}
-		{ {113,0,203,52},UiAction_ChangeLowerMeterUp,NULL },  // Lower Meter: Meter Toggle
 		{ {0,136,80,13}, UiAction_ToggleWaterfallScopeDisplay,UiAction_ChangeSpectrumSize }, // Spectrum Bar Left Part: WaterfallScope Toggle
 		{ {120,136,80,13}, UiAction_ChangeSpectrumZoomLevelDown,UiAction_ZoomResetToOne }, // Spectrum Bar Middle Part: Decrease Zoom Level
 		{ {240,136,80,13}, UiAction_ChangeSpectrumZoomLevelUp,UiAction_CheckSpectrumTouchActions }, // Spectrum Bar Right Part: Increase Zoom Level
@@ -277,7 +272,6 @@ static const touchaction_descr_t R320240_touchactions_widespectrum[] =
 		{ {113,87,41,13}, UiAction_ChangeDynamicTuning,NULL }, // Step Box: Dynamic Tuning Toggle
 #else //Amber 320x240
 		//{X, Y, W, H}
-		{ {113,0,203,52}, UiAction_ChangeLowerMeterUp, NULL },  // Lower Meter: Meter Toggle
 		{ {0,136,80,13}, UiAction_ToggleWaterfallScopeDisplay,UiAction_ChangeSpectrumSize }, // Spectrum Bar Left Part: WaterfallScope Toggle
 		{ {120,136,80,13}, UiAction_ChangeSpectrumZoomLevelDown,UiAction_ZoomResetToOne }, // Spectrum Bar Middle Part: Decrease Zoom Level
 		{ {240,136,80,13}, UiAction_ChangeSpectrumZoomLevelUp,UiAction_CheckSpectrumTouchActions }, // Spectrum Bar Right Part: Increase Zoom Level
@@ -694,7 +688,7 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 #endif
 //				.TUNE_STEP={ .x = 157, .y = 86, .h = 13, .w = 57 },
 
-				.ENCODER_IND = { 0, 15 },
+				.ENCODER_IND = { 0, 0 },
 				.ENCODER_MODE = MODE_VERTICAL,
 //#ifndef SDR_AMBER
 //				.DIGMODE= { .x = 74, .y = 71, .w = 80 },
@@ -706,8 +700,7 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 				.LEFTBOXES_ROW_2ND_OFF = 13,
 
 				.PW_IND = { .x = 113, .y = 56, .w = 41 },
-				.TEMP_IND={ .x = 0, .y = 0 },
-//				.RTC_IND={ .x= 5, .y = 72 },
+				.TEMP_IND={ .x = 0, .y = 35 },
 				.RTC_IND={ .x= 5, .y = 86 },
 
 				.LOADANDDEBUG_Y = 100,
@@ -728,8 +721,7 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 				.FREEDV_BER = { 5, 113 },
 				.FREEDV_FONT = 4,
 
-				.SM_IND = { .x = 113, .y = 0, .h = 52, .w = 203 },
-//				.PWR_IND = { .x = 16, .y = 86 },
+				.SM_IND = { .x = 113, .y = 0, .h = 32, .w = 203 },
 				.PWR_IND = { .x = 16, .y = 72 },
 
 				.BOTTOM_BAR = { .x = 2, .y = 231, .h = 13, .w=62 },
@@ -737,7 +729,6 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 				.MENUSIZE = 7,
 				.MENU_IND = { 60, 140 },
 				.MENU_CHANGE_X = 244,
-//				.MENU_CURSOR_X = 311,
 				.MENU_CURSOR_X = 310,
 				.MENU_TEXT_SIZE_MAX = 34,
 
