@@ -23,13 +23,8 @@
 #define SPECTRUM_SCOPE_GRID_VERT_COUNT  8
 #define SPECTRUM_SCOPE_GRID_HORIZ 16
 
-
-//#define LEFTBOX_WIDTH 58 // used for the lower left side controls
-//#define LEFTBOX_ROW_H  (28)
-//#define LEFTBOX_ROW_2ND_OFF  (13)
-
 #define ENC_COL_W (37)
-#define ENC_ROW_H (32)
+#define ENC_ROW_H (28)
 
 #define ENC_ROW_2ND_OFF (14)
 #define Xspacing 5

@@ -721,7 +721,7 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 				.FREEDV_BER = { 5, 113 },
 				.FREEDV_FONT = 4,
 
-				.SM_IND = { .x = 113, .y = 0, .h = 32, .w = 203 },
+				.SM_IND = { .x = 113, .y = 0, .h = 28, .w = 203 },
 				.PWR_IND = { .x = 16, .y = 72 },
 
 				.BOTTOM_BAR = { .x = 2, .y = 231, .h = 13, .w=62 },

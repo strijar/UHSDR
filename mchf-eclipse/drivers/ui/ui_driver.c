@@ -71,7 +71,6 @@
 
 static void     UiDriver_CreateMeters(void);
 static void     UiDriver_DeleteMeters(void);
-static void 	UiDriver_DrawSMeter(ushort color);
 static void 	UiDriver_UpdateMeterRX(uchar val);
 static void 	UiDriver_UpdateMeterTX(float val, uchar warn);
 
@@ -1143,8 +1142,8 @@ void UiDriver_EncoderDisplay(const uint8_t row, const uint8_t column, const char
 			color, Black, 0
 		);
 	} else {
-        uint8_t ENC_ROW_H_WS        = 32;
-        uint8_t ENC_ROW_2ND_OFF_WS  = 15;
+        uint8_t ENC_ROW_H_WS        = 28;
+        uint8_t ENC_ROW_2ND_OFF_WS  = 14;
 
         UiLcdHy28_DrawEmptyRect(
             ts.Layout->ENCODER_IND.x + ENC_COL_W * column,
@@ -2787,27 +2786,6 @@ static void UiDriver_CreateDesktop(void)
 #define SMETER_STEP (10)
 #define BTM_PLUS (2)
 
-static void UiDriver_DrawSMeter(uint16_t color) {
-    ushort x = ts.Layout->SM_IND.x + 18;
-    ushort y = ts.Layout->SM_IND.y + 18 + BTM_PLUS;
-
-	UiLcdHy28_DrawStraightLineDouble(x, y, 92, LCD_DIR_HORIZONTAL, color);
-
-	for (uint16_t i = 0; i < 10; i++) {
-		uint8_t 	v_s = (i % 2) ? 5 : 3;
-
-        UiLcdHy28_DrawStraightLineDouble(x + i * SMETER_STEP, y - v_s, v_s, LCD_DIR_VERTICAL, color);
-	}
-}
-
-
-//*----------------------------------------------------------------------------
-//* Function Name       : UiDriverDeleteSMeter
-//* Object              : delete the S meter
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
 static void UiDriver_DeleteMeters() {
 	UiLcdHy28_DrawFullRect(
 	    ts.Layout->SM_IND.x+1,
@@ -2825,15 +2803,6 @@ static void UiDriver_DrawPowerMeterLabels(void) {
 
     // get the pwr increment in next integer number of 0.5W steps
     const float32_t PWR_INCR = (maxW % 5 == 0)? (maxW/10.0) : (maxW/5+1)/2.0  ; //.
-
-	// Draw line
-
-    UiLcdHy28_DrawStraightLineDouble(
-        x_pos,
-        y_pos + 15,
-        170,
-        LCD_DIR_HORIZONTAL, White
-    );
 
     // Labels
 
@@ -2857,7 +2826,7 @@ static void UiDriver_DrawPowerMeterLabels(void) {
 
         char    num[4];
 
-		if(pwr_val < 10) {
+		if (pwr_val < 10) {
 			num[0] = pwr_val + 0x30;
 			num[1] = 0;
 		} else if (pwr_val < 100) {
@@ -2874,38 +2843,33 @@ static void UiDriver_DrawPowerMeterLabels(void) {
 		}
 		const int dw = UiLcdHy28_TextWidth(num,4);
 
-		// Only every second value is displayed as number,
-		// even indicies are used
+		uchar v_s;
+
 		if (i % 2 == 0) {
-			UiLcdHy28_PrintText((x_pos - dw/2 + i*15), y_pos, num, White,Black,4);
+			UiLcdHy28_PrintText(
+			    (x_pos - dw/2 + i*15),
+			    y_pos,
+			    num,
+			    White, Black, 4
+			);
+
+			v_s = 3;
+		} else {
+		    v_s = 5;
 		}
 
-		// Lines, even indicies are shorter to make room for numbers
-		uint8_t v_s= (i % 2 != 0) ? 3 : 5;
-
-		UiLcdHy28_DrawStraightLineDouble((x_pos + i*15), (y_pos + 15) - v_s, v_s, LCD_DIR_VERTICAL, White);
+		UiLcdHy28_DrawStraightLine(
+		    (x_pos + i*15),
+		    (y_pos + 15) - v_s,
+		    v_s,
+		    LCD_DIR_VERTICAL, White
+		);
 	}
 }
 
 static void UiDriver_DrawSMeterLabels(void) {
 	uchar   v_s;
 	char    num[20];
-
-	// Draw top line
-
-	UiLcdHy28_DrawStraightLineDouble(
-        (ts.Layout->SM_IND.x + 18),
-        (ts.Layout->SM_IND.y + 18 + BTM_PLUS),
-        92, LCD_DIR_HORIZONTAL,
-        White
-    );
-
-    UiLcdHy28_DrawStraightLineDouble(
-        (ts.Layout->SM_IND.x + 113),
-        (ts.Layout->SM_IND.y + 18 + BTM_PLUS),
-        75, LCD_DIR_HORIZONTAL,
-        Green
-    );
 
 	// Labels
 
@@ -2944,7 +2908,7 @@ static void UiDriver_DrawSMeterLabels(void) {
 		}
 
 		// Lines
-		UiLcdHy28_DrawStraightLineDouble(
+		UiLcdHy28_DrawStraightLine(
 		    ((ts.Layout->SM_IND.x + 18) + i * SMETER_STEP),
 		    ((ts.Layout->SM_IND.y + 18 + BTM_PLUS) - v_s),
 		    v_s,
@@ -2972,7 +2936,7 @@ static void UiDriver_DrawSMeterLabels(void) {
 			);
 
 			// Draw vert lines
-			UiLcdHy28_DrawStraightLineDouble(
+			UiLcdHy28_DrawStraightLine(
 			   ((ts.Layout->SM_IND.x + 108) + i * SMETER_STEP * 2),
 			   (ts.Layout->SM_IND.y + 13 + BTM_PLUS),
 			   5, LCD_DIR_VERTICAL,
@@ -2986,22 +2950,6 @@ static void UiDriver_DrawSWRMeterLabels() {
     int     col = White;
     char    num[20];
     uchar   v_s = 5;
-
-    // Draw bottom line
-
-    UiLcdHy28_DrawStraightLineDouble(
-        (ts.Layout->SM_IND.x + 18),
-        (ts.Layout->SM_IND.y + 18 + BTM_PLUS),
-        62, LCD_DIR_HORIZONTAL,
-        White
-    );
-
-    UiLcdHy28_DrawStraightLineDouble(
-        (ts.Layout->SM_IND.x + 83),
-        (ts.Layout->SM_IND.y + 18 + BTM_PLUS),
-        105, LCD_DIR_HORIZONTAL,
-        Red
-    );
 
     // Label
 
@@ -3033,7 +2981,7 @@ static void UiDriver_DrawSWRMeterLabels() {
                 v_s = 3;
             }
 
-            UiLcdHy28_DrawStraightLineDouble (
+            UiLcdHy28_DrawStraightLine(
                ((ts.Layout->SM_IND.x + 18) + i * 10),
                (ts.Layout->SM_IND.y + 18 + BTM_PLUS - v_s),
                v_s,
@@ -3047,22 +2995,6 @@ static void UiDriver_DrawALCMeterLabels() {
     int     col = White;
     char    num[20];
     uchar   v_s = 5;
-
-    // Draw lines
-
-    UiLcdHy28_DrawStraightLineDouble(
-        (ts.Layout->SM_IND.x + 18),
-        (ts.Layout->SM_IND.y + 18 + BTM_PLUS),
-        62,
-        LCD_DIR_HORIZONTAL, White
-    );
-
-    UiLcdHy28_DrawStraightLineDouble(
-        (ts.Layout->SM_IND.x + 83),
-        (ts.Layout->SM_IND.y + 18 + BTM_PLUS),
-        105,
-        LCD_DIR_HORIZONTAL,Red
-    );
 
     // Label
 
@@ -3093,7 +3025,7 @@ static void UiDriver_DrawALCMeterLabels() {
                 v_s = 3;
             }
 
-            UiLcdHy28_DrawStraightLineDouble(
+            UiLcdHy28_DrawStraightLine(
                 ((ts.Layout->SM_IND.x + 18) + i * 10),
                 (ts.Layout->SM_IND.y + 18 - v_s + BTM_PLUS),
                 v_s,
@@ -3107,22 +3039,6 @@ static void UiDriver_DrawAudioMeterLabels() {
     char    num[20];
     int     col = White;
     uchar   v_s = 5;
-
-    // Draw line
-
-    UiLcdHy28_DrawStraightLineDouble(
-        (ts.Layout->SM_IND.x + 18),
-        (ts.Layout->SM_IND.y + 18 + BTM_PLUS),
-        108,
-        LCD_DIR_HORIZONTAL, White
-    );
-
-    UiLcdHy28_DrawStraightLineDouble(
-        (ts.Layout->SM_IND.x + 129),
-        (ts.Layout->SM_IND.y + 18 + BTM_PLUS),
-        59,
-        LCD_DIR_HORIZONTAL, Red
-    );
 
     // Label
 
@@ -3152,7 +3068,7 @@ static void UiDriver_DrawAudioMeterLabels() {
                 v_s = 3;
             }
 
-            UiLcdHy28_DrawStraightLineDouble(
+            UiLcdHy28_DrawStraightLine(
                ((ts.Layout->SM_IND.x + 18) + i*10),
                (ts.Layout->SM_IND.y + 18 + BTM_PLUS - v_s),
                v_s,
@@ -3253,8 +3169,8 @@ static void UiDriver_UpdateMeter(uchar val, uchar warn, uint32_t color_norm, uin
         }
     }
 
-    const uint16_t ypos = ts.Layout->SM_IND.y + 26 + BTM_PLUS;
-    const uint8_t v_s = 3; // segment length
+    const uint16_t ypos = ts.Layout->SM_IND.y + 22 + BTM_PLUS;
+    const uint8_t v_s = 3;
 
     // Peak indication
     if (ts.peak_ind_tune != 0 && meterId == 0) { // Draw just for S/PWR meter, if peak ind. is ON
@@ -5669,24 +5585,6 @@ static void UiDriver_HandleSMeter(void)
 
 			sm.s_count = s_count; // preserve value for CAT level reading
 
-			if(ads.adc_clip)	 		// did clipping occur?
-			{
-				if(!clip_indicate)	 	// have we seen it clip before?
-				{
-					UiDriver_DrawSMeter(Red);		// No, make the first portion of the S-meter red to indicate A/D overload
-					clip_indicate = true;		// set flag indicating that we saw clipping and changed the screen (prevent continuous redraw)
-				}
-				ads.adc_clip = false;		// reset clip detect flag
-			}
-			else	 		// clipping NOT occur?
-			{
-				if(clip_indicate)	 	// had clipping occurred since we last visited this code?
-				{
-					UiDriver_DrawSMeter(White);					// yes - restore the S meter to a white condition
-					clip_indicate = false;							// clear the flag that indicated that clipping had occurred
-				}
-			}
-
 			// make sure that the S meter always reads something!
 			UiDriver_UpdateMeterRX((s_count>0) ? s_count : 1);
             UiDriver_DisplayDbm();
@@ -5776,7 +5674,7 @@ static void UiDriver_HandleTXMeters(void)
 		switch (ts.tx_meter_mode) {
 		    case METER_PWR:
 		        btm_mtr_val = swrm.fwd_pwr * 3;
-		        btm_mtr_red_level = 99;
+		        btm_mtr_red_level = 0;
 		        break;
 
 		    case METER_SWR:
