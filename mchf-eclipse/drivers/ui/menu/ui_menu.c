@@ -2154,10 +2154,6 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
         }
 
         RadioManagement_TcxoSetMode(temp_var_u8);   // overlay new temperature setting with old status of upper nibble
-        if(var_change)
-        {
-            UiDriver_CreateTemperatureDisplay();
-        }
 
         switch(temp_var_u8)
         {
@@ -2219,10 +2215,6 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
         else
         {
             clr = Orange;
-        }
-        if(var_change)      // update screen if a change was made
-        {
-            UiDriver_CreateTemperatureDisplay();
         }
 
         txt_ptr =temp_var_u8?"F":"C";

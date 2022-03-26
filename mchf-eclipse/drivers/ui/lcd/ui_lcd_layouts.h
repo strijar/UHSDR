@@ -23,7 +23,7 @@
 #define SPECTRUM_SCOPE_GRID_VERT_COUNT  8
 #define SPECTRUM_SCOPE_GRID_HORIZ 16
 
-#define ENC_COL_W (37)
+#define ENC_COL_W (42)
 #define ENC_ROW_H (28)
 
 #define ENC_ROW_2ND_OFF (14)
@@ -87,6 +87,7 @@ typedef struct {
 
 	UiArea_t TUNE_STEP; 			// Tunning step control
 
+    UiArea_t INFO_BAR;              // Information bar
 	UiArea_t BOTTOM_BAR;			// Bottom bar
 
 	UiCoord_t ENCODER_IND;			// Encoder controls indicator

@@ -66,8 +66,6 @@
 
 #define SPLIT_ACTIVE_COLOUR         		Yellow      // colour of "SPLIT" indicator when active
 #define SPLIT_INACTIVE_COLOUR           	Grey        // colour of "SPLIT" indicator when NOT active
-#define COL_PWR_IND                 		White
-
 
 static void     UiDriver_CreateMeters(void);
 static void     UiDriver_DeleteMeters(void);
@@ -122,7 +120,7 @@ static void 	UiDriver_HandleSMeter(void);
 static void 	UiDriver_HandleTXMeters(void);
 static bool     UiDriver_HandleVoltage(void);
 
-static void     UiDriver_CreateVoltageDisplay(void);
+static void     UiDriver_CreateInfoBarDisplay(void);
 
 static void 	UiDriver_HandleLoTemperature(void);
 
@@ -1051,13 +1049,16 @@ void UiDriver_Init()
 
 #define BOTTOM_BAR_LABEL_W (56)
 #define POS_BOTTOM_BAR_F1_offset 2
-void UiDriver_DrawFButtonLabel(uint8_t button_num, const char* label, uint32_t label_color)
-{
-	//UiLcdHy28_PrintTextCentered(BOTTOM_BAR_F1_X + (button_num - 1)*(POS_BOTTOM_BAR_BUTTON_W+2), POS_BOTTOM_BAR_F1_Y, BOTTOM_BAR_LABEL_W, label,
-//	UiLcdHy28_PrintTextCentered(ts.Layout->BOTTOM_BAR.x+POS_BOTTOM_BAR_F1_offset + (button_num - 1)*(ts.Layout->BOTTOM_BAR.w+2), ts.Layout->BOTTOM_BAR.y, BOTTOM_BAR_LABEL_W, label,
-//			label_color, Black, 0);
-    UiLcdHy28_PrintTextCentered(ts.Layout->BOTTOM_BAR.x+POS_BOTTOM_BAR_F1_offset + (button_num - 1)*(ts.Layout->BOTTOM_BAR.w+2), ts.Layout->BOTTOM_BAR.y-2, BOTTOM_BAR_LABEL_W, label,
-            label_color, Black, 0);
+
+void UiDriver_DrawFButtonLabel(uint8_t button_num, const char* label, uint32_t label_color) {
+    UiLcdHy28_PrintTextCentered(
+        ts.Layout->BOTTOM_BAR.x + POS_BOTTOM_BAR_F1_offset + (button_num - 1) * (ts.Layout->BOTTOM_BAR.w + 2),
+        ts.Layout->BOTTOM_BAR.y - 2,
+        BOTTOM_BAR_LABEL_W,
+        label,
+        label_color, Black,
+        0
+    );
 }
 
 void UiDriver_EncoderDisplay(const uint8_t row, const uint8_t column, const char *label, uint8_t style,
@@ -1162,7 +1163,7 @@ void UiDriver_EncoderDisplay(const uint8_t row, const uint8_t column, const char
         );
 
         UiLcdHy28_PrintTextRight(
-            ts.Layout->ENCODER_IND.x + ENC_COL_W - 2 + ENC_COL_W * column,
+            ts.Layout->ENCODER_IND.x + ENC_COL_W - 4 + ENC_COL_W * column,
             ts.Layout->ENCODER_IND.y + row * ENC_ROW_H_WS + ENC_ROW_2ND_OFF_WS,
             temp,
             color, Black, 0
@@ -1956,25 +1957,22 @@ UiDriver_DrawFButtonLabel(7, cap, color);
 #endif
 }
 
-void UiDriver_EncoderDisplaySimple(const uint8_t row, const uint8_t column, const char *label, uint8_t style, uint32_t value) {
+void UiDriver_EncoderDisplaySimple(const uint8_t row, const uint8_t column, const char *label, uint8_t style, int32_t value) {
 	char        temp[5];
 	uint32_t    color;
 
 	switch (style) {
 	    case ENC_STATE_NORM:
+        case ENC_STATE_TUNE_NORM:
             color = White;
             break;
-
-	    case ENC_STATE_TUNE_NORM:
-	        color = White;
-	        break;
 
 	    default:
 	        color = Grey;
 	        break;
 	}
 
-	snprintf(temp, 5, "%4lu", value);
+	snprintf(temp, sizeof(temp), "%4d", value);
 	UiDriver_EncoderDisplay(row, column, label, style, temp, color);
 }
 
@@ -2007,12 +2005,22 @@ void UiDriver_DisplaySplitFreqLabels() {
 		split_tx = "(A)TX->";
 #endif
 	}
-	UiLcdHy28_PrintText(ts.Layout->TUNE_SPLIT_MARKER_X - (SMALL_FONT_WIDTH * 5),
-			ts.Layout->TUNE_FREQ.y, split_rx, RX_Grey, Black,
-			0);  // Place identifying marker for RX frequency
-	UiLcdHy28_PrintText(ts.Layout->TUNE_SPLIT_MARKER_X - (SMALL_FONT_WIDTH * 5),
-			ts.Layout->TUNE_SPLIT_FREQ_Y_TX, split_tx, TX_Grey, Black,
-			0);  // Place identifying marker for TX frequency
+
+	UiLcdHy28_PrintText(
+	    ts.Layout->TUNE_SPLIT_MARKER_X - (SMALL_FONT_WIDTH * 5),
+		ts.Layout->TUNE_FREQ.y,
+		split_rx,
+		RX_Grey, Black,
+		0
+	);
+
+	UiLcdHy28_PrintText(
+	    ts.Layout->TUNE_SPLIT_MARKER_X - (SMALL_FONT_WIDTH * 5),
+		ts.Layout->TUNE_SPLIT_FREQ_Y_TX,
+		split_tx,
+		TX_Grey, Black,
+		0
+	);
 }
 
 void UiAction_CopyVfoAB() {
@@ -2033,8 +2041,7 @@ void UiAction_CopyVfoAB() {
 	}
 }
 
-void UiAction_ToggleVfoAB()
-{
+void UiAction_ToggleVfoAB() {
 
 	uint32_t old_dmod_mode = ts.dmod_mode;
 
@@ -2045,46 +2052,37 @@ void UiAction_ToggleVfoAB()
 	 * in a more central way...
 	 */
 	RadioManagement_ToggleVfoAB();
-	UiDriver_SetDemodMode( ts.dmod_mode );
+	UiDriver_SetDemodMode(ts.dmod_mode);
 
 	UiDriver_FButton_F4ActiveVFO();
 
 	// do frequency/display update
-	if(is_splitmode())      // in SPLIT mode?
-	{
+	if (is_splitmode()) {      // in SPLIT mode?
 		UiDriver_DisplaySplitFreqLabels();
 	}
 
 	// Change decode mode if need to
-	if(ts.dmod_mode != old_dmod_mode)
-	{
+	if (ts.dmod_mode != old_dmod_mode) {
 		UiDriver_UpdateDisplayAfterParamChange();
-	}
-	else
-	{
+	} else {
 		UiDriver_FrequencyUpdateLOandDisplay(true);
 	}
 }
 
-void UiDriver_SetSplitMode(bool mode_active)
-{
-	if(mode_active)      // are we in SPLIT mode?
-	{
-		ts.vfo_mem_mode |= VFO_MEM_MODE_SPLIT;      // yes - turn on MSB to activate SPLIT
+void UiDriver_SetSplitMode(bool mode_active) {
+	if (mode_active) {
+		ts.vfo_mem_mode |= VFO_MEM_MODE_SPLIT;      // turn on MSB to activate SPLIT
+	} else {
+		ts.vfo_mem_mode &= ~VFO_MEM_MODE_SPLIT;     // turn off MSB to turn off SPLIT
 	}
-	else // are we NOT in SPLIT mode?
-	{
-		ts.vfo_mem_mode &= ~VFO_MEM_MODE_SPLIT; // yes - turn off MSB to turn off SPLIT
-	}
-	UiDriver_CreateMainFreqDisplay(false);      //
+	UiDriver_CreateMainFreqDisplay(false);
 	UiDriver_FrequencyUpdateLOandDisplay(true);
 }
 
 /**
  * @brief: process hardcoded buttons click and hold
  */
-void UiDriver_RefreshEncoderDisplay()
-{
+void UiDriver_RefreshEncoderDisplay() {
 	UiDriver_DisplayEncoderMode(ENC1);
 	UiDriver_DisplayEncoderMode(ENC2);
 	UiDriver_DisplayEncoderMode(ENC3);
@@ -2095,8 +2093,7 @@ void UiDriver_RefreshEncoderDisplay()
  * @brief This is THE function to call after changing operational parameters such as frequency or demod mode
  * It will make sure to update the display AND also tunes to a newly selected frequency if not already tuned to it.
  */
-bool UiDriver_IsDemodModeChange()
-{
+bool UiDriver_IsDemodModeChange() {
 	bool retval = (ts.dmod_mode != ui_driver_state.dmod_mode);
 	retval |= ts.dmod_mode == DEMOD_DIGI && ts.digital_mode != ui_driver_state.digital_mode;
 
@@ -2106,10 +2103,8 @@ bool UiDriver_IsDemodModeChange()
 /**
  * @brief cleans out mode specific ui elements before switching to next mode
  */
-void UiDriver_ModeSpecificDisplayClear(uint8_t dmod_mode, uint8_t digital_mode)
-{
-	switch(dmod_mode)
-	{
+void UiDriver_ModeSpecificDisplayClear(uint8_t dmod_mode, uint8_t digital_mode) {
+	switch(dmod_mode) {
 	case DEMOD_CW:
 		UiDriver_TextMsgClear();
 		CwDecoder_WpmDisplayClearOrPrepare(false);
@@ -2147,8 +2142,7 @@ void UiDriver_ModeSpecificDisplayClear(uint8_t dmod_mode, uint8_t digital_mode)
 /**
  * @brief prepares mode specific ui elements run the mode
  */
-void UiDriver_ModeSpecificDisplayPrepare(uint8_t dmod_mode, uint8_t digital_mode)
-{
+void UiDriver_ModeSpecificDisplayPrepare(uint8_t dmod_mode, uint8_t digital_mode) {
 	switch(dmod_mode)
 	{
 	case DEMOD_CW:
@@ -2196,8 +2190,7 @@ void UiDriver_ModeSpecificDisplayPrepare(uint8_t dmod_mode, uint8_t digital_mode
 	}
 }
 
-void UiDriver_UpdateDemodSpecificDisplayAfterParamChange()
-{
+void UiDriver_UpdateDemodSpecificDisplayAfterParamChange() {
     // clear display content specific for the old mode
     UiDriver_ModeSpecificDisplayClear(ui_driver_state.dmod_mode,ui_driver_state.digital_mode);
     // prepare mode specific UI elements used in the new mode
@@ -2505,62 +2498,30 @@ void UiDriver_ClearMemoryLabel()
 #endif
 #endif
 }
-//*----------------------------------------------------------------------------
-//static void UiDriver_DisplayMemoryLabel()
-void UiDriver_DisplayMemoryLabel()
-{
-    if(ts.expflags1 & EXPFLAGS1_NO_SHOW_BNDMEM)
-    {
-#ifndef SDR_AMBER
-#ifdef USE_FREEDV
-        UiLcdHy28_PrintText(ts.Layout->MEMORYLABEL.x,  ts.Layout->MEMORYLABEL.y,"      ",Black,Black,0);
-#else
-        UiLcdHy28_PrintText(ts.Layout->MEMORYLABEL.x,  ts.Layout->MEMORYLABEL.y,"        ",Black,Black,0);
-#endif
-#endif
+
+void UiDriver_DisplayMemoryLabel() {
+    char txt[12];
+
+    if (ts.expflags1 & EXPFLAGS1_NO_SHOW_BNDMEM) {
+        UiLcdHy28_DrawFullRect(ts.Layout->MEMORYLABEL.x, ts.Layout->MEMORYLABEL.y, 8, SMALL_FONT_WIDTH * 5, sd.boxes_colour);
         return;
     }
-	char txt[12];
-//	uint32_t col = White;
-#ifdef SDR_AMBER
-	uint32_t col = (!ts.show_wide_spectrum?White:Blue);
-#else
-	uint32_t col = White;
-#endif
-	if (ts.band->band_mode < MAX_BAND_NUM && ts.cat_band_index == 255)
-	{
 
+	if (ts.band->band_mode < MAX_BAND_NUM && ts.cat_band_index == 255) {
 #ifdef USE_MEMORY_MODE
 	    // Enable all band memories, don't use band names
-        snprintf(txt,12,"M%02d  ", ts.band->band_mode);
+        snprintf(txt,12,"M%02d ", ts.band->band_mode);
 #else
         // Each memory has its designated band, use that as band
-  #ifndef SDR_AMBER
-  	  #ifndef OVI40_MOD_480_320
-        snprintf(txt,12,"Bnd%s   ", ts.band->name);
-  	  #else
-        snprintf(txt,12,"B%s   ", ts.band->name);
-  	  #endif
-  #else
-        snprintf(txt,12,"B%s   ", ts.band->name);
-  #endif
+        snprintf(txt, sizeof(txt), "B%s ", ts.band->name);
 #endif
 	}
-	if (ts.cat_band_index != 255)		// no band storage place active because of "CAT running in sandbox"
-	{
-		snprintf(txt,12," CAT  ");
+
+	if (ts.cat_band_index != 255) {		// no band storage place active because of "CAT running in sandbox"
+		snprintf(txt, sizeof(txt), " CAT ");
 	}
-#ifndef SDR_AMBER
-	txt[8]='\0'; // "Bnd" + 4digits + "m" = max 8 characters. We make sure the string is never longer than that.
-#else
-	txt[6]='\0'; // "B" + 4digits + "m" = max 6 characters.
-#endif
-//#ifdef USE_FREEDV
-//        UiLcdHy28_PrintText(ts.Layout->MEMORYLABEL.x,  ts.Layout->MEMORYLABEL.y,"      ",col,Black,0);
-//#else
-//        UiLcdHy28_PrintText(ts.Layout->MEMORYLABEL.x,  ts.Layout->MEMORYLABEL.y,"        ",col,Black,0);
-//#endif
-	UiLcdHy28_PrintText(ts.Layout->MEMORYLABEL.x,  ts.Layout->MEMORYLABEL.y,txt,col,Black,0);
+
+	UiLcdHy28_PrintText(ts.Layout->MEMORYLABEL.x,  ts.Layout->MEMORYLABEL.y, txt, White, sd.boxes_colour, 4);
 }
 
 /**
@@ -2630,7 +2591,6 @@ static void UiDriver_DisplayBand(const BandInfo* band)
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-//static void UiDriver_CreateMainFreqDisplay()
 void UiDriver_CreateMainFreqDisplay(bool all_digits)
 {
 //	UiDriver_FButton_F3MemSplit();
@@ -2745,16 +2705,15 @@ static void UiDriver_CreateDesktop(void)
 
 	UiDriver_RefreshEncoderDisplay();
 	UiDriver_DisplayPowerLevel();
-	UiDriver_CreateVoltageDisplay();
-	UiDriver_CreateTemperatureDisplay();
+
 	UiDriver_FrequencyUpdateLOandDisplay(true);
 
 	ts.dsp.active =  DSP_OFF;
 
 	UiDriver_UpdateDisplayAfterParamChange();
 
-	// S-meter
     UiDriver_CreateMeters();
+    UiDriver_CreateInfoBarDisplay();
 
 	// Backlight on - only when all is drawn
 	UiLcdHy28_BacklightEnable(true);
@@ -2814,7 +2773,7 @@ static void UiDriver_DrawPowerMeterLabels(void) {
     );
 
     UiLcdHy28_PrintText(
-        x_pos + 167,
+        x_pos + 162,
         y_pos,
         "W",
         White, Black, 4
@@ -2881,7 +2840,7 @@ static void UiDriver_DrawSMeterLabels(void) {
 	 );
 
 	UiLcdHy28_PrintText(
-	   (ts.Layout->SM_IND.x + 185),
+	   (ts.Layout->SM_IND.x + 175),
 	   (ts.Layout->SM_IND.y + 3 + BTM_PLUS),
 	   "dB",
 	   Green, Black, 4
@@ -3526,69 +3485,76 @@ void UiDriver_UpdateFrequency(bool force_update, enum UpdateFrequencyMode_t mode
 	}
 }
 
-
-
-//static void UiDriver_UpdateFreqDisplay(uint32_t dial_freq, uint32_t pos_x_loc, uint32_t pos_y_loc, uint16_t color, uint8_t digit_font)
-static void UiDriver_UpdateFreqDisplay(uint64_t dial_freq, uint32_t pos_x_loc, uint32_t pos_y_loc, uint16_t color, uint8_t digit_font)
-{
+static void UiDriver_UpdateFreqDisplay(uint64_t dial_freq, uint32_t pos_x_loc, uint32_t pos_y_loc, uint16_t color, uint16_t bg_color, uint8_t digit_font) {
 	uint8_t MAX_DIGITS_T = MAX_DIGITS; // 11
 
-	if(!(ts.xverter_mode & 0xf))
-	{
+	if (!(ts.xverter_mode & 0xf)) {
 	    MAX_DIGITS_T = 9;
 	}
 
-//	uint8_t MAX_DIGITS_T = !ts.show_wide_spectrum?MAX_DIGITS:MAX_DIGITS_WS;
     uint8_t digits[MAX_DIGITS_T];
     uint8_t last_non_zero = 0;
-    const uint8_t font_width = UiLcdHy28_TextWidth("0",digit_font);
+    const uint8_t font_width = UiLcdHy28_TextWidth("0", digit_font);
 
     // Terminate string for digit
     char digit[2];
     digit[1] = 0;
 
     // calculate the digits
-//    uint32_t dial_freq_temp = dial_freq;
     uint64_t dial_freq_temp = dial_freq;
-    for (uint32_t idx = 0; idx < MAX_DIGITS_T; idx++)
-    {
+
+    for (uint32_t idx = 0; idx < MAX_DIGITS_T; idx++) {
         digits[idx] = dial_freq_temp % 10;
         dial_freq_temp /= 10;
         if (digits[idx] != 0) last_non_zero = idx;
     }
 
     const uint16_t group_space = 3* font_width + font_width/2;
-
     const uint16_t x_right = pos_x_loc + (9* font_width);
 
-    for (uint32_t idx = 3; idx < MAX_DIGITS_T; idx+=3)
-    {
+    for (uint32_t idx = 3; idx < MAX_DIGITS_T; idx+=3) {
         bool noshow = last_non_zero < idx;
         int digit_group = idx / 3; // we group every 3 digits
 
         digit[0] = '.';
-        uint32_t dot_clr = noshow?Black:color;
-        if (digit_font != 5)
-        {
-            UiLcdHy28_PrintText(x_right - (digit_group * group_space) + font_width/2 + 1  ,pos_y_loc,digit,dot_clr,Black,digit_font);
-        }
-        else
-        {
-            UiLcdHy28_PrintText(x_right - (digit_group * group_space) + font_width ,pos_y_loc,digit,dot_clr,Black,digit_font);
+        uint32_t dot_clr = noshow ? bg_color : color;
+
+        if (digit_font != 5) {
+            UiLcdHy28_PrintText(
+                x_right - (digit_group * group_space) + font_width/2 + 1,
+                pos_y_loc,
+                digit,
+                dot_clr, bg_color,
+                digit_font
+             );
+        } else {
+            UiLcdHy28_PrintText(
+                x_right - (digit_group * group_space) + font_width,
+                pos_y_loc,
+                digit,
+                dot_clr, bg_color,
+                digit_font
+             );
         }
     }
 
-    for (uint32_t idx = 0; idx < MAX_DIGITS_T; idx++)
-    {
+    for (uint32_t idx = 0; idx < MAX_DIGITS_T; idx++) {
         int digit_group = idx / 3; // we group every 3 digits
         int digit_idx = idx % 3;
 
         bool noshow = idx > last_non_zero;
         // don't show leading zeros, except for the 0th digits
-        digit[0] = noshow?'0':0x30 + (digits[idx] & 0x0F);
-        uint32_t digit_clr = noshow?Black:color;
+        digit[0] = noshow ? '0' : 0x30 + (digits[idx] & 0x0F);
+        uint32_t digit_clr = noshow ? bg_color : color;
+
         // Update segment
-        UiLcdHy28_PrintText(x_right -  digit_idx * font_width - (digit_group * group_space), pos_y_loc, digit, digit_clr, Black, digit_font);
+        UiLcdHy28_PrintText(
+            x_right -  digit_idx * font_width - (digit_group * group_space),
+            pos_y_loc,
+            digit,
+            digit_clr, bg_color,
+            digit_font
+        );
     }
 }
 
@@ -3600,32 +3566,27 @@ static void UiDriver_UpdateFreqDisplay(uint64_t dial_freq, uint32_t pos_x_loc, u
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-static void UiDriver_UpdateLcdFreq(uint32_t dial_freq, uint16_t color, uint16_t mode)
-{
-//	uint8_t		digit_font;
+static void UiDriver_UpdateLcdFreq(uint32_t dial_freq, uint16_t color, uint16_t mode) {
+    uint16_t bg_color = Black;
 
-	if(ts.frequency_lock)
-	{
+	if (ts.frequency_lock) {
 		// Frequency is locked - change color of display
 		color = Grey;
 	}
 
-	if(mode == UFM_AUTOMATIC)
-	{
+	if(mode == UFM_AUTOMATIC) {
 	    mode = is_splitmode() ? UFM_SMALL_RX : UFM_LARGE;
 		// in "split" mode?
 		// yes - update upper, small digits (receive frequency)
 		// no  - large, normal-sized digits
 	}
 
-//	uint32_t disp_freq;
     uint64_t disp_freq;
 
     // if in transverter mode, main display shows translated frequencies  in blue2
     // the secondary display will always show the real untranslated frequency
 
-    if(RadioManagement_Transverter_IsEnabled() && mode != UFM_SECONDARY)        // transverter mode active?
-	{
+    if (RadioManagement_Transverter_IsEnabled() && mode != UFM_SECONDARY) {        // transverter mode active?
         uint8_t txrx_mode = (mode == UFM_LARGE) ?
                 ts.txrx_mode
                 :
@@ -3639,20 +3600,18 @@ static void UiDriver_UpdateLcdFreq(uint32_t dial_freq, uint16_t color, uint16_t 
 	}
 
 	// Handle frequency display offset in "CW RX" modes
-	if (ts.dmod_mode == DEMOD_CW)	 		// In CW mode?
-	{
-		switch(ts.cw_offset_mode)
-		{
-		case CW_OFFSET_LSB_RX:	// Yes - In an LSB mode with display offset?
-		case CW_OFFSET_USB_RX:	// In a USB mode with display offset?
-		case CW_OFFSET_AUTO_RX:	// in "auto" mode with display offset?
-			if(ts.cw_lsb) {
-				disp_freq -= ts.cw_sidetone_freq;		// yes - LSB - lower display frequency by sidetone amount
-			} else {
-				disp_freq += ts.cw_sidetone_freq;		// yes - USB - raise display frequency by sidetone amount
-			}
-			break;
-		}
+	if (ts.dmod_mode == DEMOD_CW) {	 		// In CW mode?
+		switch(ts.cw_offset_mode) {
+            case CW_OFFSET_LSB_RX:	// Yes - In an LSB mode with display offset?
+            case CW_OFFSET_USB_RX:	// In a USB mode with display offset?
+            case CW_OFFSET_AUTO_RX:	// in "auto" mode with display offset?
+                if (ts.cw_lsb) {
+                    disp_freq -= ts.cw_sidetone_freq;		// yes - LSB - lower display frequency by sidetone amount
+                } else {
+                    disp_freq += ts.cw_sidetone_freq;		// yes - USB - raise display frequency by sidetone amount
+                }
+                break;
+            }
 	}
 
     uint16_t       pos_y_loc;
@@ -3660,43 +3619,44 @@ static void UiDriver_UpdateLcdFreq(uint32_t dial_freq, uint16_t color, uint16_t 
     uint8_t        digit_font;
 
 	switch (mode) {
-	case UFM_SMALL_RX:
-		digit_font = 0;
-		pos_y_loc = ts.Layout->TUNE_FREQ.y;
-		pos_x_loc = ts.Layout->TUNE_SPLIT_FREQ_X;
-		break;
-	case UFM_SMALL_TX:					// small digits in lower location
-		digit_font = 0;
-		pos_y_loc = ts.Layout->TUNE_SPLIT_FREQ_Y_TX;
-		pos_x_loc = ts.Layout->TUNE_SPLIT_FREQ_X;
-		break;
-	case UFM_SECONDARY:
-		digit_font = 0;
-		pos_y_loc = ts.Layout->TUNE_SFREQ.y;
-		pos_x_loc = ts.Layout->TUNE_SFREQ.x;
-		break;
-	case UFM_LARGE:
-	default:			// default:  normal sized (large) digits
-#ifdef USE_8bit_FONT
-		digit_font=ts.FreqDisplayFont==0?1:5;
-#else
-		digit_font = 1;
-#endif
-		pos_y_loc = ts.Layout->TUNE_FREQ.y;
-		pos_x_loc = ts.Layout->TUNE_FREQ.x;
+        case UFM_SMALL_RX:
+            digit_font = 0;
+            pos_y_loc = ts.Layout->TUNE_FREQ.y;
+            pos_x_loc = ts.Layout->TUNE_SPLIT_FREQ_X;
+            break;
+        case UFM_SMALL_TX:					// small digits in lower location
+            digit_font = 0;
+            pos_y_loc = ts.Layout->TUNE_SPLIT_FREQ_Y_TX;
+            pos_x_loc = ts.Layout->TUNE_SPLIT_FREQ_X;
+            break;
+        case UFM_SECONDARY:
+            digit_font = 4;
+            bg_color = sd.boxes_colour;
+            pos_y_loc = ts.Layout->TUNE_SFREQ.y;
+            pos_x_loc = ts.Layout->TUNE_SFREQ.x;
+            break;
+        case UFM_LARGE:
+        default:			// default:  normal sized (large) digits
+    #ifdef USE_8bit_FONT
+            digit_font=ts.FreqDisplayFont==0?1:5;
+    #else
+            digit_font = 1;
+    #endif
+            pos_y_loc = ts.Layout->TUNE_FREQ.y;
+            pos_x_loc = ts.Layout->TUNE_FREQ.x;
 	}
 
 	// in SAM mode, never display any RIT etc., but
 	// use small display for display of the carrier frequency that the PLL has locked to
 	if (ts.dmod_mode == DEMOD_SAM && (mode == UFM_SMALL_RX || mode == UFM_SECONDARY)) {
-		digit_font = 0;
+		digit_font = 4;
 		pos_y_loc = ts.Layout->TUNE_SFREQ.y;
 		pos_x_loc = ts.Layout->TUNE_SFREQ.x;
 		disp_freq += ads.carrier_freq_offset;
 		color = Yellow;
 	}
 
-    UiDriver_UpdateFreqDisplay(disp_freq, pos_x_loc, pos_y_loc, color, digit_font);
+    UiDriver_UpdateFreqDisplay(disp_freq, pos_x_loc, pos_y_loc, color, bg_color, digit_font);
 }
 
 //*----------------------------------------------------------------------------
@@ -4722,26 +4682,24 @@ static void UiDriver_RotateNormalEncoder(int8_t pot_diff, uint8_t enc) {
 
 static void UiDriver_RotateTuneEncoder(int8_t pot_diff, uint8_t enc) {
     uint8_t state = ts.enc_state[enc] & ENC_MODE_MASK;
-    int8_t  mode = ts.enc_mode[enc][state] + (pot_diff < 0 ? -1:1);
 
-    if (mode < 0) {
-        mode = ENC_NUM_MODES - 1;
-    } else if (mode > ENC_NUM_MODES - 1) {
-        mode = 0;
-    }
+    ts.enc_mode[enc][state] = change_and_limit_uint(
+        ts.enc_mode[enc][state],
+        pot_diff < 0 ? -1 : 1,
+        0, ENC_NUM_MODES
+    );
 
-    ts.enc_mode[enc][state] = mode;
     UiDriver_DisplayEncoderMode(enc);
 }
 
 static void UiDriver_RotateCarouselEncoder(int8_t pot_diff, uint8_t enc) {
-    int8_t  state = (ts.enc_state[enc] & ENC_MODE_MASK) + (pot_diff < 0 ? -1:1);
+    int8_t  state = (ts.enc_state[enc] & ENC_MODE_MASK);
 
-    if (state < 0) {
-        state = ENC_STATE_NUM - 1;
-    } else if (state > ENC_STATE_NUM - 1) {
-        state = 0;
-    }
+    state = change_and_limit_uint(
+        state,
+        pot_diff < 0 ? -1 : 1,
+        0, ENC_STATE_NUM
+    );
 
     ts.enc_state[enc] = (ENC_STATE_CAROUSEL << ENC_STATE_BITS) | state;
     UiDriver_DisplayEncoderMode(enc);
@@ -5069,11 +5027,11 @@ static void UiDriver_DisplayDSPMode() {
 }
 
 static void UiDriver_DisplayNotch(uint8_t enc, uint8_t style) {
-    UiDriver_EncoderDisplaySimple(0, enc, "NCF", style, ts.dsp.notch_frequency);
+    UiDriver_EncoderDisplaySimple(0, enc, "NTCH", style, ts.dsp.notch_frequency);
 }
 
 static void UiDriver_DisplayPeak(uint8_t enc, uint8_t style) {
-    UiDriver_EncoderDisplaySimple(0, enc, "PKF", style, ts.dsp.peak_frequency);
+    UiDriver_EncoderDisplaySimple(0, enc, "PEAK", style, ts.dsp.peak_frequency);
 }
 
 static void UiDriver_DisplayKeyerSpeed(uint8_t enc, uint8_t style) {
@@ -5437,78 +5395,93 @@ static void UiDriver_DisplayPowerLevel()
 	UiLcdHy28_PrintTextCentered((ts.Layout->PW_IND.x),(ts.Layout->PW_IND.y),ts.Layout->PW_IND.w,txt,fg_clr,bg_clr,0);
 }
 
-static void UiDriver_DisplayDbm(void)
-{
-    // TODO: Move to UI Driver
+static void UiDriver_DisplayDbm(void) {
     bool display_something = false;
     static long oldVal=99999;
     static uint8_t dBmShown=0;
-    if( ts.txrx_mode == TRX_MODE_RX)
-    {
+    char txt[12];
+
+    if (ts.txrx_mode == TRX_MODE_RX) {
         long val;
         const char* unit_label;
 
-        switch(ts.display_dbm)
-        {
-        case DISPLAY_S_METER_DBM:
-            display_something = true;
-            val = sm.dbm;
-            unit_label = "dBm   ";
+        switch(ts.display_dbm) {
+            case DISPLAY_S_METER_DBM:
+                display_something = true;
+                val = sm.dbm;
+                unit_label = "dBm   ";
 
-            break;
-        case DISPLAY_S_METER_DBMHZ:
-            display_something = true;
-            val = sm.dbmhz;
-            unit_label = "dBm/Hz";
-            break;
+                break;
+            case DISPLAY_S_METER_DBMHZ:
+                display_something = true;
+                val = sm.dbmhz;
+                unit_label = "dBm/Hz";
+                break;
         }
 
-        if ((display_something == true) && (val!=oldVal))
-        {
-        	if(!ts.show_wide_spectrum)
-        	{
-				char txt[12];
-				snprintf(txt,12,"%4ld      ", val);
-//				UiLcdHy28_PrintText(ts.Layout->DisplayDbm.x,ts.Layout->DisplayDbm.y,txt,White,Blue,0);
-//				UiLcdHy28_PrintText(ts.Layout->DisplayDbm.x+SMALL_FONT_WIDTH * 4,ts.Layout->DisplayDbm.y,unit_label,White,Blue,4);
+        if ((display_something == true) && (val!=oldVal)) {
+            snprintf(txt, sizeof(txt), "%4ld", val);
 #ifndef SDR_AMBER_480_320
-	#ifndef OVI40_MOD_480_320
-                UiLcdHy28_PrintText(ts.Layout->DisplayDbm.x,ts.Layout->DisplayDbm.y,txt,White,sd.boxes_colour,0);
-                UiLcdHy28_PrintText(ts.Layout->DisplayDbm.x+SMALL_FONT_WIDTH * 4,ts.Layout->DisplayDbm.y,unit_label,White,sd.boxes_colour,4);
-	#else
-                UiLcdHy28_PrintText(ts.Layout->DisplayDbm.x,ts.Layout->DisplayDbm.y,txt,White,Black,0);
-                UiLcdHy28_PrintText(ts.Layout->DisplayDbm.x+SMALL_FONT_WIDTH * 4,ts.Layout->DisplayDbm.y,unit_label,White,Black,4);
-	#endif
-#else
-                UiLcdHy28_PrintText(ts.Layout->DisplayDbm.x,ts.Layout->DisplayDbm.y,txt,White,Black,0);
-                UiLcdHy28_PrintText(ts.Layout->DisplayDbm.x+SMALL_FONT_WIDTH * 4,ts.Layout->DisplayDbm.y,unit_label,White,Black,4);
-#endif
-        	}
-        	else
-        	{
-				char txt[7];
-				snprintf(txt,12,"%4ld ", val);
-				UiLcdHy28_PrintText(ts.Layout->DisplayDbm.x,ts.Layout->DisplayDbm.y,txt,White,Black,0);
-				UiLcdHy28_PrintText(ts.Layout->DisplayDbm.x,ts.Layout->DisplayDbm.y+13,unit_label,White,Black,4);
+#ifndef OVI40_MOD_480_320
+            UiLcdHy28_PrintText(
+                ts.Layout->DisplayDbm.x,
+                ts.Layout->DisplayDbm.y,
+                txt,
+                White, sd.boxes_colour,
+                4
+            );
 
-        	}
+            UiLcdHy28_PrintText(
+                ts.Layout->DisplayDbm.x + SMALL_FONT_WIDTH * 4,
+                ts.Layout->DisplayDbm.y,
+                unit_label,
+                White, sd.boxes_colour,
+                4
+            );
+#else
+            UiLcdHy28_PrintText(
+                ts.Layout->DisplayDbm.x,
+                ts.Layout->DisplayDbm.y,
+                txt,
+                White, sd.boxes_colour,
+                0
+            );
+
+            UiLcdHy28_PrintText(
+                ts.Layout->DisplayDbm.x+SMALL_FONT_WIDTH * 4,
+                ts.Layout->DisplayDbm.y,
+                unit_label,
+                White, sd.boxes_colour,
+                4
+            );
+#endif
+#else
+            UiLcdHy28_PrintText(
+                ts.Layout->DisplayDbm.x,
+                ts.Layout->DisplayDbm.y,
+                txt,
+                White, sd.boxes_colour,
+                0
+            );
+
+            UiLcdHy28_PrintText(
+                ts.Layout->DisplayDbm.x+SMALL_FONT_WIDTH * 4,
+                ts.Layout->DisplayDbm.y,
+                unit_label,
+                White, sd.boxes_colour,
+                4
+           );
+#endif
             oldVal=val;     //this will prevent from useless redrawing the same
             dBmShown=1;     //for indicate that dms are shown and erase function may it clear when needed
         }
     }
 
     // clear the display since we are not showing dBm or dBm/Hz or we are in TX mode
-    if ((display_something == false) && (dBmShown==1))
-    {
-    	if(!ts.show_wide_spectrum)
-    	{
-    		UiLcdHy28_DrawFullRect(ts.Layout->DisplayDbm.x, ts.Layout->DisplayDbm.y, 15, SMALL_FONT_WIDTH * 10 , Black);
-    	}
-    	else
-    	{
-    		UiLcdHy28_DrawFullRect(ts.Layout->DisplayDbm.x, ts.Layout->DisplayDbm.y, 22, 43 , Black);
-    	}
-        dBmShown=0;     //just to indicate that dbm is erased
+    if ((display_something == false) && (dBmShown==1)) {
+   		UiLcdHy28_DrawFullRect(ts.Layout->DisplayDbm.x, ts.Layout->DisplayDbm.y, 8, 75, sd.boxes_colour);
+
+   		dBmShown=0;     //just to indicate that dbm is erased
         oldVal=99999;   //some value that will enforce refresh when user enable display dbm
     }
 }
@@ -5713,18 +5686,13 @@ static void UiDriver_HandleTXMeters(void)
 	}
 }
 
-
-static void UiDriver_CreateVoltageDisplay() {
-	// Create voltage
-#ifndef SDR_AMBER_480_320
-	#ifndef OVI40_MOD_480_320
-	UiLcdHy28_PrintTextCentered (ts.Layout->PWR_IND.x,ts.Layout->PWR_IND.y,ts.Layout->LEFTBOXES_IND.w,   "--.- V",  COL_PWR_IND,Black,0);
-	#else
-	UiLcdHy28_PrintTextCentered (ts.Layout->PWR_IND.x,ts.Layout->PWR_IND.y,58,   "--.- V",  COL_PWR_IND,Black,0);
-	#endif
-#else
-	UiLcdHy28_PrintTextCentered (ts.Layout->PWR_IND.x,ts.Layout->PWR_IND.y,58,   "--.- V",  COL_PWR_IND,Black,0);
-#endif
+static void UiDriver_CreateInfoBarDisplay() {
+    UiLcdHy28_DrawFullRect(
+        ts.Layout->INFO_BAR.x,
+        ts.Layout->INFO_BAR.y,
+        ts.Layout->INFO_BAR.h,
+        ts.Layout->INFO_BAR.w,
+        sd.boxes_colour);
 }
 
 static bool UiDriver_SaveConfiguration()
@@ -5827,45 +5795,42 @@ static void UiDriver_PowerDownCleanup(bool saveConfiguration)
 /*
  * @brief Display external voltage
  */
-static void UiDriver_DisplayVoltage()
-{
-//    if(ts.show_wide_spectrum)
-//    {
-//        return;
-//    }
+static void UiDriver_DisplayVoltage() {
 	uint32_t low_power_threshold = ((ts.low_power_config & LOW_POWER_THRESHOLD_MASK) + LOW_POWER_THRESHOLD_OFFSET) * 10;
-	// did we detect a voltage change?
+	uint32_t col = White;
 
-	uint32_t col = COL_PWR_IND;  // Assume normal voltage, so Set normal color
-
-	if (pwmt.voltage < low_power_threshold + 50)
-	{
+	if (pwmt.voltage < low_power_threshold + 50) {
 		col = Red;
-	}
-	else if (pwmt.voltage < low_power_threshold + 100)
-	{
+	} else if (pwmt.voltage < low_power_threshold + 100) {
 		col = Orange;
-	}
-	else if (pwmt.voltage < low_power_threshold + 150)
-	{
+	} else if (pwmt.voltage < low_power_threshold + 150) {
 		col = Yellow;
 	}
 
 	static uint8_t voltage_blink = 0;
+
 	// in case of low power shutdown coming, we let the voltage blink with 1hz
-	if (pwmt.undervoltage_detected == true && voltage_blink < 1 )
-	{
+
+	if (pwmt.undervoltage_detected == true && voltage_blink < 1 ) {
 		col = Black;
 	}
+
 	voltage_blink++;
-	if (voltage_blink == 2)
-	{
+
+	if (voltage_blink == 2) {
 		voltage_blink = 0;
 	}
 
-	char digits[6];
-	snprintf(digits,6,"%2ld.%02ld",pwmt.voltage/100,pwmt.voltage%100);
-	UiLcdHy28_PrintText(ts.Layout->PWR_IND.x,ts.Layout->PWR_IND.y,digits,col,Black,0);
+	char txt[9];
+	snprintf(txt, sizeof(txt), "%2ld.%02ldV", pwmt.voltage / 100, pwmt.voltage % 100);
+
+	UiLcdHy28_PrintText(
+	    ts.Layout->PWR_IND.x,
+	    ts.Layout->PWR_IND.y,
+	    txt,
+	    col, sd.boxes_colour,
+	    4
+	);
 }
 
 /**
@@ -5982,83 +5947,41 @@ static void UiDriverUpdateLoMeter(uchar val,uchar active)
 #endif
 
 /**
- * \brief draws the the TCXO temperature display, has to be called once
- *
- * @param create set to true in order to draw the static parts of the UI too.
- * @param enabled set to true in order to enable actual display of temperature
- */
-#define TEMP_DATA 43
-void UiDriver_CreateTemperatureDisplay()
-{
-	const char *label, *txt;
-	uint32_t label_color, txt_color;
-
-	bool enabled = lo.sensor_present == true && RadioManagement_TcxoIsEnabled();
-
-	label = "TCXO";
-	label_color = Black;
-
-	// Top part - name and temperature display
-	UiLcdHy28_DrawEmptyRect(ts.Layout->TEMP_IND.x, ts.Layout->TEMP_IND.y,13,109,Grey);
-
-	if (enabled)
-	{
-		txt = RadioManagement_TcxoIsFahrenheit()?"*---.-F":"*---.-C";
-		txt_color = Grey;
-	}
-	else
-	{
-		if (lo.sensor_present == false)
-		{
-//			txt = "SENSOR!";
-//			txt_color = Red;
-            txt = "*  NOP ";
-            txt_color = Grey;
-		}
-		else
-		{
-			txt = "*  OFF ";
-			txt_color = Grey;
-		}
-	}
-
-	// Label
-	UiLcdHy28_PrintText((ts.Layout->TEMP_IND.x + 1), (ts.Layout->TEMP_IND.y + 1),label,label_color,Grey,0);
-	// Lock Indicator
-	UiLcdHy28_PrintText(ts.Layout->TEMP_IND.x + TEMP_DATA,(ts.Layout->TEMP_IND.y + 1), txt,txt_color,Black,0);	// show base string
-}
-
-/**
  * @brief display measured temperature and current state of TCXO
  * @param temp in tenth of degrees Celsius (10 == 1 degree C)
  */
-static void UiDriver_DisplayTemperature(int temp)
-{
+static void UiDriver_DisplayTemperature(int temp) {
 	static int last_disp_temp = -100;
 	uint32_t clr =  RadioManagement_TcxoGetMode() ==TCXO_ON ? Blue:Red;
 
-	UiLcdHy28_PrintText(ts.Layout->TEMP_IND.x + TEMP_DATA,(ts.Layout->TEMP_IND.y + 1),"*",clr,Black,0);
-
-	if (temp != last_disp_temp)
-	{
+	if (temp != last_disp_temp) {
 		char out[10];
 		char* txt_ptr;
-		if((temp < 0) || (temp > 1000))  // is the temperature out of range?
-		{
+
+		if ((temp < 0) || (temp > 1000)) {  // is the temperature out of range?
 			txt_ptr = "RANGE!";
-		}
-		else {
+		} else {
 			last_disp_temp = temp;
 
 			int32_t ttemp = last_disp_temp;
-			if(RadioManagement_TcxoIsFahrenheit())
-			{
-				ttemp = ((ttemp *9)/5) + 320;			// multiply by 1.8 and add 32 degrees
+			char    unit = 'C';
+
+			if (RadioManagement_TcxoIsFahrenheit()) {
+				ttemp = ((ttemp * 9) / 5) + 320;			// multiply by 1.8 and add 32 degrees
+				unit = 'F';
 			}
-			snprintf(out,10,"%3ld.%1ld",ttemp/10,(ttemp)%10);
+
+			snprintf(out, sizeof(out), "%3ld.%1ld%c", ttemp / 10, ttemp % 10, unit);
 			txt_ptr = out;
 		}
-		UiLcdHy28_PrintText(ts.Layout->TEMP_IND.x + TEMP_DATA + SMALL_FONT_WIDTH*1,(ts.Layout->TEMP_IND.y + 1),txt_ptr,Grey,Black,0);
+
+		UiLcdHy28_PrintText(
+		    ts.Layout->TEMP_IND.x,
+		    ts.Layout->TEMP_IND.y,
+		    txt_ptr,
+		    White, sd.boxes_colour,
+		    4
+		);
 	}
 }
 

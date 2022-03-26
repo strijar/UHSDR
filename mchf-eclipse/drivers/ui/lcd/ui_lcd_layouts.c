@@ -660,47 +660,50 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 				.Size = { 320, 240 },
 				.StartUpScreen_START = { 0, 10 },
 				.SpectrumWindow = { .x = 4, .y = 136, .w = 312, .h = 89 },//x0_w320
-
 				.SpectrumWindowPadding = 0,
+
+                // 1 line
+
+                .INFO_BAR = {.x = 0, .y = 0, .h = 11, .w = 320 },
+                .TEMP_IND={ .x = 0, .y = 1 },          // width 40
+                .PWR_IND = { .x = 40 + 8, .y = 1 },
+
+                .DisplayDbm = { 126, 1 },              // width 75
+#ifdef SDR_AMBER
+                .MEMORYLABEL= { 64, 123 },
+#else
+                .MEMORYLABEL= { 126 + 75 + 5, 1 },     // width 40
+#endif
+                .TUNE_SFREQ = { 126 + 75 + 5 + 40, 1 },
+
+                // 2 line
+
+                .ENCODER_IND = { 0, 12 },
+                .ENCODER_MODE = MODE_VERTICAL,
+                .SM_IND = { .x = 126, .y = 12, .h = 28, .w = 191 },
+
+				//
 
 				.TUNE_FREQ = { 116, 109 },
 				.TUNE_SPLIT_FREQ_X = 196,
 				.TUNE_SPLIT_MARKER_X = 167,
 				.TUNE_SPLIT_FREQ_Y_TX = 121,
-				.TUNE_SFREQ = { 236, 87 },
-				.DisplayDbm = { 277, 56 },
-#ifdef SDR_AMBER
-				.MEMORYLABEL= { 64, 123 } ,
-#else
-				.MEMORYLABEL= { 157, 87 } ,
-#endif
 				.BAND_MODE = { 276, 112 },
 				.BAND_MODE_MASK = { .x = 275, .y = 111, .h = 13, .w = 33 },
 				.DEMOD_MODE_MASK = { .x = 138, .y = 71, .h = 12, .w = 16 },
 #ifndef SDR_AMBER
-//				.DEMOD_MODE_MASK = { .x = 113, .y = 86, .h = 13, .w = 41 },
 				.AGC_MASK = { .x = 74, .y = 86, .h = 13, .w = 36 },
 				.TUNE_STEP={ .x = 113, .y = 86, .h = 13, .w = 41 },
 #else
-//				.DEMOD_MODE_MASK = { .x = 138, .y = 71, .h = 12, .w = 16 },
 				.AGC_MASK = { .x = 74, .y = 86, .h = 13, .w = 80 },
 				.TUNE_STEP={ .x = 157, .y = 86, .h = 13, .w = 57 },
 #endif
-//				.TUNE_STEP={ .x = 157, .y = 86, .h = 13, .w = 57 },
-
-				.ENCODER_IND = { 0, 0 },
-				.ENCODER_MODE = MODE_VERTICAL,
-//#ifndef SDR_AMBER
-//				.DIGMODE= { .x = 74, .y = 71, .w = 80 },
-//#else
 				.DIGMODE= { .x = 74, .y = 71, .w = 63 },
-//#endif
 				.LEFTBOXES_IND = { .x = 157, .y = 56, .w = 58, .h = 28 },
 				.LEFTBOXES_MODE = MODE_HORIZONTAL,
 				.LEFTBOXES_ROW_2ND_OFF = 13,
 
 				.PW_IND = { .x = 113, .y = 56, .w = 41 },
-				.TEMP_IND={ .x = 0, .y = 35 },
 				.RTC_IND={ .x= 5, .y = 86 },
 
 				.LOADANDDEBUG_Y = 100,
@@ -720,9 +723,6 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 				.FREEDV_SNR = { 5, 123 },
 				.FREEDV_BER = { 5, 113 },
 				.FREEDV_FONT = 4,
-
-				.SM_IND = { .x = 113, .y = 0, .h = 28, .w = 203 },
-				.PWR_IND = { .x = 16, .y = 72 },
 
 				.BOTTOM_BAR = { .x = 2, .y = 231, .h = 13, .w=62 },
 
