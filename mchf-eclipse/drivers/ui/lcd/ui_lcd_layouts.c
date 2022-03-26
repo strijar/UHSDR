@@ -659,7 +659,7 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 		{		//320x240_wide_spectrum
 				.Size = { 320, 240 },
 				.StartUpScreen_START = { 0, 10 },
-				.SpectrumWindow = { .x = 4, .y = 136, .w = 312, .h = 89 },//x0_w320
+				.SpectrumWindow = { .x = 4, .y = 136-32, .w = 312, .h = 89+32 },
 				.SpectrumWindowPadding = 0,
 
                 // 1 line
@@ -682,28 +682,43 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
                 .ENCODER_MODE = MODE_VERTICAL,
                 .SM_IND = { .x = 126, .y = 12, .h = 28, .w = 191 },
 
-				//
+				// 3 line
 
-				.TUNE_FREQ = { 116, 109 },
+                .FILTER_IND = { .x = 0,  .y = 12 + 28 + 2, .w = 82, .h = 30 },
+                .PW_IND = { .x = 82 + 2, .y = 12 + 28 + 2, .w = 40, .h = 14 },
+                .DEMOD_MODE_MASK = { .x = 82 + 2, .y = 12 + 28 + 2 + 14 + 2, .w = 40, .h = 14 },
+                .TUNE_FREQ = { 126 + 10, 12 + 28 + 2 + 5},
+
+                // 4 line
+
+                .DSP_IND = { .x = 0, .y = 12 + (28 + 2) + (14 + 2) + (14 + 2), .w = 82, .h = 14 },
+                .AGC_MASK = { .x = 82 + 2, .y = 12 + (28 + 2) + (14 + 2) + (14 + 2), .w = 40, .h = 14 },
+                .TUNE_STEP={ .x = 126 + 26, .y = 12 + (28 + 2) + (14 + 2) + (14 + 2), .w = 40, .h = 14 },
+                .SNAP_CARRIER = { 126 + 96, 12 + (28 + 2) + (14 + 2) + (14 + 2) + 2 },
+                .BAND_MODE = { 320 - 55 + 1, 12 + (28 + 2) + (14 + 2) + (14 + 2) },
+                .BAND_MODE_MASK = { .x = 320 - 55, .y = 12 + (28 + 2) + (14 + 2) + (14 + 2) - 1, .h = 14, .w = 30 },
+
+                // 5 line
+                .CW_DECODER_WPM = { 0, 12 + (28 + 2) + (14 + 2) + (14 + 2) + (14 + 2) + 2 },
+
+                .TextMsgLine = { 50, 12 + (28 + 2) + (14 + 2) + (14 + 2) + (14 + 2) + 2},
+                .TextMsg_buffer_max = 32,
+                .TextMsg_font = 4,
+
+                //
+
 				.TUNE_SPLIT_FREQ_X = 196,
 				.TUNE_SPLIT_MARKER_X = 167,
 				.TUNE_SPLIT_FREQ_Y_TX = 121,
-				.BAND_MODE = { 276, 112 },
-				.BAND_MODE_MASK = { .x = 275, .y = 111, .h = 13, .w = 33 },
-				.DEMOD_MODE_MASK = { .x = 138, .y = 71, .h = 12, .w = 16 },
 #ifndef SDR_AMBER
-				.AGC_MASK = { .x = 74, .y = 86, .h = 13, .w = 36 },
-				.TUNE_STEP={ .x = 113, .y = 86, .h = 13, .w = 41 },
 #else
 				.AGC_MASK = { .x = 74, .y = 86, .h = 13, .w = 80 },
-				.TUNE_STEP={ .x = 157, .y = 86, .h = 13, .w = 57 },
 #endif
 				.DIGMODE= { .x = 74, .y = 71, .w = 63 },
 				.LEFTBOXES_IND = { .x = 157, .y = 56, .w = 58, .h = 28 },
 				.LEFTBOXES_MODE = MODE_HORIZONTAL,
 				.LEFTBOXES_ROW_2ND_OFF = 13,
 
-				.PW_IND = { .x = 113, .y = 56, .w = 41 },
 				.RTC_IND={ .x= 5, .y = 86 },
 
 				.LOADANDDEBUG_Y = 100,
@@ -711,14 +726,6 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 				.LOAD_X = 280,
 
 				.PWR_NUM_IND = { 1, 100 },
-
-				.CW_DECODER_WPM = { 0, 113 },
-
-				.SNAP_CARRIER = { 27, 128 },
-
-				.TextMsgLine = { 5, 99 },
-				.TextMsg_buffer_max = 44,
-				.TextMsg_font = 4,
 
 				.FREEDV_SNR = { 5, 123 },
 				.FREEDV_BER = { 5, 113 },

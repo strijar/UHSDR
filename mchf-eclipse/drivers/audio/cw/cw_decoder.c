@@ -1078,31 +1078,43 @@ void CW_Decode(void)
 	}
 }
 
-void CwDecoder_WpmDisplayClearOrPrepare(bool prepare)
-{
-    uint16_t color1 = prepare?White:Black;
-    uint16_t color2 = prepare?Green:Black;
+void CwDecoder_WpmDisplayClearOrPrepare(bool prepare) {
+    UiLcdHy28_PrintText(
+        ts.Layout->CW_DECODER_WPM.x,
+        ts.Layout->CW_DECODER_WPM.y,
+        " --",
+        White, Black,
+        4
+    );
 
-    UiLcdHy28_PrintText(ts.Layout->CW_DECODER_WPM.x, ts.Layout->CW_DECODER_WPM.y," --",color1,Black,0);
-    UiLcdHy28_PrintText(ts.Layout->CW_DECODER_WPM.x + 27, ts.Layout->CW_DECODER_WPM.y, "wpm", color2, Black, 4);
+    UiLcdHy28_PrintText(
+        ts.Layout->CW_DECODER_WPM.x + 24,
+        ts.Layout->CW_DECODER_WPM.y,
+        "wpm",
+        White, Black,
+        4
+    );
 
-    if (prepare == true)
-    {
+    if (prepare == true) {
         CwDecoder_WpmDisplayUpdate(true);
     }
 }
 
-void CwDecoder_WpmDisplayUpdate(bool force_update)
-{
+void CwDecoder_WpmDisplayUpdate(bool force_update) {
 	static uint8_t old_speed = 0;
 
-	if(cw_decoder_config.speed != old_speed || force_update == true)
-	{
-	    char WPM_str[10];
+	if(cw_decoder_config.speed != old_speed || force_update == true) {
+	    char str[10];
 
-	    snprintf(WPM_str, 10, cw_decoder_config.speed > 0? "%3u" : " --", cw_decoder_config.speed);
+	    snprintf(str, sizeof(str), cw_decoder_config.speed > 0 ? "%3u" : " --", cw_decoder_config.speed);
 
-		UiLcdHy28_PrintText(ts.Layout->CW_DECODER_WPM.x, ts.Layout->CW_DECODER_WPM.y, WPM_str,White,Black,0);
+		UiLcdHy28_PrintText(
+		    ts.Layout->CW_DECODER_WPM.x,
+		    ts.Layout->CW_DECODER_WPM.y,
+		    str,
+		    White, Black,
+		    4
+		);
 	}
 }
 

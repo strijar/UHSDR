@@ -600,39 +600,47 @@ void UiDriver_RIT_Reset()
 	UiDriver_UpdateDisplayAfterParamChange();
 }
 
-void UiDriver_TextMsgClear()
-{
+void UiDriver_TextMsgClear() {
 	uint32_t fillcnt;
-	for(fillcnt=0; fillcnt<ts.Layout->TextMsg_buffer_max;fillcnt++)
-	{
+
+	for (fillcnt=0; fillcnt < ts.Layout->TextMsg_buffer_max; fillcnt++) {
 		ui_txt_msg_buffer[fillcnt]=' ';
 	}
+
 	ui_txt_msg_buffer[fillcnt]='\0';
 
-	// FIXME there is more affective way to clear space on the screen.
-//  UiLcdHy28_PrintText(ts.Layout->TextMsgLine.x,ts.Layout->TextMsgLine.y, ui_txt_msg_buffer,Yellow,Black,ts.Layout->TextMsg_font);
-    UiLcdHy28_PrintText(ts.Layout->TextMsgLine.x,ts.Layout->TextMsgLine.y, ui_txt_msg_buffer,sd.txtline_colour,Black,ts.Layout->TextMsg_font);
+    UiLcdHy28_PrintText(
+        ts.Layout->TextMsgLine.x,
+        ts.Layout->TextMsgLine.y,
+        ui_txt_msg_buffer,
+        sd.txtline_colour, Black,
+        ts.Layout->TextMsg_font
+    );
+
     ui_txt_msg_idx = 0;
     ui_txt_msg_update = true;
 }
 
-void UiDriver_TextMsgDisplay()
-{
-    if (ui_txt_msg_update == true)
-    {
+void UiDriver_TextMsgDisplay() {
+    if (ui_txt_msg_update == true) {
         ui_txt_msg_update = false;
-        if(ui_txt_msg_idx==0)
-        {
+
+        if (ui_txt_msg_idx==0) {
         	uint32_t fillcnt;
-        	for(fillcnt=0; fillcnt<ts.Layout->TextMsg_buffer_max;fillcnt++)
-        	{
+
+        	for (fillcnt=0; fillcnt < ts.Layout->TextMsg_buffer_max; fillcnt++) {
         		ui_txt_msg_buffer[fillcnt]=' ';
         	}
         	ui_txt_msg_buffer[fillcnt]='\0';
         }
 
-//      UiLcdHy28_PrintText(ts.Layout->TextMsgLine.x,ts.Layout->TextMsgLine.y, ui_txt_msg_buffer,Yellow,Black,ts.Layout->TextMsg_font);
-        UiLcdHy28_PrintText(ts.Layout->TextMsgLine.x,ts.Layout->TextMsgLine.y, ui_txt_msg_buffer,sd.txtline_colour,Black,ts.Layout->TextMsg_font);
+        UiLcdHy28_PrintText(
+            ts.Layout->TextMsgLine.x,
+            ts.Layout->TextMsgLine.y,
+            ui_txt_msg_buffer,
+            sd.txtline_colour, Black,
+            ts.Layout->TextMsg_font
+        );
     }
 }
 
@@ -668,69 +676,6 @@ void UiDriver_TextMsgPutSign(const char *s)
 	UiDriver_TextMsgPutChar('>');
 }
 
-static void UiDriver_LeftBoxDisplay(const uint8_t row, const char *label, bool encoder_active,
-		const char* text, uint32_t color, uint32_t clr_val, bool text_is_value)
-{
-
-	uint32_t label_color = encoder_active ? Black : color;
-	uint32_t bg_color = encoder_active ? White : sd.boxes_colour;
-	uint32_t brdr_color = encoder_active ? White : sd.boxes_colour;
-
-	uint8_t row_t = row;
-#ifndef SDR_AMBER_480_320
-	#ifndef OVI40_MOD_480_320
-	if(ts.show_wide_spectrum) // first filter box
-	{
-		row_t = (row==1)?0:1;
-	}
-	#else
-	row_t = (row==1)?0:1;
-	#endif
-#else
-	row_t = (row==1)?0:1;
-#endif
-
-	uint16_t posX, posY;
-	if(ts.Layout->LEFTBOXES_MODE==MODE_HORIZONTAL)
-	{
-//		posX=ts.Layout->LEFTBOXES_IND.x+ (row * ts.Layout->LEFTBOXES_IND.w);
-#ifndef SDR_AMBER_480_320
-	#ifndef OVI40_MOD_480_320
-		posX=ts.Layout->LEFTBOXES_IND.x + (row_t * ts.Layout->LEFTBOXES_IND.w + ((ts.show_wide_spectrum)&(row_t>0)?2:0));
-	#else
-		posX=ts.Layout->LEFTBOXES_IND.x + (row_t * ts.Layout->LEFTBOXES_IND.w) + (row_t>0?2:0);
-	#endif
-#else
-		posX=ts.Layout->LEFTBOXES_IND.x + (row_t * ts.Layout->LEFTBOXES_IND.w) + (row_t>0?2:0);
-#endif
-		posY=ts.Layout->LEFTBOXES_IND.y;
-	}
-	else
-	{
-		posX=ts.Layout->LEFTBOXES_IND.x;
-		posY=ts.Layout->LEFTBOXES_IND.y + (row_t * ts.Layout->LEFTBOXES_IND.h);
-	}
-
-
-	UiLcdHy28_DrawEmptyRect(posX, posY, ts.Layout->LEFTBOXES_IND.h - 2, ts.Layout->LEFTBOXES_IND.w - 2, brdr_color);
-	UiLcdHy28_PrintTextCentered(posX + 1, posY + 1,ts.Layout->LEFTBOXES_IND.w - 3, label,
-			label_color, bg_color, 0);
-
-	// this causes flicker, but I am too lazy to fix that now
-	UiLcdHy28_DrawFullRect(posX + 1, posY + 1 + 12, ts.Layout->LEFTBOXES_IND.h - 4 - 11, ts.Layout->LEFTBOXES_IND.w - 3, text_is_value?Black:bg_color);
-	if (text_is_value)
-	{
-		UiLcdHy28_PrintTextRight((posX + ts.Layout->LEFTBOXES_IND.w - 4), (posY + 1 + ts.Layout->LEFTBOXES_ROW_2ND_OFF), text,
-				clr_val, text_is_value?Black:bg_color, 0);
-	}
-	else
-	{
-		UiLcdHy28_PrintTextCentered((posX + 1), (posY + 1 + ts.Layout->LEFTBOXES_ROW_2ND_OFF),ts.Layout->LEFTBOXES_IND.w - 3, text,
-				color, bg_color, 0);
-	}
-
-}
-
 static void UiDriver_LcdBlankingStealthSwitch(void)
 {
 	if(ts.lcd_backlight_blanking & LCD_BLANKING_ENABLE)
@@ -747,20 +692,53 @@ static void UiDriver_LcdBlankingStealthSwitch(void)
 }
 
 void UiDriver_DisplayFilter() {
-	const char* filter_ptr;
-	uint32_t font_clr= filter_path_change ? Black : White;
+    const char *filter_names[2];
+    uint32_t   color = White;
+    uint32_t   bg_color = Black;
 
-	const char *filter_names[2];
+    AudioFilter_GetNamesOfFilterPath(ts.filter_path, filter_names);
 
-	AudioFilter_GetNamesOfFilterPath(ts.filter_path, filter_names);
+    if (filter_names[1] == NULL)
+        filter_names[1] = " ";
 
-	if (filter_names[1] != NULL) {
-		filter_ptr = filter_names[1];
-	} else {
-		filter_ptr = " ";
-	}
+    if (filter_path_change) {
+        UiLcdHy28_DrawFullRect(
+            ts.Layout->FILTER_IND.x,
+            ts.Layout->FILTER_IND.y,
+            ts.Layout->FILTER_IND.h,
+            ts.Layout->FILTER_IND.w,
+            White
+        );
 
-	UiDriver_LeftBoxDisplay(1, filter_names[0], filter_path_change, filter_ptr, font_clr, font_clr, false);
+        color = Black;
+        bg_color = White;
+    } else {
+        UiLcdHy28_DrawFullRect(
+            ts.Layout->FILTER_IND.x + 1,
+            ts.Layout->FILTER_IND.y + 1,
+            ts.Layout->FILTER_IND.h - 1,
+            ts.Layout->FILTER_IND.w - 1,
+            Black
+        );
+
+        UiLcdHy28_DrawEmptyRect(
+            ts.Layout->FILTER_IND.x,
+            ts.Layout->FILTER_IND.y,
+            ts.Layout->FILTER_IND.h,
+            ts.Layout->FILTER_IND.w,
+            sd.boxes_colour
+        );
+    }
+
+    for (int i = 0; i < 2; i++)
+        UiLcdHy28_PrintTextCentered(
+                ts.Layout->FILTER_IND.x + 1,
+                ts.Layout->FILTER_IND.y + 2 + i * 14,
+                ts.Layout->FILTER_IND.w - 2,
+                filter_names[i],
+                color, bg_color,
+                0
+        );
 }
 
 // TODO: most of this belongs to radio management, not UI
@@ -2292,109 +2270,107 @@ static void UiDriver_PressHoldStep(uchar is_up)
 }
 
 void UiDriver_DisplayDemodMode() {
-	// Clear control
 	char* txt = "???";
-	uint16_t clr_fg = White, clr_bg = sd.boxes_colour;
+	uint16_t color= White;
 
-#if !defined(SDR_AMBER_480_320) && !defined(OVI40_MOD_480_320)
     switch(ts.dmod_mode) {
         case DEMOD_USB:
             txt = "USB";
             break;
+
         case DEMOD_LSB:
             txt = "LSB";
             break;
+
         case DEMOD_SAM:
-            if(ads.sam_sideband == SAM_SIDEBAND_LSB)
-            {
+            if (ads.sam_sideband == SAM_SIDEBAND_LSB) {
                 txt = "SAM-L";
-            }
-            else if (ads.sam_sideband == SAM_SIDEBAND_USB)
-            {
+            } else if (ads.sam_sideband == SAM_SIDEBAND_USB) {
                 txt = "SAM-U";
             }
     #ifdef USE_TWO_CHANNEL_AUDIO
-            else if (ads.sam_sideband == SAM_SIDEBAND_STEREO)
-            {
+            else if (ads.sam_sideband == SAM_SIDEBAND_STEREO) {
                 txt = "SAM-S";
             }
     #endif
-            else
-            {
+            else {
                 txt = "SAM";
             }
             break;
+
         case DEMOD_AM:
             txt = "AM";
             break;
+
         case DEMOD_FM:
             txt = RadioManagement_FmDevIs5khz() ? "FM-W" : "FM-N";
-            {
-                if(ts.txrx_mode == TRX_MODE_RX)
-                {
-                    if(ads.fm_conf.squelched == false)
-                    {
-                        // is audio not squelched?
-                        if((ads.fm_conf.subaudible_tone_detected) && (ts.fm_subaudible_tone_det_select))
-                        {
-                            // is tone decoding enabled AND a tone being detected?
-                            clr_fg =  Black;
-                            clr_bg = Red2;	// Not squelched, passing audio - change color!
-                        }
-                        else  	// tone decoder disabled - squelch only
-                        {
-                            clr_fg = Black;
-                            clr_bg = White;	// Not squelched, passing audio - change color, but different from tone
-                        }
+
+            if (ts.txrx_mode == TRX_MODE_RX) {
+                if (ads.fm_conf.squelched == false) {
+                    // is audio not squelched?
+                    if ((ads.fm_conf.subaudible_tone_detected) && (ts.fm_subaudible_tone_det_select)) {
+                        // is tone decoding enabled AND a tone being detected?
+                        color = Red2;	// Not squelched, passing audio - change color!
+                    } else { 	        // tone decoder disabled - squelch only
+                        color = Cyan;	// Not squelched, passing audio - change color, but different from tone
                     }
                 }
-                else if(ts.txrx_mode == TRX_MODE_TX)	 	// in transmit mode?
-                {
-                    if(ads.fm_conf.tone_burst_active)	 		// yes - is tone burst active?
-                    {
-                        clr_fg = Black;
-                        clr_bg = Yellow;	// Yes, make "FM" yellow
-                    }
+            } else if (ts.txrx_mode == TRX_MODE_TX) {	 	// in transmit mode?
+                if (ads.fm_conf.tone_burst_active) {	 		// yes - is tone burst active?
+                    color = Yellow;	// Yes, make "FM" yellow
                 }
-                break;
             }
+            break;
+
         case DEMOD_CW:
-            txt = ts.cw_lsb?"CW-L":"CW-U";
+            txt = ts.cw_lsb ? "CW-L" : "CW-U";
             break;
+
         case DEMOD_DIGI:
-            switch(ts.digital_mode)
-            {
-            case DigitalMode_RTTY:
-                txt = ts.digi_lsb?"RT-L":"RT-U";
-                break;
-            case DigitalMode_BPSK:
-                txt = ts.digi_lsb?"PSK-L":"PSK-U";
-                break;
-            default:
-                txt = ts.digi_lsb?"DI-L":"DI-U";
-            }
+            switch (ts.digital_mode) {
+                case DigitalMode_RTTY:
+                    txt = ts.digi_lsb ? "RT-L" : "RT-U";
+                    break;
+
+                case DigitalMode_BPSK:
+                    txt = ts.digi_lsb ? "PSK-L" : "PSK-U";
+                    break;
+
+                default:
+                    txt = ts.digi_lsb ? "DI-L" : "DI-U";
+                }
             break;
+
     #ifdef USE_TWO_CHANNEL_AUDIO
         case DEMOD_IQ:
             txt = "IQ-S";
             break;
+
         case DEMOD_SSBSTEREO:
             txt = "SSB-S";
             break;
+
     #endif
         default:
             break;
     }
-#endif
 
-	UiLcdHy28_PrintTextCentered(
-	    ts.Layout->DEMOD_MODE_MASK.x,
-	    ts.Layout->DEMOD_MODE_MASK.y,
-	    ts.Layout->DEMOD_MODE_MASK.w,
-	    txt, clr_fg, clr_bg, 0
-	);
+    UiLcdHy28_DrawEmptyRect(
+        ts.Layout->DEMOD_MODE_MASK.x,
+        ts.Layout->DEMOD_MODE_MASK.y,
+        ts.Layout->DEMOD_MODE_MASK.h,
+        ts.Layout->DEMOD_MODE_MASK.w,
+        sd.boxes_colour
+    );
 
-	// UiDriver_DisplayModulationType();
+    UiLcdHy28_PrintTextCentered(
+            ts.Layout->DEMOD_MODE_MASK.x + 1,
+            ts.Layout->DEMOD_MODE_MASK.y + 2,
+            ts.Layout->DEMOD_MODE_MASK.w - 2,
+            txt,
+            color, Black,
+            0
+    );
 }
 
 /**
@@ -2528,58 +2504,62 @@ void UiDriver_DisplayMemoryLabel() {
  * Display the ham or broadcast band name of the currently selected band
  * @param band the band id, last band id is BAND_MODE_GEN, which is everything outside ham bands
  */
-static void UiDriver_DisplayBand(const BandInfo* band)
-{
+static void UiDriver_DisplayBand(const BandInfo* band) {
 
-	if (band != NULL)
-	{
+	if (band != NULL) {
 	    const char* bandName;
 	    bool print_bc_name = true;
 
 		uint16_t col = Orange; // default color for non-bc band
 
 		// only if we are not in a ham band, we check the name of a broadcast band
-		if (RadioManagement_IsGenericBand(band))
-		{
+		if (RadioManagement_IsGenericBand(band)) {
 		    int idx;
-			for (idx = 0; bandGenInfo[idx].start !=0; idx++)
-			{
-				if (df.tune_old >= bandGenInfo[idx].start && df.tune_old < bandGenInfo[idx].end)
-				{
+
+			for (idx = 0; bandGenInfo[idx].start !=0; idx++) {
+				if (df.tune_old >= bandGenInfo[idx].start && df.tune_old < bandGenInfo[idx].end) {
 					break; // found match
 				}
 			}
 
-			if (bandGenInfo[idx].start !=0)
-			{
+			if (bandGenInfo[idx].start !=0) {
 				// Print name of BC band in yellow, if frequency is within a broadcast band
 				col = Yellow;
 			}
 
-			if  (bandGenInfo[idx].start == 26965000)
-			{
+			if  (bandGenInfo[idx].start == 26965000) {
 				col = Blue;		// CB radio == blue
 			}
 
-			if (idx == ts.bc_band)
-			{
+			if (idx == ts.bc_band) {
 				print_bc_name = false;
 			}
 
-			ts.bc_band =idx;
+			ts.bc_band = idx;
 
 			bandName = bandGenInfo[idx].name;
-		}
-		else
-		{
+		} else {
 			print_bc_name = true;
 			bandName = band->name;
 			ts.bc_band = 0xff;
 		}
-		if (print_bc_name)
-		{
-			UiLcdHy28_DrawFullRect(ts.Layout->BAND_MODE_MASK.x,ts.Layout->BAND_MODE_MASK.y,ts.Layout->BAND_MODE_MASK.h,ts.Layout->BAND_MODE_MASK.w,Black);
-			UiLcdHy28_PrintTextRight(ts.Layout->BAND_MODE.x + 5*8,ts.Layout->BAND_MODE.y,bandName,col,Black,0);
+
+		if (print_bc_name) {
+			UiLcdHy28_DrawFullRect(
+			    ts.Layout->BAND_MODE_MASK.x,
+			    ts.Layout->BAND_MODE_MASK.y,
+			    ts.Layout->BAND_MODE_MASK.h,
+			    ts.Layout->BAND_MODE_MASK.w,
+			    Black
+			);
+
+			UiLcdHy28_PrintTextRight(
+			    ts.Layout->BAND_MODE.x + ts.Layout->BAND_MODE_MASK.w,
+			    ts.Layout->BAND_MODE.y,
+			    bandName,
+			    col, Black,
+			    0
+			);
 		}
 	}
 }
@@ -4968,62 +4948,94 @@ uint32_t UiDriver_GetActiveDSPFunctions()
 }
 
 static void UiDriver_DisplayDSPMode() {
-	uint32_t clr = White;
-	uint32_t clr_val = White;
-
-	char val_txt[7] = { 0x0 };
-	bool txt_is_value = false;
-	const char* txt[2] = { "DSP", NULL };
-
-	UiVk_Redraw();			//virtual keypads call (refresh purpose)
+    uint32_t    color = White;
+	char*       txt;
 
 	switch (ts.dsp.mode) {
         case DSP_SWITCH_OFF:
-            clr = Grey2;
-            txt[1] = "OFF";
+            color = Grey5;
+            txt = "DSP OFF";
             break;
 
         case DSP_SWITCH_NR:
-            txt[0] = "NR";
-            snprintf(val_txt,7,"%5u", ts.dsp.nr_strength);
-            txt[1] = val_txt;
-            txt_is_value = true;
+            txt = "NR";
             break;
 
         case DSP_SWITCH_ANR:
-            txt[1] = "ANR";
+            txt = "A-NR";
             break;
 
         case DSP_SWITCH_NOTCH:
-            txt[1] = "A-NOTCH";
+            txt = "A-NOTCH";
             break;
 
         case DSP_SWITCH_NR_AND_NOTCH:
-            txt[0] = "NR+NOTC";
-            snprintf(val_txt,7,"%5u", ts.dsp.nr_strength);
-            txt[1] = val_txt;
-            txt_is_value = true;
+            txt = "NR+NOTCH";
             break;
 
         case DSP_SWITCH_NOTCH_MANUAL:
-            txt[0] = "M-NOTCH";
-            snprintf(val_txt,7,"%5lu", ts.dsp.notch_frequency);
-            txt[1] = val_txt;
-            txt_is_value = true;
+            txt = "NOTCH";
             break;
 
         case DSP_SWITCH_PEAK_FILTER:
-            txt[0] = "PEAK";
-            snprintf(val_txt,7,"%5lu", ts.dsp.peak_frequency);
-            txt[1] = val_txt;
-            txt_is_value = true;
+            txt = "PEAK";
             break;
 
         default:
+            txt = "???";
             break;
     }
 
-	UiDriver_LeftBoxDisplay(0, txt[0], ENC_STATE_NORM, txt[1], clr, clr_val, txt_is_value);
+	UiLcdHy28_DrawEmptyRect(
+        ts.Layout->DSP_IND.x,
+        ts.Layout->DSP_IND.y,
+        ts.Layout->DSP_IND.h,
+        ts.Layout->DSP_IND.w,
+        sd.boxes_colour
+    );
+
+    UiLcdHy28_PrintTextCentered(
+            ts.Layout->DSP_IND.x + 1,
+            ts.Layout->DSP_IND.y + 2,
+            ts.Layout->DSP_IND.w - 2,
+            txt,
+            color, Black,
+            0
+    );
+
+}
+
+static UiDriver_DisplayStateAGC() {
+    uint16_t color = Grey5;
+
+    /*
+    if (agc_wdsp_conf.hang_action == 1 && agc_wdsp_conf.hang_enable == 1) {
+        color = Green;
+    } else {
+       color = Yellow;
+    }
+    */
+
+    if (agc_wdsp_conf.action == 1) {
+        color = White;
+    }
+
+    UiLcdHy28_DrawEmptyRect(
+        ts.Layout->AGC_MASK.x,
+        ts.Layout->AGC_MASK.y,
+        ts.Layout->AGC_MASK.h,
+        ts.Layout->AGC_MASK.w,
+        sd.boxes_colour
+    );
+
+    UiLcdHy28_PrintTextCentered(
+            ts.Layout->AGC_MASK.x + 1,
+            ts.Layout->AGC_MASK.y + 2,
+            ts.Layout->AGC_MASK.w - 2,
+            "AGC",
+            color, Black,
+            0
+    );
 }
 
 static void UiDriver_DisplayNotch(uint8_t enc, uint8_t style) {
@@ -5343,56 +5355,53 @@ static void UiDriver_DisplayModulationType() {
  * @param txt_len length of txt array
  * @param power_mW power value, if 0 result is "FULL"
  */
-void UiDriver_Power2String(char* txt, size_t txt_len,uint32_t power_mW)
-{
-    if (power_mW == 0 )
-    {
-        snprintf(txt,txt_len,"FULL");
-    }
-    else if (power_mW < 100)
-    {
-        snprintf(txt,txt_len,"%ldmW",power_mW);
-    }
-    else if (power_mW < 1000)
-    {
-        snprintf(txt,txt_len,"0.%ldW",power_mW/100);
-    }
-    else
-    {
-        snprintf(txt,txt_len,"%ldW",power_mW/1000);
+void UiDriver_Power2String(char* txt, size_t txt_len, uint32_t power_mW) {
+    if (power_mW == 0 ) {
+        snprintf(txt, txt_len, "FULL");
+    } else if (power_mW < 100) {
+        snprintf(txt, txt_len, "%ldmW", power_mW);
+    } else if (power_mW < 1000) {
+        snprintf(txt, txt_len, "0.%ldW", power_mW / 100);
+    } else {
+        snprintf(txt, txt_len, "%ldW", power_mW / 1000);
     }
 }
 
-static void UiDriver_DisplayPowerLevel()
-{
-    uint16_t fg_clr = White;
+static void UiDriver_DisplayPowerLevel() {
     char txt[5];
 
-    UiDriver_Power2String(txt,sizeof(txt),ts.power);
+    UiDriver_Power2String(txt, sizeof(txt), ts.power);
 
-//    uint16_t bg_clr = Blue; // normal operation
-    uint16_t bg_clr = sd.boxes_colour; // normal operation
+    uint16_t color = White; // normal operation
 
-    if (RadioManagement_IsTxDisabled() == true)
-    {
+    if (RadioManagement_IsTxDisabled()) {
         // we'll not transmit, power is irrelevant
-        bg_clr = Grey;
-        fg_clr = Grey4;
-    }
-    else if (ts.tx_power_factor == 0)
-    {
+        color = Grey5;
+    } else if (ts.tx_power_factor == 0) {
         // no output at all will be generate with power factor 0
         // probably not calibrated PA
-        bg_clr = Red;
-    }
-    else if (ts.power_modified == true)
-    {
+        color = Red;
+    } else if (ts.power_modified) {
         // transmit p, power is irrelevant
-        bg_clr = Orange;
-        fg_clr = Grey4;
+        color = Orange;
     }
 
-	UiLcdHy28_PrintTextCentered((ts.Layout->PW_IND.x),(ts.Layout->PW_IND.y),ts.Layout->PW_IND.w,txt,fg_clr,bg_clr,0);
+	UiLcdHy28_DrawEmptyRect(
+        ts.Layout->PW_IND.x,
+        ts.Layout->PW_IND.y,
+        ts.Layout->PW_IND.h,
+        ts.Layout->PW_IND.w,
+        sd.boxes_colour
+    );
+
+    UiLcdHy28_PrintTextCentered(
+            ts.Layout->PW_IND.x + 1,
+            ts.Layout->PW_IND.y + 2,
+            ts.Layout->PW_IND.w - 2,
+            txt,
+            color, Black,
+            0
+    );
 }
 
 static void UiDriver_DisplayDbm(void) {
@@ -8836,37 +8845,9 @@ void UiDriver_TaskHandler_MainTasks()
 				{
 					//UiDriver_UpdateLcdFreq(ads.snap_carrier_freq, Green, UFM_SECONDARY);
 				}
-		// display AGC box and AGC state
-				// we have 5 states -> We can collapse 1 and 2 -> you see this in the box title anyway
-				// we use an asterisk to indicate action
-				// 1 OFF -> WDSP AGC not active
-				// 2 ON + NO_HANG + NO ACTION		no asterisk
-				// 3 ON + HANG_ACTION + NO ACTION 	white asterisk
-				// 4 ON + ACTION                	green asterisk
-				// 5 ON + ACTION + HANG_ACTION  	blue asterisk
-				const char* txt = "   ";
-				uint16_t AGC_bg_clr = Black;
-				uint16_t AGC_fg_clr = Black;
+                UiDriver_DisplayStateAGC();
 
-				if(agc_wdsp_conf.hang_action == 1 && agc_wdsp_conf.hang_enable == 1)
-				{
-					AGC_bg_clr = White;
-					AGC_fg_clr = Black;
-				}
-				else
-				{
-//					AGC_bg_clr = Blue;
-				    AGC_bg_clr = sd.boxes_colour;
-					AGC_fg_clr = White;
-				}
-				if(agc_wdsp_conf.action == 1)
-				{
-					txt = "AGC";
-				}
-
-//				UiLcdHy28_PrintTextCentered(ts.Layout->DEMOD_MODE_MASK.x - 41,ts.Layout->DEMOD_MODE_MASK.y,ts.Layout->DEMOD_MODE_MASK.w-6,txt,AGC_fg_clr,AGC_bg_clr,0);
 #ifndef SDR_AMBER
-				UiLcdHy28_PrintTextCentered(ts.Layout->AGC_MASK.x,ts.Layout->AGC_MASK.y,ts.Layout->AGC_MASK.w,txt,AGC_fg_clr,AGC_bg_clr,0);
 #else
 	#ifndef SDR_AMBER_480_320
 				if(!ts.show_wide_spectrum)

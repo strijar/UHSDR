@@ -39,7 +39,6 @@ typedef struct
     const int16_t SCOPE_GRID_HORIZ;
 } pos_spectrum_display_t;
 
-
 SpectrumAreas_t slayout;
 
 // full area =      x[const]=58,                y[const]= 128,                          w[const]= 262,                  h[const]=94
@@ -644,21 +643,11 @@ static void UiSpectrum_CreateDrawArea(void)
 //				RGB((COL_SPECTRUM_GRAD*2),(COL_SPECTRUM_GRAD*2),(COL_SPECTRUM_GRAD*2)),
 				RGB(64,64,64),
 				0);
-    }
-    else
-    {
+    } else {
         char fwmltext[3];
         sprintf(fwmltext,"x%u ", (1<<sd.magnify));
-//		UiLcdHy28_PrintText(292,118,fwmltext,Blue,Black,0);
-#ifndef SDR_AMBER_480_320
-	#ifndef OVI40_MOD_480_320
-        UiLcdHy28_PrintText(292,118 + (!ts.show_wide_spectrum?0:6),fwmltext,Blue,Black,0);
-	#else
-        UiLcdHy28_PrintText(452,107 + (!ts.show_wide_spectrum?0:6),fwmltext,Blue,Black,0);
-	#endif
-#else
-        UiLcdHy28_PrintText(452,107 + (!ts.show_wide_spectrum?0:6),fwmltext,Blue,Black,0);
-#endif
+
+        UiLcdHy28_PrintText(ts.Layout->Size.x - 28, ts.Layout->SpectrumWindow.y - 10, fwmltext, Blue, Black, 4);
     }
 
     // Horizontal grid lines
@@ -1641,17 +1630,10 @@ void UiSpectrum_Init()
     UiSpectrum_Clear();         // clear display under spectrum scope
     UiSpectrum_CreateDrawArea();
     UiSpectrum_DisplayFilterBW();	// Update on-screen indicator of filter bandwidth
-    if(ts.show_wide_spectrum && ts.spectrum_size == SPECTRUM_BIG)
-    {
-        UiLcdHy28_DrawStraightLine(0, 136, 320, LCD_DIR_HORIZONTAL, sd.scope_grid_colour_active);
+
+    if (ts.spectrum_size == SPECTRUM_BIG) {
+        UiLcdHy28_DrawStraightLine(0, ts.Layout->SpectrumWindow.y, ts.Layout->Size.x, LCD_DIR_HORIZONTAL, sd.scope_grid_colour_active);
     }
-    //Test
-#ifdef SDR_AMBER_480_320
-    if(ts.spectrum_size == SPECTRUM_BIG)
-    {
-        UiLcdHy28_DrawStraightLine(0, 123, 480, LCD_DIR_HORIZONTAL, sd.scope_grid_colour_active);
-    }
-#endif
 }
 /**
  * @brief Calculate parameters for display filter bar. This function is used also for spectrum BW highlight.

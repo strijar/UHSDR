@@ -89,6 +89,8 @@ typedef struct {
 
     UiArea_t INFO_BAR;              // Information bar
 	UiArea_t BOTTOM_BAR;			// Bottom bar
+	UiArea_t FILTER_IND;
+	UiArea_t DSP_IND;
 
 	UiCoord_t ENCODER_IND;			// Encoder controls indicator
 	uint8_t ENCODER_MODE;			//horizontal/vertical draw order
