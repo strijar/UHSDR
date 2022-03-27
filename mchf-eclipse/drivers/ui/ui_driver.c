@@ -67,6 +67,8 @@
 #define SPLIT_ACTIVE_COLOUR         		Yellow      // colour of "SPLIT" indicator when active
 #define SPLIT_INACTIVE_COLOUR           	Grey        // colour of "SPLIT" indicator when NOT active
 
+#define TOUCH_SHOW_REGIONS_AND_POINTS       //this definition enables the drawing of boxes of regions and put the pixel in touch point
+
 static void     UiDriver_CreateMeters(void);
 static void     UiDriver_DeleteMeters(void);
 static void 	UiDriver_UpdateMeterRX(uchar val);
@@ -120,7 +122,7 @@ static void 	UiDriver_HandleSMeter(void);
 static void 	UiDriver_HandleTXMeters(void);
 static bool     UiDriver_HandleVoltage(void);
 
-static void     UiDriver_CreateInfoBarDisplay(void);
+static void     UiDriver_CreateSomeKindDisplay(void);
 
 static void 	UiDriver_HandleLoTemperature(void);
 
@@ -613,7 +615,7 @@ void UiDriver_TextMsgClear() {
         ts.Layout->TextMsgLine.x,
         ts.Layout->TextMsgLine.y,
         ui_txt_msg_buffer,
-        sd.txtline_colour, Black,
+        sd.txtline_colour, sd.boxes_colour,
         ts.Layout->TextMsg_font
     );
 
@@ -638,7 +640,7 @@ void UiDriver_TextMsgDisplay() {
             ts.Layout->TextMsgLine.x,
             ts.Layout->TextMsgLine.y,
             ui_txt_msg_buffer,
-            sd.txtline_colour, Black,
+            sd.txtline_colour, sd.boxes_colour,
             ts.Layout->TextMsg_font
         );
     }
@@ -2693,7 +2695,7 @@ static void UiDriver_CreateDesktop(void)
 	UiDriver_UpdateDisplayAfterParamChange();
 
     UiDriver_CreateMeters();
-    UiDriver_CreateInfoBarDisplay();
+    UiDriver_CreateSomeKindDisplay();
 
 	// Backlight on - only when all is drawn
 	UiLcdHy28_BacklightEnable(true);
@@ -3915,15 +3917,6 @@ static void UiDriver_TxRxUiSwitch(enum TRX_States_t state) {
     }
 
     if ((ts.menu_mode)) {              // update menu when we are (or WERE) in MENU mode
-#ifndef SDR_AMBER_480_320
-	#ifndef	OVI40_MOD_480_320
-		if (ts.show_wide_spectrum) { UiLcdHy28_PrintTextCentered(0, 175, 79," SETUP  ",Blue,Black,0); }
-	#else
-		UiLcdHy28_PrintTextCentered(0, 205, 130," SETUP  ",Blue,Black,0);
-	#endif
-#else
-		UiLcdHy28_PrintTextCentered(0, 205, 130," SETUP  ",Blue,Black,0);
-#endif
 		UiMenu_RenderMenu(MENU_RENDER_ONLY);
 	}
 }
@@ -5695,12 +5688,26 @@ static void UiDriver_HandleTXMeters(void)
 	}
 }
 
-static void UiDriver_CreateInfoBarDisplay() {
+static void UiDriver_CreateSomeKindDisplay() {
     UiLcdHy28_DrawFullRect(
         ts.Layout->INFO_BAR.x,
         ts.Layout->INFO_BAR.y,
         ts.Layout->INFO_BAR.h,
         ts.Layout->INFO_BAR.w,
+        sd.boxes_colour);
+
+    UiLcdHy28_DrawFullRect(
+        ts.Layout->MID_BAR.x,
+        ts.Layout->MID_BAR.y,
+        ts.Layout->MID_BAR.h,
+        ts.Layout->MID_BAR.w,
+        sd.boxes_colour);
+
+    UiLcdHy28_DrawEmptyRect(
+        ts.Layout->TUNE_BOX.x,
+        ts.Layout->TUNE_BOX.y,
+        ts.Layout->TUNE_BOX.h,
+        ts.Layout->TUNE_BOX.w,
         sd.boxes_colour);
 }
 
@@ -7207,38 +7214,13 @@ void UiAction_ChangeBandUpOrDown()
 static void UiAction_SaveConfigurationToMemory(void)
 {
 	if(ts.txrx_mode == TRX_MODE_RX)	 				// only allow EEPROM write in receive mode
-//	{
-//		UiDriver_DisplayMessageStart();
-//		UiDriver_SaveConfiguration();
-//		HAL_Delay(3000);
-//        UiDriver_DisplayMessageStop();
-//
-//		ts.menu_var_changed = 0;                    // clear "EEPROM SAVE IS NECESSARY" indicators
-//		UiDriver_DisplayFButton_F1MenuExit();
-//	}
 	{
-	    if(ts.menu_var_changed != 0)
-        {
+	    if (ts.menu_var_changed != 0) {
             UiDriver_DisplayMessageStart();
             UiDriver_SaveConfiguration();
             HAL_Delay(3000);
             UiDriver_DisplayMessageStop();
-			if(!ts.show_wide_spectrum)
-			{
-#ifndef SDR_AMBER_480_320
-	#ifndef OVI40_MOD_480_320
-				// Do nothing
-	#else
-//				UiLcdHy28_PrintTextCentered(0, 205, 130," SETUP  ",Blue,Black,0);
-	#endif
-#else
-//				UiLcdHy28_PrintTextCentered(0, 205, 130," SETUP  ",Blue,Black,0);
-#endif
-			}
-			else if(ts.menu_mode)
-			{
-				UiLcdHy28_PrintTextCentered(0, 175, 79," SETUP  ",Blue,Black,0);
-			}
+
             ts.menu_var_changed = 0;                    // clear "EEPROM SAVE IS NECESSARY" indicators
             UiDriver_DisplayFButton_F1MenuExit();
         }
@@ -7259,39 +7241,68 @@ static void UiAction_SaveConfigurationToMemory(void)
 	}
 }
 
-static void UiDriver_DrawGraticule_Rect(bool show)
-{
-	uint16_t pos_y=sd.Slayout->graticule.y;
-	if(show)
-	{
+static void UiDriver_DrawGraticule_Rect(bool show) {
+	uint16_t pos_y = sd.Slayout->graticule.y;
 
-		UiLcdHy28_PrintText(sd.Slayout->graticule.x+5,pos_y+4,"CHOOSE NEW POSITION",White,Black,4);
-		UiLcdHy28_PrintText(sd.Slayout->graticule.x+sd.Slayout->graticule.w-65,pos_y+4,"| OK |",Green,Black,4);
-		UiLcdHy28_PrintText(sd.Slayout->graticule.x+sd.Slayout->graticule.w-20,pos_y+4,"X",Orange,Black,4);
-		UiLcdHy28_DrawEmptyRect(sd.Slayout->graticule.x+1,pos_y+1,sd.Slayout->graticule.h-3,sd.Slayout->graticule.w-3,White);
-	}
-	else
-	{
-		//clear the graticule area
-		UiLcdHy28_DrawFullRect(sd.Slayout->graticule.x+1,pos_y+1,sd.Slayout->graticule.h-2,sd.Slayout->graticule.w-2,Black);
+	if (show) {
+		UiLcdHy28_PrintText(
+		    sd.Slayout->graticule.x+5,
+		    pos_y+4,
+		    "CHOOSE NEW POSITION",
+		    White, Black,
+		    4
+		);
+
+		UiLcdHy28_PrintText(
+		    sd.Slayout->graticule.x+sd.Slayout->graticule.w-65,
+		    pos_y+4,
+		    "| OK |",
+		    Green, Black,
+		    4
+		);
+
+		UiLcdHy28_PrintText(
+		    sd.Slayout->graticule.x+sd.Slayout->graticule.w-20,
+		    pos_y+4, "X",
+		    Orange, Black,
+		    4
+		);
+
+		UiLcdHy28_DrawEmptyRect(
+		    sd.Slayout->graticule.x+1,
+		    pos_y+1,
+		    sd.Slayout->graticule.h-3,
+		    sd.Slayout->graticule.w-3,
+		    White
+		);
+	} else {
+		UiLcdHy28_DrawFullRect(
+		   sd.Slayout->graticule.x+1,
+		   pos_y+1,
+		   sd.Slayout->graticule.h-2,
+		   sd.Slayout->graticule.w-2,
+		   Black
+		);
 	}
 }
 
 /*
  * Special actions for long pressed spectrum/waterfall area
  */
-void UiAction_CheckSpectrumTouchActions()
-{
-	//UiArea_t* ScGRAT_area=UiSpectrum_GetSpectrumGraticule();	//fetch the current scope graticule area pointer
-
-	if(UiDriver_CheckTouchRegion(&sd.Slayout->graticule)			//check for spectrum/waterfall size ratio change
-			&&ts.txrx_mode == TRX_MODE_RX)
-	{
-		if(ts.SpectrumResize_flag==0)
-		{
+void UiAction_CheckSpectrumTouchActions() {
+	if (UiDriver_CheckTouchRegion(&sd.Slayout->graticule) && ts.txrx_mode == TRX_MODE_RX) {
+		if (ts.SpectrumResize_flag == 0) {
 			UiSpectrum_Clear();
 			UiDriver_DrawGraticule_Rect(true);		//draw new graticule control
-			UiLcdHy28_DrawEmptyRect(sd.Slayout->full.x,sd.Slayout->full.y,sd.Slayout->full.h-1,sd.Slayout->full.w-1,White);
+
+			UiLcdHy28_DrawEmptyRect(
+			    sd.Slayout->full.x,
+			    sd.Slayout->full.y,
+			    sd.Slayout->full.h-1,
+			    sd.Slayout->full.w-1,
+			    White
+			);
+
 			ts.SpectrumResize_flag=1;
 			return;
 		}
@@ -7751,9 +7762,8 @@ static void UiAction_ToggleSplitModeOrToggleMemMode(void)
 	}
 }
 
-static void UiAction_ToggleMenuMode(void)
-{
-	if(!ts.mem_disp)	 			// allow only if NOT in memory display mode
+static void UiAction_ToggleMenuMode(void) {
+	if (!ts.mem_disp)	 			// allow only if NOT in memory display mode
 	{
 		if(ts.menu_mode == false)	 	// go into menu mode if NOT already in menu mode and not to halt on startup
 		{
@@ -7762,34 +7772,17 @@ static void UiAction_ToggleMenuMode(void)
 			filter_path_change = false;			// deactivate while in menu mode
 			UiDriver_DisplayFilter();
 			UiSpectrum_Clear();
-			if(!ts.show_wide_spectrum)
-			{
-#ifndef SDR_AMBER_480_320
-	#ifndef OVI40_MOD_480_320
-				// Do nothing
-	#else
-				UiLcdHy28_PrintTextCentered(0, 205, 130," SETUP  ",Blue,Black,0);
-	#endif
-#else
-				UiLcdHy28_PrintTextCentered(0, 205, 130," SETUP  ",Blue,Black,0);
-#endif
-			}
-			else
-			{
-				UiLcdHy28_PrintTextCentered(0, 175, 79," SETUP  ",Blue,Black,0);
-			}
+
 			UiDriver_DisplayFButton_F1MenuExit();
 			UiDriver_DrawFButtonLabel(2,"PREV",Yellow);
 			UiDriver_DrawFButtonLabel(3,"NEXT",Yellow);
 			UiDriver_DrawFButtonLabel(4,"DEFLT",Yellow);
-			//
-			//
+
 			// Grey out adjustments and put encoders in known states
-			//
 			UiDriver_RefreshEncoderDisplay();
 
 			ts.menu_var = 0;
-			//
+
 			UiMenu_RenderMenu(MENU_RENDER_ONLY);	// Draw the menu the first time
 			UiMenu_RenderMenu(MENU_PROCESS_VALUE_CHANGE);	// Do update of the first menu item
 		}
@@ -8056,49 +8049,48 @@ static void UiAction_StepPlusHold(void)
 	}
 }
 
-static bool UiDriver_Process_WFscope_RatioChange(void)
-{
-	bool TouchProcessed=false;
+static bool UiDriver_Process_WFscope_RatioChange(void) {
+	bool TouchProcessed = false;
 
-	UiArea_t OKArea;
-	OKArea.x=sd.Slayout->graticule.x+sd.Slayout->graticule.w-65;
-	OKArea.y=sd.Slayout->graticule.y;
-	OKArea.h=sd.Slayout->graticule.h;
-	OKArea.w=25;
-	UiArea_t ExitArea;
-	ExitArea.x=sd.Slayout->graticule.x+sd.Slayout->graticule.w-30;
-	ExitArea.y=sd.Slayout->graticule.y;
-	ExitArea.h=sd.Slayout->graticule.h;
-	ExitArea.w=30;
+	UiArea_t OKArea = {
+	    .x = sd.Slayout->graticule.x + sd.Slayout->graticule.w - 65,
+	    .y = sd.Slayout->graticule.y,
+	    .h = sd.Slayout->graticule.h,
+	    .w = 25
+	};
 
-	if(UiDriver_CheckTouchRegion(&OKArea))
-	{
-		ts.SpectrumResize_flag=0;
-		ts.graticulePowerupYpos=sd.Slayout->graticule.y;		//store current graticule position for future eeprom save
-		UiDriver_DisplayFButton_F1MenuExit();		//redraw the menu button to indicate the changed item
-		ts.menu_var_changed=1;
+	UiArea_t ExitArea = {
+	    .x = sd.Slayout->graticule.x + sd.Slayout->graticule.w - 30,
+	    .y = sd.Slayout->graticule.y,
+	    .h = sd.Slayout->graticule.h,
+	    .w = 30
+	};
+
+	if (UiDriver_CheckTouchRegion(&OKArea)) {
+		ts.SpectrumResize_flag = 0;
+		ts.graticulePowerupYpos = sd.Slayout->graticule.y;		//store current graticule position for future eeprom save
+		UiDriver_DisplayFButton_F1MenuExit();		            //redraw the menu button to indicate the changed item
+		ts.menu_var_changed = 1;
 		ts.flags1 |= FLAGS1_SCOPE_ENABLED;
 		ts.flags1 |= FLAGS1_WFALL_ENABLED;
+
 		UiSpectrum_Init();
-		TouchProcessed=true;
-	}
-	else if(UiDriver_CheckTouchRegion(&ExitArea))
-	{
-		ts.SpectrumResize_flag=0;
+		TouchProcessed = true;
+	} else if (UiDriver_CheckTouchRegion(&ExitArea)) {
+		ts.SpectrumResize_flag = 0;
+
 		UiSpectrum_Init();
-		TouchProcessed=true;
-	}
-	else if(UiDriver_CheckTouchRegion(&sd.Slayout->full))
-	{
-		UiDriver_DrawGraticule_Rect(false); 	 //clear graticule current area
-		sd.Slayout->graticule.y=UiSprectrum_CheckNewGraticulePos(ts.tp->hr_y);
-		UiDriver_DrawGraticule_Rect(true);		//draw new graticule control
-		TouchProcessed=true;
+		TouchProcessed = true;
+	} else if (UiDriver_CheckTouchRegion(&sd.Slayout->full)) {
+		UiDriver_DrawGraticule_Rect(false);
+		sd.Slayout->graticule.y = UiSprectrum_CheckNewGraticulePos(ts.tp->hr_y);
+		UiDriver_DrawGraticule_Rect(true);
+
+		TouchProcessed = true;
 	}
 
 	return TouchProcessed;
 }
-#define TOUCH_SHOW_REGIONS_AND_POINTS	//this definition enables the drawing of boxes of regions and put the pixel in touch point
 
 #ifdef SDR_AMBER
 static void UiAction_ToggleIllumButt(void)
@@ -8122,23 +8114,20 @@ static void UiAction_ToggleIllumButt(void)
 }
 #endif
 
-static void UiDriver_HandleTouchScreen(bool is_long_press)
-{
-	if(!(ts.disabled_tp) && is_touchscreen_pressed())
-	{
-		uint32_t touchaction_idx = ts.menu_mode == true?1:0;
+static void UiDriver_HandleTouchScreen(bool is_long_press) {
+	if (!(ts.disabled_tp) && is_touchscreen_pressed()) {
+		uint32_t touchaction_idx = ts.menu_mode ? 1 : 0;
 
-		if (ts.show_debug_info)					// show coordinates for coding purposes
-		{
+		if (ts.show_debug_info) {					// show coordinates for coding purposes
 			char text[14];
-			snprintf(text,14,"%04d%s%04d%s",ts.tp->hr_x," : ",ts.tp->hr_y,"  ");
+			snprintf(text, sizeof(text), "%04d : %04d ", ts.tp->hr_x, ts.tp->hr_y);
 
     #ifdef TOUCH_SHOW_REGIONS_AND_POINTS
-			UiLcdHy28_DrawColorPoint(ts.tp->hr_x,ts.tp->hr_y,White);
+			UiLcdHy28_DrawColorPoint(ts.tp->hr_x, ts.tp->hr_y, White);
 
-			uint16_t x,y,w,h;
-			for(int n=0;n<ts.Layout->touchaction_list[touchaction_idx].size;n++)
-			{
+			uint16_t x, y, w, h;
+
+			for (int n=0; n<ts.Layout->touchaction_list[touchaction_idx].size; n++) {
 				x=ts.Layout->touchaction_list[touchaction_idx].actions[n].region.x;
 				y=ts.Layout->touchaction_list[touchaction_idx].actions[n].region.y;
 				w=ts.Layout->touchaction_list[touchaction_idx].actions[n].region.w;
@@ -8146,24 +8135,18 @@ static void UiDriver_HandleTouchScreen(bool is_long_press)
 				UiLcdHy28_DrawEmptyRect(x,y,h,w,Red);
 			}
     #endif
-
-
-			UiLcdHy28_PrintText(0,ts.Layout->LOADANDDEBUG_Y,text,White,Black,0);
+			UiLcdHy28_PrintText(0, ts.Layout->LOADANDDEBUG_Y, text, White, Black, 0);
 		}
 
-		bool TouchProcessed=0;
-		if(ts.SpectrumResize_flag==true
-				&& ts.menu_mode==0)
-		{
-			TouchProcessed=UiDriver_Process_WFscope_RatioChange();
-		}
-		else if(ts.VirtualKeysShown_flag)
-		{
-			TouchProcessed=UiVk_Process_VirtualKeypad(is_long_press);
+		bool TouchProcessed = 0;
+
+		if (ts.SpectrumResize_flag && ts.menu_mode==0) {
+			TouchProcessed = UiDriver_Process_WFscope_RatioChange();
+		} else if(ts.VirtualKeysShown_flag) {
+			TouchProcessed = UiVk_Process_VirtualKeypad(is_long_press);
 		}
 
-		if(!TouchProcessed)
-		{
+		if (!TouchProcessed) {
 			UiDriver_ProcessTouchActions(&ts.Layout->touchaction_list[touchaction_idx], is_long_press);
 		}
 

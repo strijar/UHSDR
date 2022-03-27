@@ -278,9 +278,7 @@ typedef struct SpectrumDisplay
 // Spectrum display
 extern SpectrumDisplay      sd;
 
-//#define MinimumScopeSize 24
-#define MinimumScopeSize 46
-#define MinimumWaterfallSize 16
-
+#define MinimumScopeSize        24
+#define MinimumWaterfallSize    16
 
 #endif

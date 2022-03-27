@@ -659,7 +659,7 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 		{		//320x240_wide_spectrum
 				.Size = { 320, 240 },
 				.StartUpScreen_START = { 0, 10 },
-				.SpectrumWindow = { .x = 4, .y = 136-32, .w = 312, .h = 89+32 },
+				.SpectrumWindow = { .x = 4, .y = 136-34, .w = 312, .h = 89+34 },
 				.SpectrumWindowPadding = 0,
 
                 // 1 line
@@ -687,7 +687,11 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
                 .FILTER_IND = { .x = 0,  .y = 12 + 28 + 2, .w = 82, .h = 30 },
                 .PW_IND = { .x = 82 + 2, .y = 12 + 28 + 2, .w = 40, .h = 14 },
                 .DEMOD_MODE_MASK = { .x = 82 + 2, .y = 12 + 28 + 2 + 14 + 2, .w = 40, .h = 14 },
+                .TUNE_BOX = {.x = 126, .y = 12 + 28 + 2, .w = 191 + 2, .h = 30 + 14 + 2 },
                 .TUNE_FREQ = { 126 + 10, 12 + 28 + 2 + 5},
+                .TUNE_SPLIT_FREQ_X = 196 + 20,
+                .TUNE_SPLIT_FREQ_Y_TX = (12 + 28 + 2 + 5) + 12,
+                .TUNE_SPLIT_MARKER_X = 196,
 
                 // 4 line
 
@@ -699,17 +703,23 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
                 .BAND_MODE_MASK = { .x = 320 - 55, .y = 12 + (28 + 2) + (14 + 2) + (14 + 2) - 1, .h = 14, .w = 30 },
 
                 // 5 line
-                .CW_DECODER_WPM = { 0, 12 + (28 + 2) + (14 + 2) + (14 + 2) + (14 + 2) + 2 },
 
-                .TextMsgLine = { 50, 12 + (28 + 2) + (14 + 2) + (14 + 2) + (14 + 2) + 2},
-                .TextMsg_buffer_max = 32,
+                .MID_BAR = {.x = 0, .y = 12 + (28 + 2) + (14 + 2) + (14 + 2) + (14 + 2), .h = 11, .w = 320 },
+                .CW_DECODER_WPM = { 0, 12 + (28 + 2) + (14 + 2) + (14 + 2) + (14 + 2) + 1 },
+                .TextMsgLine = { 50, 12 + (28 + 2) + (14 + 2) + (14 + 2) + (14 + 2) + 1},
+                .TextMsg_buffer_max = 38,
                 .TextMsg_font = 4,
+
+                // Menu
+
+                .MENUSIZE = 9,
+                .MENU_IND = { 10, (136 - 32) + 8 },
+                .MENU_CHANGE_X = 244,
+                .MENU_CURSOR_X = 310,
+                .MENU_TEXT_SIZE_MAX = 40,
 
                 //
 
-				.TUNE_SPLIT_FREQ_X = 196,
-				.TUNE_SPLIT_MARKER_X = 167,
-				.TUNE_SPLIT_FREQ_Y_TX = 121,
 #ifndef SDR_AMBER
 #else
 				.AGC_MASK = { .x = 74, .y = 86, .h = 13, .w = 80 },
@@ -732,12 +742,6 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 				.FREEDV_FONT = 4,
 
 				.BOTTOM_BAR = { .x = 2, .y = 231, .h = 13, .w=62 },
-
-				.MENUSIZE = 7,
-				.MENU_IND = { 60, 140 },
-				.MENU_CHANGE_X = 244,
-				.MENU_CURSOR_X = 310,
-				.MENU_TEXT_SIZE_MAX = 34,
 
 				.touchaction_list = R320240__touch_regions_widespectrum
 		}

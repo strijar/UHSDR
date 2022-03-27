@@ -42,6 +42,7 @@
 #include "uhsdr_board.h"
 #include "ui_lcd_layouts.h"
 #include "ui_driver.h"
+#include "ui_spectrum.h"
 #include "cw_decoder.h"
 #include "audio_driver.h"
 #include "rtty.h"
@@ -1078,25 +1079,34 @@ void CW_Decode(void)
 	}
 }
 
+extern SpectrumDisplay  sd;
+
 void CwDecoder_WpmDisplayClearOrPrepare(bool prepare) {
-    UiLcdHy28_PrintText(
-        ts.Layout->CW_DECODER_WPM.x,
-        ts.Layout->CW_DECODER_WPM.y,
-        " --",
-        White, Black,
-        4
-    );
+    if (prepare) {
+        UiLcdHy28_PrintText(
+            ts.Layout->CW_DECODER_WPM.x,
+            ts.Layout->CW_DECODER_WPM.y,
+            " --",
+            White, sd.boxes_colour,
+            4
+        );
 
-    UiLcdHy28_PrintText(
-        ts.Layout->CW_DECODER_WPM.x + 24,
-        ts.Layout->CW_DECODER_WPM.y,
-        "wpm",
-        White, Black,
-        4
-    );
+        UiLcdHy28_PrintText(
+            ts.Layout->CW_DECODER_WPM.x + 24,
+            ts.Layout->CW_DECODER_WPM.y,
+            "wpm",
+            White, sd.boxes_colour,
+            4
+        );
 
-    if (prepare == true) {
         CwDecoder_WpmDisplayUpdate(true);
+    } else {
+        UiLcdHy28_DrawFullRect(
+            ts.Layout->CW_DECODER_WPM.x,
+            ts.Layout->CW_DECODER_WPM.y,
+            8, SMALL_FONT_WIDTH * 6,
+            sd.boxes_colour
+        );
     }
 }
 
@@ -1112,9 +1122,8 @@ void CwDecoder_WpmDisplayUpdate(bool force_update) {
 		    ts.Layout->CW_DECODER_WPM.x,
 		    ts.Layout->CW_DECODER_WPM.y,
 		    str,
-		    White, Black,
+		    White, sd.boxes_colour,
 		    4
 		);
 	}
 }
-

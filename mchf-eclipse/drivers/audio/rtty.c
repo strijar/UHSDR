@@ -185,8 +185,8 @@ const uint8_t Ascii2Baudot[128] =
 
 const rtty_speed_item_t rtty_speeds[RTTY_SPEED_NUM] =
 {
-		{ .id =RTTY_SPEED_45, .value = 45.45, .label = "45" },
-		{ .id =RTTY_SPEED_50, .value = 50, .label = "50"  },
+		{ .id =RTTY_SPEED_45, .value = 45.45, .label = "  45" },
+		{ .id =RTTY_SPEED_50, .value = 50, .label = "  50"  },
 };
 
 const rtty_shift_item_t rtty_shifts[RTTY_SHIFT_NUM] =

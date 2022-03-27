@@ -92,37 +92,34 @@ void UiSpectrum_CalculateLayout(const bool is_big, const UiArea_t* full_ptr, con
 }
 
 //sets graticule position according to control bits (to default for particular case)
-void UiSpectrum_ResetSpectrum()
-{
-	switch(ts.flags1&(FLAGS1_SCOPE_ENABLED | FLAGS1_WFALL_ENABLED))
-	{
-	case FLAGS1_SCOPE_ENABLED:
-		slayout.graticule.y=slayout.draw.y+slayout.draw.h-slayout.graticule.h;
-		break;
-	case FLAGS1_WFALL_ENABLED:
-		slayout.graticule.y=slayout.draw.y+slayout.title.h;
-		break;
-	case (FLAGS1_SCOPE_ENABLED | FLAGS1_WFALL_ENABLED):
-		slayout.graticule.y=UiSprectrum_CheckNewGraticulePos(ts.graticulePowerupYpos);
-		break;
-	default:
-		break;
+void UiSpectrum_ResetSpectrum() {
+	switch (ts.flags1 & (FLAGS1_SCOPE_ENABLED | FLAGS1_WFALL_ENABLED)) {
+	    case FLAGS1_SCOPE_ENABLED:
+	        slayout.graticule.y = slayout.draw.y + slayout.draw.h - slayout.graticule.h;
+	        break;
+
+	    case FLAGS1_WFALL_ENABLED:
+	        slayout.graticule.y = slayout.draw.y + slayout.title.h;
+	        break;
+
+	    case (FLAGS1_SCOPE_ENABLED | FLAGS1_WFALL_ENABLED):
+		    slayout.graticule.y = UiSprectrum_CheckNewGraticulePos(ts.graticulePowerupYpos);
+		    break;
+
+	    default:
+	        break;
 	}
 }
-uint16_t UiSprectrum_CheckNewGraticulePos(uint16_t new_y)
-{
-	if((new_y<sd.Slayout->draw.y))
-	{
-		new_y=sd.Slayout->draw.y+sd.Slayout->draw.h/2-sd.Slayout->graticule.h/2;		//the default setting for graticule location if invalid value detected (first powerup issue)
+
+uint16_t UiSprectrum_CheckNewGraticulePos(uint16_t new_y) {
+	if ((new_y < sd.Slayout->draw.y)) {
+		new_y = sd.Slayout->draw.y + sd.Slayout->draw.h/2 - sd.Slayout->graticule.h/2;		//the default setting for graticule location if invalid value detected (first powerup issue)
+	} if ((new_y < sd.Slayout->draw.y + MinimumScopeSize)) {
+		new_y = sd.Slayout->draw.y + MinimumScopeSize;
+	} if(new_y > (sd.Slayout->draw.y + sd.Slayout->draw.h - MinimumWaterfallSize - sd.Slayout->graticule.h)) {
+		new_y = sd.Slayout->draw.y + sd.Slayout->draw.h - MinimumWaterfallSize - sd.Slayout->graticule.h;
 	}
-	if((new_y<sd.Slayout->draw.y+MinimumScopeSize))
-	{
-		new_y=sd.Slayout->draw.y+MinimumScopeSize;
-	}
-	if(new_y>(sd.Slayout->draw.y+sd.Slayout->draw.h-MinimumWaterfallSize-sd.Slayout->graticule.h))
-	{
-		new_y=sd.Slayout->draw.y+sd.Slayout->draw.h-MinimumWaterfallSize-sd.Slayout->graticule.h;
-	}
+
 	return new_y;
 }
 
@@ -205,21 +202,6 @@ typedef struct
     float32_t value;
     const char* label;
 } scope_scaling_info_t;
-/*
-static const scope_scaling_info_t scope_scaling_factors[SCOPE_SCALE_NUM+1] =
-{
-        // scaling factors for the various dB/division settings
-        { 0,                        "Waterfall      " }, // just a small trick, the scope will never use scaling index 0
-        { DB_SCALING_5,             "SC(5dB/div)    " },
-        { DB_SCALING_7,             "SC(7.5dB/div)  " },
-        { DB_SCALING_10,            "SC(10dB/div)   " },
-        { DB_SCALING_15,            "SC(15dB/div)   " },
-        { DB_SCALING_20,            "SC(20dB/div)   " },
-        { DB_SCALING_S1,            "SC(1S-Unit/div)" },
-        { DB_SCALING_S2,            "SC(2S-Unit/div)" },
-        { DB_SCALING_S3,            "SC(3S-Unit/div)" },
-        { 0,                        "Dual (10dB/div)" }, // just a small trick, the scope will never use scaling index SCOPE_SCALE_NUM
-};*/
 
 static const scope_scaling_info_t scope_scaling_factors[SCOPE_SCALE_NUM+1] =
 {
@@ -643,11 +625,6 @@ static void UiSpectrum_CreateDrawArea(void)
 //				RGB((COL_SPECTRUM_GRAD*2),(COL_SPECTRUM_GRAD*2),(COL_SPECTRUM_GRAD*2)),
 				RGB(64,64,64),
 				0);
-    } else {
-        char fwmltext[3];
-        sprintf(fwmltext,"x%u ", (1<<sd.magnify));
-
-        UiLcdHy28_PrintText(ts.Layout->Size.x - 28, ts.Layout->SpectrumWindow.y - 10, fwmltext, Blue, Black, 4);
     }
 
     // Horizontal grid lines
@@ -1596,36 +1573,7 @@ void UiSpectrum_Init()
     UiSpectrum_WaterfallClearData();
 #endif
 
-/*
-    switch(disp_resolution)
-    {
-#ifdef USE_DISP_480_320
-    case RESOLUTION_480_320:
-    {
-        UiSpectrum_CalculateLayout(ts.spectrum_size == SPECTRUM_BIG, is_scopemode(), is_waterfallmode(), &ts.Layout->SpectrumWindow, 0);
-        break;
-    }
-#endif
-#ifdef USE_DISP_320_240
-    case RESOLUTION_320_240:
-        {
-            const UiArea_t area_320_240 = { .x = 58, .y = 128, .w = 260, .h = 94 };
-            UiSpectrum_CalculateLayout(ts.spectrum_size == SPECTRUM_BIG, is_scopemode(), is_waterfallmode(), &area_320_240, 2);
-            break;
-        }
-#endif
-    }
-  */
-//    UiSpectrum_CalculateLayout(ts.spectrum_size == SPECTRUM_BIG, &ts.Layout->SpectrumWindow, ts.Layout->SpectrumWindowPadding);
-//    if(!ts.show_wide_spectrum)
-//    {
-        UiSpectrum_CalculateLayout(ts.spectrum_size == SPECTRUM_BIG, &ts.Layout->SpectrumWindow, ts.Layout->SpectrumWindowPadding);
-//    }
-//    else
-//    {
-//        const UiArea_t widearea_320_240 = { .x = 2, .y = 128, .w = 316, .h = 94 };
-//        UiSpectrum_CalculateLayout(ts.spectrum_size == SPECTRUM_BIG, &widearea_320_240, ts.Layout->SpectrumWindowPadding);
-//    }
+    UiSpectrum_CalculateLayout(ts.spectrum_size == SPECTRUM_BIG, &ts.Layout->SpectrumWindow, ts.Layout->SpectrumWindowPadding);
     UiSpectrum_InitSpectrumDisplayData();
     UiSpectrum_Clear();         // clear display under spectrum scope
     UiSpectrum_CreateDrawArea();
@@ -1816,12 +1764,8 @@ void UiSpectrum_Redraw()
     // Only in RX mode and NOT while powering down or in menu mode or if displaying memory information
     if (
             (ts.txrx_mode == TRX_MODE_RX)
-          //&& (ts.menu_mode == false)
             && (ts.powering_down == false)
-          //&& (ts.mem_disp == false)
-          //&& (sd.enabled == true)
             && (ts.lcd_blanking_flag == false)
-		  //&& (ts.SpectrumResize_flag == false)
     )
     {
         if(ts.waterfall.scheduler == 0 && is_waterfallmode())   // is waterfall mode enabled?
@@ -1853,12 +1797,13 @@ void UiSpectrum_Redraw()
 void UiSpectrum_InitCwSnapDisplay (bool visible)
 {
 	int color = Green;
-	if(!visible)
-	{
+
+	if(!visible) {
 		color = Black;
 		// also erase yellow indicator
         UiLcdHy28_DrawFullRect(ts.Layout->SNAP_CARRIER.x-27, ts.Layout->SNAP_CARRIER.y, 6, 58, Black);
 	}
+
 	//Horizontal lines of box
 	UiLcdHy28_DrawStraightLine(ts.Layout->SNAP_CARRIER.x-27,
 			ts.Layout->SNAP_CARRIER.y + 6,
