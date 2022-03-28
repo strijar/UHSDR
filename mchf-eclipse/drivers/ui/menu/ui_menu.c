@@ -3350,7 +3350,7 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
         if(var_change)          // change?
         {
 #ifdef SDR_AMBER
-        	if(temp_var_u8 & ts.show_wide_spectrum)
+        	if(temp_var_u8)
         	{
         		//Don't show BndMem
         		ts.expflags1 = ts.expflags1 | EXPFLAGS1_NO_SHOW_BNDMEM;
@@ -5370,20 +5370,6 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
             if(var_change)
             {
                 LO_TX_SUPR_DAC_WriteReg(1, ts.cal_lo_tx_supr1[ts.band_lo_tx_supr]); // Set the DAC1 voltage
-            }
-//            break;
-	}
-//        case CONFIG_WIDE_SPEC_DEF:
-	else if(select==CONFIG_WIDE_SPEC_DEF)
-	{
-            if ((ts.txrx_mode != TRX_MODE_TX) && (ts.Layout->Size.x == 320)) // only allow adjustment if in right mode
-            {
-            var_change = UiDriverMenuItemChangeEnableOnOffFlag(var, mode, &ts.expflags1,0,options,&clr, EXPFLAGS1_WIDE_SPEC_DEF);
-            clr = White;
-            }
-            else
-            {
-                *clr_ptr = Orange;
             }
 //            break;
 	}

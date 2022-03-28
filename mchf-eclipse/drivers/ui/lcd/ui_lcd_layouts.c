@@ -17,7 +17,6 @@
 #include "ui_lcd_layouts.h"
 #include "ui_driver.h"
 
-//------------------------------------------------------------------------------------------------------------------------------------------
 //some local 480x320 calculations to make life easier in case of change something
 
 #define R480320_TUNE_FREQ_X             		280
@@ -47,7 +46,7 @@
 #define R480320_DEMOD_MODE_MASK_X           	R480320_DEMOD_MODE_X
 #define R480320_DEMOD_MODE_MASK_Y           	(R480320_DEMOD_MODE_Y - 1)
 #define R480320_DEMOD_MODE_MASK_H           	13
-#define R480320_DEMOD_MODE_MASK_W           	58	//same as R480320_DIGMODE_IND_W
+#define R480320_DEMOD_MODE_MASK_W           	58
 
 // AGC display box
 //#define R480320_AGC_MASK_X (R480320_DEMOD_MODE_MASK_X-41)
@@ -79,10 +78,6 @@
 
 #define R480320_ENCODER_IND_X                	128
 #define R480320_ENCODER_IND_Y                	64
-
-#define R480320_DIGMODE_IND_X              		R480320_DEMOD_MODE_MASK_X  // 218
-#define R480320_DIGMODE_IND_Y              		0
-#define R480320_DIGMODE_IND_W					R480320_DEMOD_MODE_MASK_W
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 //some local 320x240 calculations to make life easier in case of change something
@@ -145,13 +140,9 @@
 #define R320240_ENCODER_IND_X                	0
 #define R320240_ENCODER_IND_Y                	16
 
-#define R320240_DIGMODE_IND_X              		0
-#define R320240_DIGMODE_IND_Y              		191
-#define R320240_DIGMODE_IND_W					58
-//------------------------------------------------------------------------------------------------------------------------------------------
 //Touchscreen definitions for 480x320
-static const touchaction_descr_t R480320_touchactions_normal[] =
-{
+
+static const touchaction_descr_t R480320_touchactions_normal[] = {
 #ifndef SDR_AMBER_480_320
 	#ifndef OVI40_MOD_480_320
 		{ {0,110,160,16}, UiAction_ToggleWaterfallScopeDisplay,    UiAction_ChangeSpectrumSize }, // Spectrum Bar Left Part: WaterfallScope Toggle
@@ -165,7 +156,6 @@ static const touchaction_descr_t R480320_touchactions_normal[] =
 		{ {R480320_BAND_MODE_X+R480320_BAND_MODE_MASK_W*3/4,R480320_BAND_MODE_Y,R480320_BAND_MODE_MASK_W/2,R480320_BAND_MODE_MASK_H}, UiAction_ChangeBandUpOrDown,             NULL }, // Right Part Band Display: Band up
 		{ {R480320_LEFTBOXES_IND_X,R480320_LEFTBOXES_IND_Y,R480320_LEFTBOX_WIDTH,R480320_LEFTBOX_ROW_H}, UiVk_DSPVirtualKeys, Codec_RestartI2S }, // DSP Box: Restart I2S
 		{ {0,110,480,176}, UiAction_ChangeFrequencyByTouch, UiAction_CheckSpectrumTouchActions}, // Scope Draw Area: Tune to Touch
-		{ {R480320_DIGMODE_IND_X,R480320_DIGMODE_IND_Y,R480320_DIGMODE_IND_W,16}, UiVk_ModSelVirtualKeys,              NULL }, // Digital Mode Box: Switch Digi Mode
 		{ {R480320_TUNE_STEP_X,R480320_TUNE_STEP_Y,R480320_TUNE_STEP_MASK_W,R480320_TUNE_STEP_MASK_H}, UiAction_ChangeDynamicTuning,            NULL }, // Step Box: Dynamic Tuning Toggle
 		{ {R480320_TUNE_STEP_X,R480320_TUNE_STEP_Y,R480320_TUNE_STEP_MASK_W,R480320_TUNE_STEP_MASK_H}, UiAction_ChangeDynamicTuning, NULL }, // Step Box: Dynamic Tuning Toggle
 	#else
@@ -208,57 +198,42 @@ static const touchaction_descr_t R480320_touchactions_normal[] =
 };
 
 // this is the map for menu mode, right now only used for debugging/experimental purposes
-static const touchaction_descr_t R480320_touchactions_menu[] =
-{
+static const touchaction_descr_t R480320_touchactions_menu[] = {
 		{ { R480320_SM_IND_X+R480320_SM_IND_W-16,R480320_SM_IND_Y,16,16 }, UiAction_ChangeDebugInfoDisplay, NULL}, // S-Meter db: toggle show tp coordinates
 };
 
-static const touchaction_list_descr_t R480320_touch_regions[] =
-{
+static const touchaction_list_descr_t R480320_touch_regions[] = {
 		// ATTENTION: the size calculation only works for true arrays, not for pointers!
 		{ R480320_touchactions_normal, sizeof(R480320_touchactions_normal)/sizeof(*R480320_touchactions_normal) },
 		{ R480320_touchactions_menu, sizeof(R480320_touchactions_menu)/sizeof(*R480320_touchactions_menu) },
 };
 
-//------------------------------------------------------------------------------------------------------------------------------------------
 //Touchscreen definitions for 320x240
-static const touchaction_descr_t R320240_touchactions_normal[] =
-{
-//		{ {64,128,60,16}, UiAction_ToggleWaterfallScopeDisplay,UiAction_ChangeSpectrumSize }, // Spectrum Bar Left Part: WaterfallScope Toggle
+
+static const touchaction_descr_t R320240_touchactions_normal[] = {
 		{ {60,128,64,16}, UiAction_ToggleWaterfallScopeDisplay,UiAction_ChangeSpectrumSize }, // Spectrum Bar Left Part: WaterfallScope Toggle
-//		{ {180,128,40,16}, UiAction_ChangeSpectrumZoomLevelDown,UiAction_CheckSpectrumTouchActions }, // Spectrum Bar Middle Part: Decrease Zoom Level
 		{ {156,128,64,16}, UiAction_ChangeSpectrumZoomLevelDown,UiAction_CheckSpectrumTouchActions }, // Spectrum Bar Middle Part: Decrease Zoom Level
-//		{ {280,128,40,16}, UiAction_ChangeSpectrumZoomLevelUp,UiAction_CheckSpectrumTouchActions }, // Spectrum Bar Right Part: Increase Zoom Level
 		{ {252,128,64,16}, UiAction_ChangeSpectrumZoomLevelUp,UiAction_CheckSpectrumTouchActions }, // Spectrum Bar Right Part: Increase Zoom Level
 		{ {R320240_TUNE_FREQ_X+16*7,R320240_TUNE_FREQ_Y,16*3,24},UiAction_ChangeFrequencyToNextKhz,NULL }, // Tune button:Set last 3 digits to zero
-//		{ {R320240_TUNE_FREQ_X,R320240_TUNE_FREQ_Y,16*7,24}, UiVk_BndSelVirtualKeys,       NULL }, // Frequency display, first digits :Select the band
 		{ {R320240_TUNE_FREQ_X,R320240_TUNE_FREQ_Y,16*7,24}, UiVk_BndSelVirtualKeys, UiVk_BndFreqSetVirtualKeys }, // Frequency display, first digits :Select the band/freq
-//		{ {R320240_DEMOD_MODE_X,R320240_DEMOD_MODE_Y,R320240_DEMOD_MODE_MASK_W,R320240_DEMOD_MODE_MASK_H}, UiAction_ChangeDemodMode,NULL }, // Demod Mode Box: mode switch
 		{ {R320240_DEMOD_MODE_X,R320240_DEMOD_MODE_Y,R320240_DEMOD_MODE_MASK_W,R320240_DEMOD_MODE_MASK_H}, UiAction_ChangeDemodModeToAlternativeMode,NULL }, // Demod Mode Box: mode switch
 		{ {R320240_PW_IND_X,R320240_PW_IND_Y,64,16},UiAction_ChangePowerLevel,NULL }, // Power Box: TX Power Increase
         { {74,14,37,29}, UiDriver_RIT_Reset,NULL }, // RIT Box: RIT Reset
 		{ {R320240_BAND_MODE_X,R320240_BAND_MODE_Y,R320240_BAND_MODE_MASK_W/2,R320240_BAND_MODE_MASK_H}, UiAction_ChangeBandDownOrUp,NULL }, // Left Part Band Display: Band down
 		{ {R320240_BAND_MODE_X+R320240_BAND_MODE_MASK_W*3/4,R320240_BAND_MODE_Y,R320240_BAND_MODE_MASK_W/2,R320240_BAND_MODE_MASK_H}, UiAction_ChangeBandUpOrDown,NULL }, // Right Part Band Display: Band up
 		{ {R320240_LEFTBOXES_IND_X,R320240_LEFTBOXES_IND_Y,R320240_LEFTBOX_WIDTH,R320240_LEFTBOX_ROW_H}, UiVk_DSPVirtualKeys, Codec_RestartI2S }, // DSP Box: Restart I2S
-//		{ {60,128,256,90}, UiAction_ChangeFrequencyByTouch, UiAction_CheckSpectrumTouchActions }, // Scope Draw Area: Tune to Touch
 		{ {60,146,256,72}, UiAction_ChangeFrequencyByTouch, UiAction_CheckSpectrumTouchActions }, // Scope Draw Area: Tune to Touch
-		{ {R320240_DIGMODE_IND_X,R320240_DIGMODE_IND_Y,R320240_DIGMODE_IND_W,16}, UiVk_ModeVirtualKeys,UiAction_ChangeDigitalMode }, // Digital Mode Box: Switch Digi Mode
 		{ {R320240_TUNE_STEP_X,R320240_TUNE_STEP_Y,R320240_TUNE_STEP_MASK_W,R320240_TUNE_STEP_MASK_H}, UiAction_ChangeDynamicTuning,NULL }, // Step Box: Dynamic Tuning Toggle
 };
-//------------------------------------------------------------------------------------------------------------------------------------------
-////Touchscreen definitions for 320x240 Alternative wide spectrum mode
-static const touchaction_descr_t R320240_touchactions_widespectrum[] =
-{
+
+static const touchaction_descr_t R320240_touchactions[] = {
 #ifndef SDR_AMBER // not Amber
 		//{X, Y, W, H}
 		{ {0,136,80,13}, UiAction_ToggleWaterfallScopeDisplay,UiAction_ChangeSpectrumSize }, // Spectrum Bar Left Part: WaterfallScope Toggle
 		{ {120,136,80,13}, UiAction_ChangeSpectrumZoomLevelDown,UiAction_ZoomResetToOne }, // Spectrum Bar Middle Part: Decrease Zoom Level
 		{ {240,136,80,13}, UiAction_ChangeSpectrumZoomLevelUp,UiAction_CheckSpectrumTouchActions }, // Spectrum Bar Right Part: Increase Zoom Level
 		{ {226,109,48,24},UiAction_ChangeFrequencyToNextKhz,NULL }, // Tune button:Set last 3 digits to zero
-//		{ {118,109,105,24}, UiVk_BndSelVirtualKeys,       NULL }, // Frequency display, first digits :Select the band
 		{ {118,109,105,24}, UiVk_BndSelVirtualKeys, UiVk_BndFreqSetVirtualKeys }, // Frequency display, first digits :Select the band/freq
-//		{ {113,87,41,13}, UiAction_ChangeDemodMode,NULL }, // Demod Mode Box: mode switch
-//		{ {113,87,41,13}, UiAction_ChangeDemodModeToAlternativeMode,NULL }, // Demod Mode Box: sideband switch
 		{ {138,71,16,12}, UiAction_ChangeDemodModeToAlternativeMode,NULL }, // Demod Mode Box: sideband switch
 		{ {113,56,41,13},UiAction_ChangePowerLevel,NULL }, // Power Box: TX Power Increase
 		{ {74,14,37,26}, UiDriver_RIT_Reset,NULL }, // RIT Box: RIT Reset
@@ -266,9 +241,7 @@ static const touchaction_descr_t R320240_touchactions_widespectrum[] =
 		{ {305,108,15,16}, UiAction_ChangeBandUpOrDown,NULL }, // Right Part Band Display: Band up
 		{ {217,56,58,29}, UiVk_DSPVirtualKeys, Codec_RestartI2S }, // DSP Box: Restart I2S
 		{ {1,152,318,73}, UiAction_ChangeFrequencyByTouch, UiAction_CheckSpectrumTouchActions }, // Scope Draw Area: Tune to Touch
-//		{ {74,71,80,13}, UiAction_ChangeDigitalMode,UiVk_ModeVirtualKeys }, // Digital Mode Box: Switch Digi Mode
 		{ {74,71,61,13}, UiVk_ModeVirtualKeys,UiAction_ChangeDigitalMode }, // Digital Mode Box: Switch Digi Mode
-//		{ {157,87,57,13}, UiAction_ChangeDynamicTuning,NULL }, // Step Box: Dynamic Tuning Toggle
 		{ {113,87,41,13}, UiAction_ChangeDynamicTuning,NULL }, // Step Box: Dynamic Tuning Toggle
 #else //Amber 320x240
 		//{X, Y, W, H}
@@ -284,7 +257,6 @@ static const touchaction_descr_t R320240_touchactions_widespectrum[] =
 		{ {305,108,15,16}, UiAction_ChangeBandUpOrDown, NULL }, // Right Part Band Display: Band up
 		{ {217,56,58,28}, UiVk_DSPVirtualKeys, Codec_RestartI2S }, // DSP Box: Restart I2S
 		{ {1,152,318,73}, UiAction_ChangeFrequencyByTouch, UiAction_CheckSpectrumTouchActions }, // Scope Draw Area: Tune to Touch
-//		{ {74,71,61,13}, UiAction_ChangeDigitalMode, UiVk_ModeVirtualKeys }, // Digital Mode Box: Switch Digi Mode
 		{ {74,71,61,13}, UiVk_ModeVirtualKeys, UiAction_ChangeDigitalMode }, // Digital Mode Box: Switch Digi Mode
 		{ {157,56,58,28}, UiVk_ModeVirtualKeys, UiAction_ChangeDigitalMode }, // Digital Mode Box - double touch zone
 		{ {157,86,57,13}, UiAction_ChangeDynamicTuning, NULL }, // Step Box: Dynamic Tuning Toggle
@@ -293,99 +265,18 @@ static const touchaction_descr_t R320240_touchactions_widespectrum[] =
 #endif
 };
 
-// this is the map for menu mode, right now only used for debugging/experimental purposes
-static const touchaction_descr_t R320240_touchactions_menu[] =
-{
+static const touchaction_descr_t R320240_touchactions_menu[] = {
 		{ { R320240_SM_IND_X+R320240_SM_IND_W-16,R320240_SM_IND_Y,16,16 }, UiAction_ChangeDebugInfoDisplay, NULL}, // S-Meter db: toggle show tp coordinates
 };
 
-static const touchaction_list_descr_t R320240__touch_regions[] =
-{
-		// ATTENTION: the size calculation only works for true arrays, not for pointers!
-		{ R320240_touchactions_normal, sizeof(R320240_touchactions_normal)/sizeof(*R320240_touchactions_normal) },
-		{ R320240_touchactions_menu, sizeof(R320240_touchactions_menu)/sizeof(*R320240_touchactions_menu) },
+static const touchaction_list_descr_t R320240__touch_regions_widespectrum[] = {
+		{ R320240_touchactions, sizeof(R320240_touchactions) / sizeof(*R320240_touchactions) },
+		{ R320240_touchactions_menu, sizeof(R320240_touchactions_menu) / sizeof(*R320240_touchactions_menu) },
 };
 
-static const touchaction_list_descr_t R320240__touch_regions_widespectrum[] =
-{
-		// ATTENTION: the size calculation only works for true arrays, not for pointers!
-		{ R320240_touchactions_widespectrum, sizeof(R320240_touchactions_widespectrum)/sizeof(*R320240_touchactions_widespectrum) },
-		{ R320240_touchactions_menu, sizeof(R320240_touchactions_menu)/sizeof(*R320240_touchactions_menu) },
-};
-//------------------------------------------------------------------------------------------------------------------------------------------
-const LcdLayout LcdLayouts[LcdLayoutsCount]=
-{
-		//-----------------------------------------------------------------
-		{		//320x240
-				.Size = { 320, 240 },
-				.StartUpScreen_START = { 0, 10 },
-				.SpectrumWindow = {  .x = 58, .y = 128, .w = 260, .h = 94  },
-
-				.SpectrumWindowPadding=2,
-
-				.TUNE_FREQ= { R320240_TUNE_FREQ_X, R320240_TUNE_FREQ_Y },
-				.TUNE_SPLIT_FREQ_X=R320240_TUNE_SPLIT_FREQ_X,
-				.TUNE_SPLIT_MARKER_X=R320240_TUNE_SPLIT_MARKER_X,
-				.TUNE_SPLIT_FREQ_Y_TX=R320240_TUNE_SPLIT_FREQ_Y_TX,
-				.TUNE_SFREQ = { R320240_TUNE_SFREQ_X, R320240_TUNE_SFREQ_Y },
-				.DisplayDbm = { R320240_DisplayDbm_X, R320240_DisplayDbm_Y },
-				.MEMORYLABEL= { R320240_MEMORYLABEL_X, R320240_MEMORYLABEL_Y} ,
-
-				.BAND_MODE = { R320240_BAND_MODE_X, R320240_BAND_MODE_Y},
-				.BAND_MODE_MASK = { .x = R320240_BAND_MODE_MASK_X, .y = R320240_BAND_MODE_MASK_Y, .h = R320240_BAND_MODE_MASK_H, .w = R320240_BAND_MODE_MASK_W },
-
-				.DEMOD_MODE_MASK = { .x = R320240_DEMOD_MODE_MASK_X, .y = R320240_DEMOD_MODE_MASK_Y, .h = R320240_DEMOD_MODE_MASK_H, .w = R320240_DEMOD_MODE_MASK_W},
-				.AGC_MASK = {.x = R320240_AGC_MASK_X, .y = R320240_AGC_MASK_Y, .h = R320240_AGC_MASK_H,
-						                .w = R320240_AGC_MASK_W},
-				.TUNE_STEP={.x=R320240_TUNE_STEP_X, .y=R320240_TUNE_STEP_Y, .h=R320240_TUNE_STEP_MASK_H, .w=R320240_TUNE_STEP_MASK_W},
-
-				.ENCODER_IND = { R320240_ENCODER_IND_X, R320240_ENCODER_IND_Y},
-				.ENCODER_MODE=MODE_VERTICAL,
-
-				.DIGMODE={.x=R320240_DIGMODE_IND_X,.y=R320240_DIGMODE_IND_Y,.w=R320240_DIGMODE_IND_W},
-
-				.LEFTBOXES_IND = { .x=R320240_LEFTBOXES_IND_X, .y=R320240_LEFTBOXES_IND_Y, .w=R320240_LEFTBOX_WIDTH, .h=R320240_LEFTBOX_ROW_H},
-				.LEFTBOXES_MODE=MODE_VERTICAL,
-				.LEFTBOXES_ROW_2ND_OFF=R320240_LEFTBOX_ROW_2ND_OFF,
-
-				.PW_IND = { .x=R320240_PW_IND_X, .y=R320240_PW_IND_Y, .w=R320240_PW_IND_W},
-				.TEMP_IND={.x = 0, .y = 0},
-				.RTC_IND={.x= 0, .y = 79},
-
-				.LOADANDDEBUG_Y=95,
-				.DEBUG_X=0,
-				.LOAD_X=280,
-
-				.PWR_NUM_IND = { 1, 80},
-
-				.CW_DECODER_WPM = { 0, 108},
-
-				.SNAP_CARRIER = { 27, 122},
-
-				.TextMsgLine = { 5, 92},
-				.TextMsg_buffer_max=44,
-				.TextMsg_font=4,
-
-				.FREEDV_SNR = { 5, 116},
-				.FREEDV_BER = { 5, 104},
-				.FREEDV_FONT=4,
-
-				.SM_IND={.x=R320240_SM_IND_X,.y=R320240_SM_IND_Y,.h=R320240_SM_IND_H,.w=R320240_SM_IND_W},
-				.PWR_IND={.x = 4, .y = 193+15},
-
-				.BOTTOM_BAR={.x=0,.y=228, .h=16, .w=62},
-
-				.MENUSIZE=7,
-				.MENU_IND = { 60, 128},
-				.MENU_CHANGE_X=244,
-				.MENU_CURSOR_X=311,
-				.MENU_TEXT_SIZE_MAX=34,
-
-				.touchaction_list=R320240__touch_regions
-		},
-
-		//-----------------------------------------------------------------
-		{		//480x320
+const LcdLayout LcdLayouts[LcdLayoutsCount] = {
+		//------ 480 x 320 ---------------------------------------------------------
+		{
 #ifndef SDR_AMBER //OVI40, Sparrow
 	#ifndef OVI40_MOD_480_320
 				.Size = { 480, 320},
@@ -413,12 +304,6 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 				.ENCODER_IND = { R480320_ENCODER_IND_X, R480320_ENCODER_IND_Y},
 				.ENCODER_MODE=MODE_HORIZONTAL,
 
-				.DIGMODE={.x=R480320_DIGMODE_IND_X,.y=R480320_DIGMODE_IND_Y,.w=R480320_DIGMODE_IND_W},
-
-				.LEFTBOXES_IND = { .x=R480320_LEFTBOXES_IND_X, .y=R480320_LEFTBOXES_IND_Y, .w=R480320_LEFTBOX_WIDTH, .h=R480320_LEFTBOX_ROW_H},
-				.LEFTBOXES_MODE=MODE_HORIZONTAL,
-				.LEFTBOXES_ROW_2ND_OFF=R480320_LEFTBOX_ROW_2ND_OFF,
-
 				.PW_IND = { .x=R480320_PW_IND_X, .y=R480320_PW_IND_Y, .w=R480320_PW_IND_W},
 				.TEMP_IND={.x = 370,.y = 64},
 				.RTC_IND={.x = 415,.y = 80},
@@ -436,13 +321,12 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 				.TextMsgLine = { 0, 290 },
 				.TextMsg_buffer_max=50,
 				.TextMsg_font=0,
+#ifdef USE_FREEDV
 
-				//.FREEDV_SNR = { 280, 28},
-				//.FREEDV_BER = {380, 28},
 				.FREEDV_SNR = {410,288},
 				.FREEDV_BER = {410,297},
 				.FREEDV_FONT=4,
-
+#endif
 				.SM_IND={.x = R480320_SM_IND_X, .y = R480320_SM_IND_Y, .h = R480320_SM_IND_H, .w = R480320_SM_IND_W},
 				.PWR_IND={ .x = 420, .y = 307},
 
@@ -478,10 +362,6 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 				.TUNE_STEP={.x = 205, .y = 15, .h = 13, .w = 56 },
 				.ENCODER_IND = { 0, 15 },
 				.ENCODER_MODE = MODE_VERTICAL,
-				.DIGMODE={.x = 122, .y = 0, .w = 63},
-				.LEFTBOXES_IND = { .x = 122, .y=30, .w = 69, .h = 28 },
-				.LEFTBOXES_MODE = MODE_HORIZONTAL,
-				.LEFTBOXES_ROW_2ND_OFF = 13,
 				.PW_IND = { .x = 205, .y = 0, .w = 56 },
 				.TEMP_IND = { .x = 0, .y = 0 },
 				.RTC_IND = { .x = 127, .y = 60 },
@@ -498,13 +378,12 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 				.TextMsgLine = { 0, 75 },
 				.TextMsg_buffer_max = 50,
 				.TextMsg_font = 0,
+#ifdef USE_FREEDV
 
-				//.FREEDV_SNR = { 280, 28},
-				//.FREEDV_BER = {380, 28},
 				.FREEDV_SNR = { 0, 90 },
 				.FREEDV_BER = { 0, 102 },
 				.FREEDV_FONT = 4,
-
+#endif
 				.SM_IND = { .x = 273, .y = 0, .h = 56, .w = 203 },
 				.PWR_IND = { .x = 207, .y = 60 },
 				.BOTTOM_BAR = {.x=0,.y=308, .h=16, .w=79},//.w=74},
@@ -537,10 +416,6 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 				.TUNE_STEP={.x = 205, .y = 15, .h = 13, .w = 56 },
 				.ENCODER_IND = { 0, 15 },
 				.ENCODER_MODE = MODE_VERTICAL,
-				.DIGMODE={.x = 122, .y = 0, .w = 63},
-				.LEFTBOXES_IND = { .x = 122, .y=30, .w = 69, .h = 28 },
-				.LEFTBOXES_MODE = MODE_HORIZONTAL,
-				.LEFTBOXES_ROW_2ND_OFF = 13,
 				.PW_IND = { .x = 205, .y = 0, .w = 56 },
 				.TEMP_IND = { .x = 0, .y = 0 },
 				.RTC_IND = { .x = 127, .y = 60 },
@@ -557,13 +432,11 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 				.TextMsgLine = { 0, 75 },
 				.TextMsg_buffer_max = 50,
 				.TextMsg_font = 0,
-
-				//.FREEDV_SNR = { 280, 28},
-				//.FREEDV_BER = {380, 28},
+#ifdef USE_FREEDV
 				.FREEDV_SNR = { 0, 90 },
 				.FREEDV_BER = { 0, 102 },
 				.FREEDV_FONT = 4,
-
+#endif
 				.SM_IND = { .x = 273, .y = 0, .h = 56, .w = 203 },
 				.PWR_IND = { .x = 207, .y = 60 },
 		#ifndef SDR_AMBER_4INCH
@@ -581,8 +454,8 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 				.touchaction_list = R480320_touch_regions
 #endif
 		},
-		//-----------------------------------------------------------------
-		{		//800x480
+		//------ 800 x 480 -----------------------------------------------------------
+		{
 				.Size = { 800, 480},
 				.StartUpScreen_START ={ 80, 60},
 				.SpectrumWindow={ .x = 0, .y = 110, .w = 480, .h = 176 },
@@ -608,12 +481,6 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 				.ENCODER_IND = { R480320_ENCODER_IND_X, R480320_ENCODER_IND_Y},
 				.ENCODER_MODE=MODE_HORIZONTAL,
 
-				.DIGMODE={.x=R480320_DIGMODE_IND_X,.y=R480320_DIGMODE_IND_Y,.w=R480320_DIGMODE_IND_W},
-
-				.LEFTBOXES_IND = { .x=R480320_LEFTBOXES_IND_X, .y=R480320_LEFTBOXES_IND_Y, .w=R480320_LEFTBOX_WIDTH, .h=R480320_LEFTBOX_ROW_H},
-				.LEFTBOXES_MODE=MODE_HORIZONTAL,
-				.LEFTBOXES_ROW_2ND_OFF=R480320_LEFTBOX_ROW_2ND_OFF,
-
 				.PW_IND = { .x=R480320_PW_IND_X, .y=R480320_PW_IND_Y, .w=R480320_PW_IND_W},
 				.TEMP_IND={.x = 370,.y = 64},
 				.RTC_IND={.x = 415,.y = 80},
@@ -631,13 +498,11 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 				.TextMsgLine = { 0, 290 },
 				.TextMsg_buffer_max=50,
 				.TextMsg_font=0,
-
-				//.FREEDV_SNR = { 280, 28},
-				//.FREEDV_BER = {380, 28},
+#ifdef USE_FREEDV
 				.FREEDV_SNR = {410,288},
 				.FREEDV_BER = {410,297},
 				.FREEDV_FONT=4,
-
+#endif
 				.SM_IND={.x = R480320_SM_IND_X, .y = R480320_SM_IND_Y, .h = R480320_SM_IND_H, .w = R480320_SM_IND_W},
 				.PWR_IND={ .x = 420, .y = 307},
 
@@ -653,10 +518,9 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 				.MENU_TEXT_SIZE_MAX=40,
 
 				.touchaction_list=R480320_touch_regions
-//		}
 		},
-		//-----------------------------------------------------------------
-		{		//320x240_wide_spectrum
+		//------- 320 x 240 ----------------------------------------------------------
+		{
 				.Size = { 320, 240 },
 				.StartUpScreen_START = { 0, 10 },
 				.SpectrumWindow = { .x = 4, .y = 136-34, .w = 312, .h = 89+34 },
@@ -720,15 +584,6 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 
                 //
 
-#ifndef SDR_AMBER
-#else
-				.AGC_MASK = { .x = 74, .y = 86, .h = 13, .w = 80 },
-#endif
-				.DIGMODE= { .x = 74, .y = 71, .w = 63 },
-				.LEFTBOXES_IND = { .x = 157, .y = 56, .w = 58, .h = 28 },
-				.LEFTBOXES_MODE = MODE_HORIZONTAL,
-				.LEFTBOXES_ROW_2ND_OFF = 13,
-
 				.RTC_IND={ .x= 5, .y = 86 },
 
 				.LOADANDDEBUG_Y = 100,
@@ -736,11 +591,11 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 				.LOAD_X = 280,
 
 				.PWR_NUM_IND = { 1, 100 },
-
+#ifdef USE_FREEDV
 				.FREEDV_SNR = { 5, 123 },
 				.FREEDV_BER = { 5, 113 },
 				.FREEDV_FONT = 4,
-
+#endif
 				.BOTTOM_BAR = { .x = 2, .y = 231, .h = 13, .w=62 },
 
 				.touchaction_list = R320240__touch_regions_widespectrum

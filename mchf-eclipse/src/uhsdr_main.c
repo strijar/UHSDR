@@ -281,7 +281,6 @@ void TransceiverStateInit(void)
     ts.display = &mchf_display;
 
     ts.show_debug_info = false;					// dont show coordinates on LCD
-    ts.show_wide_spectrum = false;              // default mode of spectrum wide on screen
     //CONFIG LOADED:ts.tune_power_level = 0;	// Tune with FULL POWER
     ts.power_scale_gen = 100;                   // power scale for Gen, %
     ts.power_scale_gen_full = 100;              // power scale for Gen, FULL POWER, %

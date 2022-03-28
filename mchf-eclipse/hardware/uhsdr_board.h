@@ -574,7 +574,7 @@ typedef struct TransceiverState
 #define EXPFLAGS1_CB_27MC_TX_ENABLE     0x02    // 1 = Enable transmitting (4W) on CB band 27 MHz (AM, FM, SSB)
 #define EXPFLAGS1_CB_26MC_TX_ENABLE     0x04    // 1 = Enable transmitting (4W) on CB band 26 MHz (AM, FM, SSB)
 #define EXPFLAGS1_CB_12W_SSB_TX_ENABLE  0x08    // 1 = Enable transmitting 12W SSB on CB bands, where TX is open
-#define EXPFLAGS1_WIDE_SPEC_DEF         0x10    // 1 = Enable default wide spectrum on screen
+#define EXPFLAGS1_WIDE_SPEC_DEF         0x10    // 1 = Enable default wide spectrum on screen [UNUSED]
 #define EXPFLAGS1_NO_SHOW_BNDMEM        0x20    // 1 - Don't show BndMemory on screen
 #define EXPFLAGS1_BANDCH_JUMP_SWAP      0x40    // 1 - LongAction of Band+/- is band change, ShortAction is jump by freq on panorama width
 #define EXPFLAGS1_TUNE_HELPER_DEFENABLE	0x80    // 1 - Tune Helper enable by default
@@ -691,7 +691,6 @@ typedef struct TransceiverState
     mchf_touchscreen_t *tp;
 
     bool	show_debug_info;	// show coordinates on LCD
-    bool    show_wide_spectrum;     // Mode of alternate full wide spectrum on screen
     uint8_t	tune_power_level;		// TX power in antenna tuning function
     uint8_t	power_temp;				// temporary tx power if tune is different from actual tx power
     uint8_t	cat_band_index;			// buffered bandindex before first CAT command arrived

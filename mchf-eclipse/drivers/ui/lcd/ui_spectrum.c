@@ -597,12 +597,12 @@ static void UiSpectrum_CreateDrawArea(void)
 //		UiLcdHy28_PrintText(292,118,"   ",Blue,Black,0);
 #ifndef SDR_AMBER_480_320
 	#ifndef OVI40_MOD_480_320
-        UiLcdHy28_PrintText(292,118 + (!ts.show_wide_spectrum?0:7),"   ",Blue,Black,0);
+        UiLcdHy28_PrintText(292,118 + 7, "   ", Blue, Black, 0);
 	#else
-        UiLcdHy28_PrintText(452,107 + (!ts.show_wide_spectrum?0:7),"   ",Blue,Black,0);
+        UiLcdHy28_PrintText(452,107 + 7),"   ", Blue, Black, 0);
 	#endif
 #else
-        UiLcdHy28_PrintText(452,107 + (!ts.show_wide_spectrum?0:7),"   ",Blue,Black,0);
+        UiLcdHy28_PrintText(452,107 + 7),"   ", Blue, Black, 0);
 #endif
 
     	// Draw top band = grey box in which text is printed
@@ -682,7 +682,7 @@ void UiSpectrum_Clear()
 {
 #ifndef SDR_AMBER_480_320
 	#ifndef OVI40_MOD_480_320
-    UiLcdHy28_DrawFullRect(slayout.full.x, slayout.full.y + (ts.show_wide_spectrum?1:0), slayout.full.h - (ts.show_wide_spectrum?1:0), slayout.full.w + (ts.show_wide_spectrum?1:0), Black);	// Clear screen under spectrum scope by drawing a single, black block (faster with SPI!)
+    UiLcdHy28_DrawFullRect(slayout.full.x, slayout.full.y + 1, slayout.full.h - 1, slayout.full.w + 1, Black);	// Clear screen under spectrum scope by drawing a single, black block (faster with SPI!)
 	#else
     UiLcdHy28_DrawFullRect(slayout.full.x, slayout.full.y + 1, slayout.full.h - 1, slayout.full.w, Black);
 	#endif

@@ -97,13 +97,8 @@ typedef struct {
 	UiCoord_t ENCODER_IND;			// Encoder controls indicator
 	uint8_t ENCODER_MODE;			//horizontal/vertical draw order
 
-	UiArea_t LEFTBOXES_IND;			// Lower DSP box
-	uint16_t LEFTBOXES_ROW_2ND_OFF;
-	uint8_t LEFTBOXES_MODE;
-
 	UiArea_t PW_IND;				// Power level
 
-	UiArea_t DIGMODE;				// Digimode item
 	UiArea_t SM_IND;				// S meter position
 	UiCoord_t PWR_IND;				// Supply Voltage indicator
 	UiCoord_t TEMP_IND;				// Temperature Indicator
@@ -119,9 +114,11 @@ typedef struct {
 
 	UiCoord_t PWR_NUM_IND;	// Location of numerical FWD/REV power indicator
 
+#ifdef USE_FREEDV
 	UiCoord_t FREEDV_SNR;	//freeDV coordinates for status display
 	UiCoord_t FREEDV_BER;
 	uint16_t FREEDV_FONT;
+#endif
 
 	UiCoord_t DisplayDbm;
 
@@ -148,10 +145,9 @@ enum MODE_{
 };
 
 enum LcdLayout_{
-	LcdLayout_320x240=0,
-	LcdLayout_480x320,
+	LcdLayout_480x320 = 0,
 	LcdLayout_800x480,
-	LcdLayout_320x240_ws,       // full wide panoram
+	LcdLayout_320x240,       // full wide panoram
 	LcdLayoutsCount		//this is last position enumerated used for layout array definition. Insert new layout name before this one
 };
 
