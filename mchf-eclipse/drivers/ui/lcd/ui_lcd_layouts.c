@@ -275,310 +275,131 @@ static const touchaction_list_descr_t R320240__touch_regions_widespectrum[] = {
 };
 
 const LcdLayout LcdLayouts[LcdLayoutsCount] = {
-		//------ 480 x 320 ---------------------------------------------------------
+		//      -- 480 x 320 --
 		{
-#ifndef SDR_AMBER //OVI40, Sparrow
-	#ifndef OVI40_MOD_480_320
-				.Size = { 480, 320},
-				.StartUpScreen_START ={ 80, 60},
-				.SpectrumWindow={ .x = 0, .y = 110, .w = 480, .h = 176 },
-				.SpectrumWindowPadding=0,
-
-				.TUNE_FREQ= { R480320_TUNE_FREQ_X, R480320_TUNE_FREQ_Y},
-				.TUNE_SPLIT_FREQ_X=R480320_TUNE_SPLIT_FREQ_X,
-				.TUNE_SPLIT_MARKER_X=R480320_TUNE_SPLIT_MARKER_X,
-				.TUNE_SPLIT_FREQ_Y_TX=R480320_TUNE_SPLIT_FREQ_Y_TX,
-				.TUNE_SFREQ = { R480320_TUNE_SFREQ_X, R480320_TUNE_SFREQ_Y},
-				.DisplayDbm = { R480320_DisplayDbm_X, R480320_DisplayDbm_Y},
-				.MEMORYLABEL = { R480320_MEMORYLABEL_X, R480320_MEMORYLABEL_Y},
-
-				.BAND_MODE = { R480320_BAND_MODE_X, R480320_BAND_MODE_Y},
-				.BAND_MODE_MASK = { .x = R480320_BAND_MODE_MASK_X, .y = R480320_BAND_MODE_MASK_Y, .h = R480320_BAND_MODE_MASK_H, .w= R480320_BAND_MODE_MASK_W},
-
-				.DEMOD_MODE_MASK = { .x = R480320_DEMOD_MODE_MASK_X, .y = R480320_DEMOD_MODE_MASK_Y, .h = R480320_DEMOD_MODE_MASK_H,
-                .w = R480320_DEMOD_MODE_MASK_W},
-				.AGC_MASK = {.x = R480320_AGC_MASK_X, .y = R480320_AGC_MASK_Y, .h = R480320_AGC_MASK_H,
-		                .w = R480320_AGC_MASK_W},
-				.TUNE_STEP={.x=R480320_TUNE_STEP_X, .y=R480320_TUNE_STEP_Y, .h=R480320_TUNE_STEP_MASK_H, .w=R480320_TUNE_STEP_MASK_W},
-
-				.ENCODER_IND = { R480320_ENCODER_IND_X, R480320_ENCODER_IND_Y},
-				.ENCODER_MODE=MODE_HORIZONTAL,
-
-				.PW_IND = { .x=R480320_PW_IND_X, .y=R480320_PW_IND_Y, .w=R480320_PW_IND_W},
-				.TEMP_IND={.x = 370,.y = 64},
-				.RTC_IND={.x = 415,.y = 80},
-
-				.LOADANDDEBUG_Y=96,
-				.DEBUG_X=0,
-				.LOAD_X=280,
-
-				.PWR_NUM_IND ={ 320, 96},
-
-				.CW_DECODER_WPM = { 420, 290},
-
-				.SNAP_CARRIER= { 242, 29},
-
-				.TextMsgLine = { 0, 290 },
-				.TextMsg_buffer_max=50,
-				.TextMsg_font=0,
-#ifdef USE_FREEDV
-
-				.FREEDV_SNR = {410,288},
-				.FREEDV_BER = {410,297},
-				.FREEDV_FONT=4,
-#endif
-				.SM_IND={.x = R480320_SM_IND_X, .y = R480320_SM_IND_Y, .h = R480320_SM_IND_H, .w = R480320_SM_IND_W},
-				.PWR_IND={ .x = 420, .y = 307},
-
-  #ifdef UI_BRD_OVI40
-				.BOTTOM_BAR={.x=0,.y=308, .h=16, .w=74},
-  #else
-				.BOTTOM_BAR={.x=32,.y=308, .h=16, .w=74},
-  #endif
-				.MENUSIZE=14,
-				.MENU_IND = { 80, 110 },
-				.MENU_CHANGE_X=280,
-				.MENU_CURSOR_X=360,
-				.MENU_TEXT_SIZE_MAX=40,
-
-				.touchaction_list=R480320_touch_regions
-	#else
 				.Size = { 480, 320 },
 				.StartUpScreen_START = { 80, 60 },
-				.SpectrumWindow = { .x = 0, .y = 123, .w = 480, .h = 174 },
-				.SpectrumWindowPadding = 0,
-
-				.TUNE_FREQ = { 276, 90 },
-				.TUNE_SPLIT_FREQ_X = 290,
-				.TUNE_SPLIT_MARKER_X = 276,
-				.TUNE_SPLIT_FREQ_Y_TX = 276,
-				.TUNE_SFREQ = { 396, 60 },
-				.DisplayDbm = { 273, 60 },
-				.MEMORYLABEL = { 355, 60 },
-				.BAND_MODE = { 436, 90 },
-				.BAND_MODE_MASK = { .x = 435, .y = 89, .h = 13, .w = 33 },
-				.DEMOD_MODE_MASK = { .x = 186, .y = 0, .h = 13, .w = 16 },
-				.AGC_MASK = {.x = 122, .y = 15, .h = 13, .w = 80 },
-				.TUNE_STEP={.x = 205, .y = 15, .h = 13, .w = 56 },
-				.ENCODER_IND = { 0, 15 },
-				.ENCODER_MODE = MODE_VERTICAL,
-				.PW_IND = { .x = 205, .y = 0, .w = 56 },
-				.TEMP_IND = { .x = 0, .y = 0 },
-				.RTC_IND = { .x = 127, .y = 60 },
-
-				.LOADANDDEBUG_Y = 75,
-				.DEBUG_X = 0,
-				.LOAD_X = 440,
-
-				.PWR_NUM_IND = { 320, 99 },
-
-				.CW_DECODER_WPM = { 0, 92 },
-
-				.SNAP_CARRIER = { 27, 107 },
-				.TextMsgLine = { 0, 75 },
-				.TextMsg_buffer_max = 50,
-				.TextMsg_font = 0,
-#ifdef USE_FREEDV
-
-				.FREEDV_SNR = { 0, 90 },
-				.FREEDV_BER = { 0, 102 },
-				.FREEDV_FONT = 4,
-#endif
-				.SM_IND = { .x = 273, .y = 0, .h = 56, .w = 203 },
-				.PWR_IND = { .x = 207, .y = 60 },
-				.BOTTOM_BAR = {.x=0,.y=308, .h=16, .w=79},//.w=74},
-
-				.MENUSIZE = 14,
-				.MENU_IND = { 140, 129 },
-				.MENU_CHANGE_X = 280,
-				.MENU_CURSOR_X = 360,
-				.MENU_TEXT_SIZE_MAX = 40,
-
-				.touchaction_list = R480320_touch_regions
-	#endif
-#else //Amber_480x320
-				.Size = { 480, 320 },
-				.StartUpScreen_START = { 80, 60 },
-				.SpectrumWindow = { .x = 0, .y = 123, .w = 480, .h = 174 },
-				.SpectrumWindowPadding = 0,
-
-				.TUNE_FREQ = { 276, 90 },
-				.TUNE_SPLIT_FREQ_X = 356,
-				.TUNE_SPLIT_MARKER_X = 316,
-				.TUNE_SPLIT_FREQ_Y_TX = 102,
-				.TUNE_SFREQ = { 396, 60 },
-				.DisplayDbm = { 273, 60 },
-				.MEMORYLABEL = { 355, 60 },
-				.BAND_MODE = { 436, 90 },
-				.BAND_MODE_MASK = { .x = 435, .y = 89, .h = 13, .w = 33 },
-				.DEMOD_MODE_MASK = { .x = 186, .y = 0, .h = 13, .w = 16 },
-				.AGC_MASK = {.x = 122, .y = 15, .h = 13, .w = 80 },
-				.TUNE_STEP={.x = 205, .y = 15, .h = 13, .w = 56 },
-				.ENCODER_IND = { 0, 15 },
-				.ENCODER_MODE = MODE_VERTICAL,
-				.PW_IND = { .x = 205, .y = 0, .w = 56 },
-				.TEMP_IND = { .x = 0, .y = 0 },
-				.RTC_IND = { .x = 127, .y = 60 },
-
-				.LOADANDDEBUG_Y = 75,
-				.DEBUG_X = 0,
-				.LOAD_X = 440,
-
-				.PWR_NUM_IND = { 320, 99 },
-
-				.CW_DECODER_WPM = { 0, 92 },
-
-				.SNAP_CARRIER = { 27, 107 },
-				.TextMsgLine = { 0, 75 },
-				.TextMsg_buffer_max = 50,
-				.TextMsg_font = 0,
-#ifdef USE_FREEDV
-				.FREEDV_SNR = { 0, 90 },
-				.FREEDV_BER = { 0, 102 },
-				.FREEDV_FONT = 4,
-#endif
-				.SM_IND = { .x = 273, .y = 0, .h = 56, .w = 203 },
-				.PWR_IND = { .x = 207, .y = 60 },
-		#ifndef SDR_AMBER_4INCH
-				.BOTTOM_BAR = {.x=0,.y=308, .h=16, .w=79},//.w=74},
-		#else
-				.BOTTOM_BAR = {.x=2,.y=308, .h=16, .w=67},
-		#endif
-
-				.MENUSIZE = 14,
-				.MENU_IND = { 140, 129 },//{ 80, 130 },
-				.MENU_CHANGE_X = 280,
-				.MENU_CURSOR_X = 430,//360,
-				.MENU_TEXT_SIZE_MAX = 40,
-
-				.touchaction_list = R480320_touch_regions
-#endif
-		},
-		//------ 800 x 480 -----------------------------------------------------------
-		{
-				.Size = { 800, 480},
-				.StartUpScreen_START ={ 80, 60},
-				.SpectrumWindow={ .x = 0, .y = 110, .w = 480, .h = 176 },
-				.SpectrumWindowPadding=0,
-
-				.TUNE_FREQ= { R480320_TUNE_FREQ_X, R480320_TUNE_FREQ_Y},
-				.TUNE_SPLIT_FREQ_X=R480320_TUNE_SPLIT_FREQ_X,
-				.TUNE_SPLIT_MARKER_X=R480320_TUNE_SPLIT_MARKER_X,
-				.TUNE_SPLIT_FREQ_Y_TX=R480320_TUNE_SPLIT_FREQ_Y_TX,
-				.TUNE_SFREQ = { R480320_TUNE_SFREQ_X, R480320_TUNE_SFREQ_Y},
-				.DisplayDbm = { R480320_DisplayDbm_X, R480320_DisplayDbm_Y},
-				.MEMORYLABEL = { R480320_MEMORYLABEL_X, R480320_MEMORYLABEL_Y},
-
-				.BAND_MODE = { R480320_BAND_MODE_X, R480320_BAND_MODE_Y},
-				.BAND_MODE_MASK = { .x = R480320_BAND_MODE_MASK_X, .y = R480320_BAND_MODE_MASK_Y, .h = R480320_BAND_MODE_MASK_H, .w= R480320_BAND_MODE_MASK_W},
-
-				.DEMOD_MODE_MASK = { .x = R480320_DEMOD_MODE_MASK_X, .y = R480320_DEMOD_MODE_MASK_Y, .h = R480320_DEMOD_MODE_MASK_H,
-                .w = R480320_DEMOD_MODE_MASK_W},
-				.AGC_MASK = {.x = R480320_AGC_MASK_X, .y = R480320_AGC_MASK_Y, .h = R480320_AGC_MASK_H,
-		                .w = R480320_AGC_MASK_W},
-				.TUNE_STEP={.x=R480320_TUNE_STEP_X, .y=R480320_TUNE_STEP_Y, .h=R480320_TUNE_STEP_MASK_H, .w=R480320_TUNE_STEP_MASK_W},
-
-				.ENCODER_IND = { R480320_ENCODER_IND_X, R480320_ENCODER_IND_Y},
-				.ENCODER_MODE=MODE_HORIZONTAL,
-
-				.PW_IND = { .x=R480320_PW_IND_X, .y=R480320_PW_IND_Y, .w=R480320_PW_IND_W},
-				.TEMP_IND={.x = 370,.y = 64},
-				.RTC_IND={.x = 415,.y = 80},
-
-				.LOADANDDEBUG_Y=96,
-				.DEBUG_X=0,
-				.LOAD_X=280,
-
-				.PWR_NUM_IND ={ 320, 96},
-
-				.CW_DECODER_WPM = { 420, 290},
-
-				.SNAP_CARRIER= { 242, 29},
-
-				.TextMsgLine = { 0, 290 },
-				.TextMsg_buffer_max=50,
-				.TextMsg_font=0,
-#ifdef USE_FREEDV
-				.FREEDV_SNR = {410,288},
-				.FREEDV_BER = {410,297},
-				.FREEDV_FONT=4,
-#endif
-				.SM_IND={.x = R480320_SM_IND_X, .y = R480320_SM_IND_Y, .h = R480320_SM_IND_H, .w = R480320_SM_IND_W},
-				.PWR_IND={ .x = 420, .y = 307},
-
-#ifdef UI_BRD_OVI40
-				.BOTTOM_BAR={.x=0,.y=308, .h=16, .w=74},
-#else
-				.BOTTOM_BAR={.x=32,.y=308, .h=16, .w=74},
-#endif
-				.MENUSIZE=14,
-				.MENU_IND = { 80, 110 },
-				.MENU_CHANGE_X=280,
-				.MENU_CURSOR_X=360,
-				.MENU_TEXT_SIZE_MAX=40,
-
-				.touchaction_list=R480320_touch_regions
-		},
-		//------- 320 x 240 ----------------------------------------------------------
-		{
-				.Size = { 320, 240 },
-				.StartUpScreen_START = { 0, 10 },
-				.SpectrumWindow = { .x = 4, .y = 136-34, .w = 312, .h = 89+34 },
+				.SpectrumWindow = { .x = 0, .y = 105, .w = 480, .h = 195 },
 				.SpectrumWindowPadding = 0,
 
                 // 1 line
 
-                .INFO_BAR = {.x = 0, .y = 0, .h = 11, .w = 320 },
-                .TEMP_IND={ .x = 0, .y = 1 },          // width 40
-                .PWR_IND = { .x = 40 + 8, .y = 1 },
+                .INFO_BAR = {.x = 0, .y = 0, .h = 12, .w = 479 },
+                .TEMP_IND={ .x = 2, .y = 2 },          // width 40
+                .PWR_IND = { .x = 2 + 40 + 8, .y = 2 },
+                .RTC_IND = { .x = 170, .y = 2 },
 
-                .DisplayDbm = { 126, 1 },              // width 75
-#ifdef SDR_AMBER
-                .MEMORYLABEL= { 64, 123 },
-#else
-                .MEMORYLABEL= { 126 + 75 + 5, 1 },     // width 40
-#endif
-                .TUNE_SFREQ = { 126 + 75 + 5 + 40, 1 },
+                .DisplayDbm = { 126+160, 2 },              // width 75
+                .MEMORYLABEL= { 126+160 + 75 + 5, 2 },     // width 40
+                .TUNE_SFREQ = { 126+160 + 75 + 5 + 40, 2 },
 
                 // 2 line
 
-                .ENCODER_IND = { 0, 12 },
+                .ENCODER_IND = { 0, 14 },
                 .ENCODER_MODE = MODE_VERTICAL,
-                .SM_IND = { .x = 126, .y = 12, .h = 28, .w = 191 },
+                .SM_IND = { .x = 126+160, .y = 14, .h = 28, .w = 191 },
+
+                // 3 line
+
+                .FILTER_IND = { .x = 0,  .y = 14 + 28 + 2, .w = 82, .h = 30 },
+                .PW_IND = { .x = 82 + 2, .y = 14 + 28 + 2, .w = 40, .h = 14 },
+                .DEMOD_MODE_MASK = { .x = 82 + 2, .y = 14 + 28 + 2 + 14 + 2, .w = 40, .h = 14 },
+                .TUNE_BOX = {.x = 126+160, .y = 14 + 28 + 2, .w = 191 + 2, .h = 30 + 14 + 2 },
+                .TUNE_FREQ = { 126+160 + 10, 14 + 28 + 2 + 5},
+                .TUNE_SPLIT_FREQ_X = 196+160 + 20,
+                .TUNE_SPLIT_FREQ_Y_TX = (14 + 28 + 2 + 5) + 12,
+                .TUNE_SPLIT_MARKER_X = 196+160,
+
+                // 4 line
+
+                .DSP_IND = { .x = 0, .y = 14 + (28 + 2) + (14 + 2) + (14 + 2), .w = 82, .h = 14 },
+                .AGC_MASK = { .x = 82 + 2, .y = 14 + (28 + 2) + (14 + 2) + (14 + 2), .w = 40, .h = 14 },
+                .TUNE_STEP={ .x = 126+160 + 26, .y = 14 + (28 + 2) + (14 + 2) + (14 + 2), .w = 40, .h = 14 },
+                .SNAP_CARRIER = { 126+160 + 96, 14 + (28 + 2) + (14 + 2) + (14 + 2) + 2 },
+                .BAND_MODE = { 480 - 55 + 1, 14 + (28 + 2) + (14 + 2) + (14 + 2) },
+                .BAND_MODE_MASK = { .x = 480 - 55, .y = 14 + (28 + 2) + (14 + 2) + (14 + 2) - 1, .h = 14, .w = 30 },
+
+                // 5 line
+
+                .MID_BAR = {.x = 0, .y = 14 + (28 + 2) + (14 + 2) + (14 + 2) + (14 + 2), .h = 12, .w = 479 },
+                .CW_DECODER_WPM = { 0, 14 + (28 + 2) + (14 + 2) + (14 + 2) + (14 + 2) + 2 },
+                .TextMsgLine = { 50, 14 + (28 + 2) + (14 + 2) + (14 + 2) + (14 + 2) + 2 },
+                .TextMsg_buffer_max = 38+20,
+                .TextMsg_font = 4,
+
+                // Menu
+
+                .MENUSIZE = 14,
+                .MENU_IND = { 100, 105 + 14 },
+                .MENU_CURSOR_X = 380,
+                .MENU_TEXT_SIZE_MAX = 40,
+
+                //
+
+                .LOADANDDEBUG_Y = 100,
+                .DEBUG_X = 0,
+                .LOAD_X = 280,
+
+                .PWR_NUM_IND = { 1, 100 },
+                .BOTTOM_BAR = { .x = 2, .y = 320-16, .h = 16, .w = 67 },
+
+				.touchaction_list = R480320_touch_regions
+		},
+		//      -- 320 x 240 --
+		{
+				.Size = { 320, 240 },
+				.StartUpScreen_START = { 0, 10 },
+				.SpectrumWindow = { .x = 0, .y = 105, .w = 320, .h = 120 },
+				.SpectrumWindowPadding = 0,
+
+                // 1 line
+
+                .INFO_BAR = {.x = 0, .y = 0, .h = 12, .w = 319 },
+                .TEMP_IND={ .x = 2, .y = 2 },          // width 40
+                .PWR_IND = { .x = 40 + 8, .y = 2 },
+
+                .DisplayDbm = { 124, 2 },              // width 75
+                .MEMORYLABEL= { 124 + 75 + 5, 2 },     // width 40
+                .TUNE_SFREQ = { 124 + 75 + 5 + 40, 2 },
+
+                // 2 line
+
+                .ENCODER_IND = { 0, 14 },
+                .ENCODER_MODE = MODE_VERTICAL,
+                .SM_IND = { .x = 126, .y = 14, .h = 28, .w = 191 },
 
 				// 3 line
 
-                .FILTER_IND = { .x = 0,  .y = 12 + 28 + 2, .w = 82, .h = 30 },
-                .PW_IND = { .x = 82 + 2, .y = 12 + 28 + 2, .w = 40, .h = 14 },
-                .DEMOD_MODE_MASK = { .x = 82 + 2, .y = 12 + 28 + 2 + 14 + 2, .w = 40, .h = 14 },
-                .TUNE_BOX = {.x = 126, .y = 12 + 28 + 2, .w = 191 + 2, .h = 30 + 14 + 2 },
-                .TUNE_FREQ = { 126 + 10, 12 + 28 + 2 + 5},
+                .FILTER_IND = { .x = 0,  .y = 14 + 28 + 2, .w = 82, .h = 30 },
+                .PW_IND = { .x = 82 + 2, .y = 14 + 28 + 2, .w = 40, .h = 14 },
+                .DEMOD_MODE_MASK = { .x = 82 + 2, .y = 14 + 28 + 2 + 14 + 2, .w = 40, .h = 14 },
+                .TUNE_BOX = {.x = 126, .y = 14 + 28 + 2, .w = 191 + 2, .h = 30 + 14 + 2 },
+                .TUNE_FREQ = { 126 + 10, 14 + 28 + 2 + 5},
                 .TUNE_SPLIT_FREQ_X = 196 + 20,
-                .TUNE_SPLIT_FREQ_Y_TX = (12 + 28 + 2 + 5) + 12,
+                .TUNE_SPLIT_FREQ_Y_TX = (14 + 28 + 2 + 5) + 12,
                 .TUNE_SPLIT_MARKER_X = 196,
 
                 // 4 line
 
-                .DSP_IND = { .x = 0, .y = 12 + (28 + 2) + (14 + 2) + (14 + 2), .w = 82, .h = 14 },
-                .AGC_MASK = { .x = 82 + 2, .y = 12 + (28 + 2) + (14 + 2) + (14 + 2), .w = 40, .h = 14 },
-                .TUNE_STEP={ .x = 126 + 26, .y = 12 + (28 + 2) + (14 + 2) + (14 + 2), .w = 40, .h = 14 },
-                .SNAP_CARRIER = { 126 + 96, 12 + (28 + 2) + (14 + 2) + (14 + 2) + 2 },
-                .BAND_MODE = { 320 - 55 + 1, 12 + (28 + 2) + (14 + 2) + (14 + 2) },
-                .BAND_MODE_MASK = { .x = 320 - 55, .y = 12 + (28 + 2) + (14 + 2) + (14 + 2) - 1, .h = 14, .w = 30 },
+                .DSP_IND = { .x = 0, .y = 14 + (28 + 2) + (14 + 2) + (14 + 2), .w = 82, .h = 14 },
+                .AGC_MASK = { .x = 82 + 2, .y = 14 + (28 + 2) + (14 + 2) + (14 + 2), .w = 40, .h = 14 },
+                .TUNE_STEP={ .x = 126 + 26, .y = 14 + (28 + 2) + (14 + 2) + (14 + 2), .w = 40, .h = 14 },
+                .SNAP_CARRIER = { 126 + 96, 14 + (28 + 2) + (14 + 2) + (14 + 2) + 2 },
+                .BAND_MODE = { 320 - 55 + 1, 14 + (28 + 2) + (14 + 2) + (14 + 2) },
+                .BAND_MODE_MASK = { .x = 320 - 55, .y = 14 + (28 + 2) + (14 + 2) + (14 + 2) - 1, .h = 14, .w = 30 },
 
                 // 5 line
 
-                .MID_BAR = {.x = 0, .y = 12 + (28 + 2) + (14 + 2) + (14 + 2) + (14 + 2), .h = 11, .w = 320 },
-                .CW_DECODER_WPM = { 0, 12 + (28 + 2) + (14 + 2) + (14 + 2) + (14 + 2) + 1 },
-                .TextMsgLine = { 50, 12 + (28 + 2) + (14 + 2) + (14 + 2) + (14 + 2) + 1},
-                .TextMsg_buffer_max = 38,
+                .MID_BAR = {.x = 0, .y = 14 + (28 + 2) + (14 + 2) + (14 + 2) + (14 + 2), .h = 12, .w = 319 },
+                .CW_DECODER_WPM = { 2, 14 + (28 + 2) + (14 + 2) + (14 + 2) + (14 + 2) + 2 },
+                .TextMsgLine = { 50, 14 + (28 + 2) + (14 + 2) + (14 + 2) + (14 + 2) + 2 },
+                .TextMsg_buffer_max = 37,
                 .TextMsg_font = 4,
 
                 // Menu
 
                 .MENUSIZE = 9,
-                .MENU_IND = { 10, (136 - 32) + 8 },
-                .MENU_CHANGE_X = 244,
+                .MENU_IND = { 10, 105 + 12 },
                 .MENU_CURSOR_X = 310,
                 .MENU_TEXT_SIZE_MAX = 40,
 
@@ -591,15 +412,74 @@ const LcdLayout LcdLayouts[LcdLayoutsCount] = {
 				.LOAD_X = 280,
 
 				.PWR_NUM_IND = { 1, 100 },
-#ifdef USE_FREEDV
-				.FREEDV_SNR = { 5, 123 },
-				.FREEDV_BER = { 5, 113 },
-				.FREEDV_FONT = 4,
-#endif
 				.BOTTOM_BAR = { .x = 2, .y = 231, .h = 13, .w=62 },
 
 				.touchaction_list = R320240__touch_regions_widespectrum
-		}
+		},
+        //      -- 800 x 480 --
+        {
+                .Size = { 800, 480},
+                .StartUpScreen_START ={ 80, 60},
+                .SpectrumWindow={ .x = 0, .y = 110, .w = 480, .h = 176 },
+                .SpectrumWindowPadding=0,
+
+                .TUNE_FREQ= { R480320_TUNE_FREQ_X, R480320_TUNE_FREQ_Y},
+                .TUNE_SPLIT_FREQ_X=R480320_TUNE_SPLIT_FREQ_X,
+                .TUNE_SPLIT_MARKER_X=R480320_TUNE_SPLIT_MARKER_X,
+                .TUNE_SPLIT_FREQ_Y_TX=R480320_TUNE_SPLIT_FREQ_Y_TX,
+                .TUNE_SFREQ = { R480320_TUNE_SFREQ_X, R480320_TUNE_SFREQ_Y},
+                .DisplayDbm = { R480320_DisplayDbm_X, R480320_DisplayDbm_Y},
+                .MEMORYLABEL = { R480320_MEMORYLABEL_X, R480320_MEMORYLABEL_Y},
+
+                .BAND_MODE = { R480320_BAND_MODE_X, R480320_BAND_MODE_Y},
+                .BAND_MODE_MASK = { .x = R480320_BAND_MODE_MASK_X, .y = R480320_BAND_MODE_MASK_Y, .h = R480320_BAND_MODE_MASK_H, .w= R480320_BAND_MODE_MASK_W},
+
+                .DEMOD_MODE_MASK = { .x = R480320_DEMOD_MODE_MASK_X, .y = R480320_DEMOD_MODE_MASK_Y, .h = R480320_DEMOD_MODE_MASK_H,
+                .w = R480320_DEMOD_MODE_MASK_W},
+                .AGC_MASK = {.x = R480320_AGC_MASK_X, .y = R480320_AGC_MASK_Y, .h = R480320_AGC_MASK_H,
+                        .w = R480320_AGC_MASK_W},
+                .TUNE_STEP={.x=R480320_TUNE_STEP_X, .y=R480320_TUNE_STEP_Y, .h=R480320_TUNE_STEP_MASK_H, .w=R480320_TUNE_STEP_MASK_W},
+
+                .ENCODER_IND = { R480320_ENCODER_IND_X, R480320_ENCODER_IND_Y},
+                .ENCODER_MODE=MODE_HORIZONTAL,
+
+                .PW_IND = { .x=R480320_PW_IND_X, .y=R480320_PW_IND_Y, .w=R480320_PW_IND_W},
+                .TEMP_IND={.x = 370,.y = 64},
+                .RTC_IND={.x = 415,.y = 80},
+
+                .LOADANDDEBUG_Y=96,
+                .DEBUG_X=0,
+                .LOAD_X=280,
+
+                .PWR_NUM_IND ={ 320, 96},
+
+                .CW_DECODER_WPM = { 420, 290},
+
+                .SNAP_CARRIER= { 242, 29},
+
+                .TextMsgLine = { 0, 290 },
+                .TextMsg_buffer_max=50,
+                .TextMsg_font=0,
+#ifdef USE_FREEDV
+                .FREEDV_SNR = {410,288},
+                .FREEDV_BER = {410,297},
+                .FREEDV_FONT=4,
+#endif
+                .SM_IND={.x = R480320_SM_IND_X, .y = R480320_SM_IND_Y, .h = R480320_SM_IND_H, .w = R480320_SM_IND_W},
+                .PWR_IND={ .x = 420, .y = 307},
+
+#ifdef UI_BRD_OVI40
+                .BOTTOM_BAR={.x=0,.y=308, .h=16, .w=74},
+#else
+                .BOTTOM_BAR={.x=32,.y=308, .h=16, .w=74},
+#endif
+                .MENUSIZE=14,
+                .MENU_IND = { 80, 110 },
+                .MENU_CURSOR_X=360,
+                .MENU_TEXT_SIZE_MAX=40,
+
+                .touchaction_list=R480320_touch_regions
+        }
 };
 
 

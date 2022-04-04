@@ -594,15 +594,14 @@ static void UiSpectrum_CreateDrawArea(void)
 
     if(slayout.title.h != 0)		//don't draw text bar if there is no space allocated for it
     {
-//		UiLcdHy28_PrintText(292,118,"   ",Blue,Black,0);
 #ifndef SDR_AMBER_480_320
 	#ifndef OVI40_MOD_480_320
         UiLcdHy28_PrintText(292,118 + 7, "   ", Blue, Black, 0);
 	#else
-        UiLcdHy28_PrintText(452,107 + 7),"   ", Blue, Black, 0);
+        UiLcdHy28_PrintText(452, 107 + 7,"   ", Blue, Black, 0);
 	#endif
 #else
-        UiLcdHy28_PrintText(452,107 + 7),"   ", Blue, Black, 0);
+        UiLcdHy28_PrintText(452, 107 + 7, "   ", Blue, Black, 0);
 #endif
 
     	// Draw top band = grey box in which text is printed

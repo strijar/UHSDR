@@ -208,7 +208,6 @@ void UiDriver_DoCrossCheck(int16_t cross[]);
 void UiAction_ToggleVfoAB(void);
 void UiDriver_SetSplitMode(bool mode_active);
 
-
 void UiDriver_StartupScreen_LogIfProblem(bool isError, const char* txt);
 
 void UiDriver_BacklightDimHandler(void);

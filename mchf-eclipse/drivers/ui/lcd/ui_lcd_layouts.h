@@ -28,8 +28,8 @@
 
 #define ENC_ROW_2ND_OFF (14)
 #define Xspacing 5
-#define ui_txt_msg_buffer_size 51		//this defines the buffer size for text line in maximum possible configuration.
-										//Please adjust it to maximum value+1 of ts.Layout->TextMsg_buffer_max
+#define MSG_BUFFER_SIZE 60		    // this defines the buffer size for text line in maximum possible configuration.
+
 typedef enum
 {
     RESOLUTION_320_240,
@@ -132,7 +132,6 @@ typedef struct {
 	uint16_t MENUSIZE;				// number of menu items per page/screen
 
 	UiCoord_t MENU_IND;       	// X position of description of menu item being changed
-	uint16_t MENU_CHANGE_X;     // Position of variable being changed
 	uint16_t MENU_CURSOR_X;     // Position of cursor used to indicate selected item
 	uint8_t MENU_TEXT_SIZE_MAX;	// One line maximum length
 
@@ -146,9 +145,9 @@ enum MODE_{
 
 enum LcdLayout_{
 	LcdLayout_480x320 = 0,
-	LcdLayout_800x480,
-	LcdLayout_320x240,       // full wide panoram
-	LcdLayoutsCount		//this is last position enumerated used for layout array definition. Insert new layout name before this one
+	LcdLayout_320x240,
+    LcdLayout_800x480,
+	LcdLayoutsCount
 };
 
 extern const LcdLayout LcdLayouts[LcdLayoutsCount];

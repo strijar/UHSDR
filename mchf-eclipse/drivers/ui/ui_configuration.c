@@ -104,7 +104,7 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
     { ConfigEntry_UInt8, EEPROM_METER_COLOUR_UP,&ts.meter_colour_up,SPEC_BLUE, 0, SPEC_MAX_COLOUR},
     { ConfigEntry_UInt8, EEPROM_METER_COLOUR_DOWN,&ts.meter_colour_down,SPEC_CYAN, 0, SPEC_MAX_COLOUR},
     { ConfigEntry_UInt8, EEPROM_BOX_COLOUR,&ts.box_colour,SPEC_BLUE, 0, SPEC_MAX_COLOUR},
-    { ConfigEntry_UInt8, EEPROM_TXTLINE_COLOUR,&ts.txtline_colour,SPEC_YELLOW, 0, SPEC_MAX_COLOUR},
+    { ConfigEntry_UInt8, EEPROM_TXTLINE_COLOUR,&ts.txt_colour,SPEC_YELLOW, 0, SPEC_MAX_COLOUR},
     { ConfigEntry_UInt8, EEPROM_SPECTRUM_TRACE_COLOUR,&ts.scope_trace_colour,SPEC_COLOUR_TRACE_DEFAULT, 0, SPEC_MAX_COLOUR},
     { ConfigEntry_UInt8, EEPROM_SPECTRUM_GRID_COLOUR,&ts.scope_grid_colour,SPEC_COLOUR_GRID_DEFAULT, 0, SPEC_MAX_COLOUR},
     { ConfigEntry_UInt8, EEPROM_SPECTRUM_CENTRE_LINE_COLOUR,&ts.spectrum_centre_line_colour,SPEC_COLOUR_GRID_DEFAULT, 0, SPEC_MAX_COLOUR},

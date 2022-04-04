@@ -228,7 +228,7 @@ const MenuDescriptor displayGroup[] =
     { MENU_DISPLAY, MENU_ITEM, MENU_METER_COLOUR_UP, NULL, "Upper Meter Colour", UiMenuDesc("Set the colour of the scale of combined S/Power-Meter") },
     { MENU_DISPLAY, MENU_ITEM, MENU_METER_COLOUR_DOWN, NULL, "Lower Meter Colour", UiMenuDesc("Set the colour of the scale of combined SWR/AUD/ALC-Meter") },
     { MENU_DISPLAY, MENU_ITEM, MENU_BOX_COLOUR, NULL, "Boxes Colour", UiMenuDesc("Screen boxes colour") },
-    { MENU_DISPLAY, MENU_ITEM, MENU_TXTLINE_COLOUR, NULL, "Ticker Colour", UiMenuDesc("Ticker colour") },
+    { MENU_DISPLAY, MENU_ITEM, MENU_TXTLINE_COLOUR, NULL, "Text Colour", UiMenuDesc("All texts colour") },
 	{ MENU_DISPLAY, MENU_ITEM, MENU_DBM_DISPLAY, NULL, "dBm display", UiMenuDesc("RX signal power (measured within the filter bandwidth) can be displayed in dBm or normalized as dBm/Hz. This value is supposed to be quite accurate to +-3dB. Preferably use low spectrum display magnify settings. Accuracy is lower for very very weak and very very strong signals.")},
     { MENU_DISPLAY, MENU_ITEM, MENU_DBM_CALIBRATE, NULL, "dBm calibrate", UiMenuDesc("dBm display calibration. Just an offset (in dB) that is added to the internally calculated dBm or dBm/Hz value.")},
     { MENU_DISPLAY, MENU_ITEM, CONFIG_SMETER_ATTACK, NULL, "S-Meter Attack", UiMenuDesc("Attack controls how quickly the S-Meter reacts to rising signal levels, higher values represent quicker reaction") },

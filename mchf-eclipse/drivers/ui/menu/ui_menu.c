@@ -5451,17 +5451,17 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
                                                   SPEC_BLUE,
                                                   1
                                                  );
-            if(var_change)
-            {
-            	UiDriver_UpdateDisplayAfterParamChange();
+
+            if (var_change) {
+                UiDriver_UpdateDisplayAfterParamChange();
             }
-            UiMenu_MapColors(ts.box_colour,options,&clr);
+            UiMenu_MapColors(ts.box_colour, options, &clr);
 //            break;
 	}
 //        case MENU_TXTLINE_COLOUR:              // ticker colour
 	else if(select==MENU_TXTLINE_COLOUR)
 	{
-            var_change = UiDriverMenuItemChangeUInt8(var, mode, &ts.txtline_colour,
+            var_change = UiDriverMenuItemChangeUInt8(var, mode, &ts.txt_colour,
                                                   0,
                                                   SPEC_MAX_COLOUR,
                                                   SPEC_YELLOW,
@@ -5471,7 +5471,7 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
             {
             	UiDriver_UpdateDisplayAfterParamChange();
             }
-            UiMenu_MapColors(ts.txtline_colour,options,&clr);
+            UiMenu_MapColors(ts.txt_colour,options,&clr);
 //            break;
 	}
 //        case CONFIG_ENC123_REVERSE:

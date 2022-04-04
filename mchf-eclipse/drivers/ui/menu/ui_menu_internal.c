@@ -374,16 +374,15 @@ bool UiMenu_FillSlotWithEntry(MenuDisplaySlot* here, const MenuDescriptor* entry
 }
 
 // DISPLAY SPECIFIC CODE BEGIN
-void UiMenu_DisplayValue(const char* value,uint32_t clr,uint16_t pos)
-{
+void UiMenu_DisplayValue(const char* value,uint32_t clr,uint16_t pos) {
     UiLcdHy28_PrintTextRight(ts.Layout->MENU_CURSOR_X - 4, ts.Layout->MENU_IND.y + (pos * 12), value, clr, Black, 0);       // yes, normal position
 }
-static void UiMenu_DisplayLabel(const char* label,uint32_t clr,uint16_t pos)
-{
+
+static void UiMenu_DisplayLabel(const char* label,uint32_t clr,uint16_t pos) {
     UiLcdHy28_PrintText(ts.Layout->MENU_IND.x, ts.Layout->MENU_IND.y + (12*(pos)),label,clr,Black,0);
 }
-static void UiMenu_DisplayCursor(const char* label,uint32_t clr,uint16_t pos)
-{
+
+static void UiMenu_DisplayCursor(const char* label,uint32_t clr,uint16_t pos) {
     UiLcdHy28_PrintText(ts.Layout->MENU_CURSOR_X, ts.Layout->MENU_IND.y + (12*(pos)),label,clr,Black,0);
 }
 // DISPLAY SPECIFIC CODE END
@@ -457,15 +456,13 @@ static void UiMenu_UpdateLines(uint16_t select, MenuProcessingMode_t mode, int p
  */
 void UiMenu_UpdateMenuEntry(const MenuDescriptor* entry, MenuProcessingMode_t mode, uint8_t pos)
 {
-    uint32_t  m_clr;
-    m_clr = Yellow;
-    char out[40];
+    uint32_t    m_clr = Yellow;
+    char        out[40];
+    char        blank[40];
 
-    char blank[40] = "                                     ";
+    memset((void*)&blank, ' ', sizeof(blank));
+
     blank[ts.Layout->MENU_TEXT_SIZE_MAX-1]=0;
-//#else
-//    const char blank[34] = "                               ";
-//#endif
 
     if (entry != NULL && (entry->kind == MENU_ITEM || entry->kind == MENU_GROUP || entry->kind == MENU_INFO || entry->kind == MENU_TEXT) )
     {
@@ -473,28 +470,29 @@ void UiMenu_UpdateMenuEntry(const MenuDescriptor* entry, MenuProcessingMode_t mo
         {
             uint16_t level = 0;
             const MenuDescriptor* parent = entry;
-            do
-            {
+
+            do {
                 parent = UiMenu_GetParentForEntry(parent);
                 level++;
             }
+
             while (parent != NULL);
             level--;
 
-            // level = 3;
-            // uint16_t labellen = strlen(entry->id)+strlen(entry->label) + 1;
-            uint16_t labellen = level+strlen(entry->label);
-            // snprintf(out,34,"%s-%s%s",entry->id,entry->label,(&blank[labellen>33?33:labellen]));
-//#ifdef USE_DISP_480_320
-            //snprintf(out,ts.40,"%s%s%s",(&blank[level>5?37-5:37-level]),entry->label,(&blank[labellen>39?39:labellen]));
-            snprintf(out,ts.Layout->MENU_TEXT_SIZE_MAX,"%s%s%s",
-            		(&blank[level>5?ts.Layout->MENU_TEXT_SIZE_MAX-8:ts.Layout->MENU_TEXT_SIZE_MAX-3-level]),
-					entry->label,(&blank[labellen>ts.Layout->MENU_TEXT_SIZE_MAX-1?ts.Layout->MENU_TEXT_SIZE_MAX-1:labellen]));
+            uint16_t labellen = level + strlen(entry->label);
 
-  //         snprintf(out,34,"%s%s%s",(&blank[level>5?31-5:31-level]),entry->label,(&blank[labellen>33?33:labellen]));
+            snprintf(
+                out,
+                ts.Layout->MENU_TEXT_SIZE_MAX,
+                "%s%s%s",
+            	(&blank[level > 5 ? ts.Layout->MENU_TEXT_SIZE_MAX-8 : ts.Layout->MENU_TEXT_SIZE_MAX-3-level]),
+				entry->label,
+				(&blank[labellen>ts.Layout->MENU_TEXT_SIZE_MAX-1 ? ts.Layout->MENU_TEXT_SIZE_MAX-1:labellen])
+            );
 
-            UiMenu_DisplayLabel(out,m_clr,pos);
+            UiMenu_DisplayLabel(out, m_clr, pos);
         }
+
         switch(entry->kind)
         {
         case MENU_ITEM:

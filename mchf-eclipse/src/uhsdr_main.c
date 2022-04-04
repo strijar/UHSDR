@@ -356,7 +356,7 @@ void TransceiverStateInit(void)
     ts.amber_pa_bandcode_mode = 0;
 #endif
     ts.box_colour = 2;         // =Blue - screen boxes colour
-    ts.txtline_colour = 9;     // =Yellow - ticker colour
+    ts.txt_colour = 9;     // =Yellow - ticker colour
     ts.cw_smooth = 1;          // smooth of CW signal edges == 5 ms
     ts.cw_smooth_len = 2;      // duration of CW signal edges
     ts.cw_smooth_steps = 9;    // duration steps of CW signal edges

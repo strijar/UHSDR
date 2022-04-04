@@ -1087,7 +1087,7 @@ void CwDecoder_WpmDisplayClearOrPrepare(bool prepare) {
             ts.Layout->CW_DECODER_WPM.x,
             ts.Layout->CW_DECODER_WPM.y,
             " --",
-            White, sd.boxes_colour,
+            sd.txt_colour, Black,
             4
         );
 
@@ -1095,7 +1095,7 @@ void CwDecoder_WpmDisplayClearOrPrepare(bool prepare) {
             ts.Layout->CW_DECODER_WPM.x + 24,
             ts.Layout->CW_DECODER_WPM.y,
             "wpm",
-            White, sd.boxes_colour,
+            sd.txt_colour, Black,
             4
         );
 
@@ -1105,7 +1105,7 @@ void CwDecoder_WpmDisplayClearOrPrepare(bool prepare) {
             ts.Layout->CW_DECODER_WPM.x,
             ts.Layout->CW_DECODER_WPM.y,
             8, SMALL_FONT_WIDTH * 6,
-            sd.boxes_colour
+            Black
         );
     }
 }
@@ -1122,7 +1122,7 @@ void CwDecoder_WpmDisplayUpdate(bool force_update) {
 		    ts.Layout->CW_DECODER_WPM.x,
 		    ts.Layout->CW_DECODER_WPM.y,
 		    str,
-		    White, sd.boxes_colour,
+		    sd.txt_colour, Black,
 		    4
 		);
 	}

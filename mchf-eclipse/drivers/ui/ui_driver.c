@@ -590,13 +590,12 @@ static void   UiDriver_LcdBlankingProcessTimer(void)
 	}
 }
 
-static char ui_txt_msg_buffer[ui_txt_msg_buffer_size];
+static char ui_txt_msg_buffer[MSG_BUFFER_SIZE];
 
 static int ui_txt_msg_idx= 0;
 static bool ui_txt_msg_update = false;
 
-void UiDriver_RIT_Reset()
-{
+void UiDriver_RIT_Reset() {
 	ts.rit_value = 0;
 	UiDriver_UpdateDisplayAfterParamChange();
 }
@@ -614,7 +613,7 @@ void UiDriver_TextMsgClear() {
         ts.Layout->TextMsgLine.x,
         ts.Layout->TextMsgLine.y,
         ui_txt_msg_buffer,
-        sd.txtline_colour, sd.boxes_colour,
+        sd.txt_colour, Black,
         ts.Layout->TextMsg_font
     );
 
@@ -639,7 +638,7 @@ void UiDriver_TextMsgDisplay() {
             ts.Layout->TextMsgLine.x,
             ts.Layout->TextMsgLine.y,
             ui_txt_msg_buffer,
-            sd.txtline_colour, sd.boxes_colour,
+            sd.txt_colour, Black,
             ts.Layout->TextMsg_font
         );
     }
@@ -694,7 +693,7 @@ static void UiDriver_LcdBlankingStealthSwitch(void)
 
 void UiDriver_DisplayFilter() {
     const char *filter_names[2];
-    uint32_t   color = White;
+    uint32_t   color = sd.txt_colour;
     uint32_t   bg_color = Black;
 
     AudioFilter_GetNamesOfFilterPath(ts.filter_path, filter_names);
@@ -708,11 +707,11 @@ void UiDriver_DisplayFilter() {
             ts.Layout->FILTER_IND.y,
             ts.Layout->FILTER_IND.h,
             ts.Layout->FILTER_IND.w,
-            White
+            sd.txt_colour
         );
 
         color = Black;
-        bg_color = White;
+        bg_color = sd.txt_colour;
     } else {
         UiLcdHy28_DrawFullRect(
             ts.Layout->FILTER_IND.x + 1,
@@ -1054,7 +1053,7 @@ void UiDriver_EncoderDisplay(const uint8_t row, const uint8_t column, const char
 	        break;
 
 	    case ENC_STATE_CAROUSEL:
-            label_color = White;
+            label_color = sd.txt_colour;
             color = Grey6;
             bg_color = sd.boxes_colour;
             brdr_color = sd.boxes_colour;
@@ -1064,8 +1063,8 @@ void UiDriver_EncoderDisplay(const uint8_t row, const uint8_t column, const char
         case ENC_STATE_TUNE_CAROUSEL:
             label_color = Black;
             color = Grey6;
-            bg_color = White;
-            brdr_color = White;
+            bg_color = sd.txt_colour;
+            brdr_color = sd.txt_colour;
             break;
 
 	    default:
@@ -1907,7 +1906,7 @@ void UiDriver_EncoderDisplaySimple(const uint8_t row, const uint8_t column, cons
 	switch (style) {
 	    case ENC_STATE_NORM:
         case ENC_STATE_TUNE_NORM:
-            color = White;
+            color = sd.txt_colour;
             break;
 
 	    default:
@@ -1923,18 +1922,18 @@ void UiDriver_DisplaySplitFreqLabels() {
 	const char *split_rx, *split_tx;
 
 	if (!(is_vfo_b())) {
-		split_rx = "(A)RX->";  // Place identifying marker for RX frequency
-		split_tx = "(B)TX->";  // Place identifying marker for TX frequency
+		split_rx = "A: RX";
+		split_tx = "B: TX";
 	} else {
-		split_rx = "(B)RX->";  // Place identifying marker for RX frequency
-		split_tx = "(A)TX->";  // Place identifying marker for TX frequency
+		split_rx = "B: RX";
+		split_tx = "A: TX";
 	}
 
 	UiLcdHy28_PrintText(
 	    ts.Layout->TUNE_SPLIT_MARKER_X - (SMALL_FONT_WIDTH * 5),
 		ts.Layout->TUNE_FREQ.y,
 		split_rx,
-		RX_Grey, Black,
+		sd.txt_colour, Black,
 		0
 	);
 
@@ -1942,7 +1941,7 @@ void UiDriver_DisplaySplitFreqLabels() {
 	    ts.Layout->TUNE_SPLIT_MARKER_X - (SMALL_FONT_WIDTH * 5),
 		ts.Layout->TUNE_SPLIT_FREQ_Y_TX,
 		split_tx,
-		TX_Grey, Black,
+		sd.txt_colour, Black,
 		0
 	);
 }
@@ -2128,7 +2127,7 @@ void UiDriver_UpdateDisplayAfterParamChange() {
     // and prepare after, but for now it should work this way
 
     UiMenu_MapColors(ts.box_colour, NULL, &sd.boxes_colour);
-    UiMenu_MapColors(ts.txtline_colour, NULL, &sd.txtline_colour);
+    UiMenu_MapColors(ts.txt_colour, NULL, &sd.txt_colour);
 
 	if (UiDriver_IsDemodModeChange()) {
 	    uint8_t mode = UiDriver_GetModeCode();
@@ -2137,8 +2136,12 @@ void UiDriver_UpdateDisplayAfterParamChange() {
 	    UiDriver_UpdateDemodSpecificDisplayAfterParamChange();
 	}
 
+	UiDriver_CreateSomeKindDisplay();
+	UiDriver_CreateMeters();
+
 	UiDriver_FrequencyUpdateLOandDisplay(false);   // update frequency display without checking encoder
 	UiDriver_DisplayDemodMode();
+	UiDriver_DisplayBandForFreq(df.tune_new, true);
 	UiDriver_DisplayMemoryLabel();
 	UiDriver_DisplayFilter();    // make certain that numerical on-screen bandwidth indicator is updated
 	UiSpectrum_DisplayFilterBW();  // update on-screen filter bandwidth indicator (graphical)
@@ -2217,7 +2220,7 @@ static void UiDriver_PressHoldStep(uchar is_up)
 
 void UiDriver_DisplayDemodMode() {
 	char* txt = "???";
-	uint16_t color= White;
+	uint16_t color= sd.txt_colour;
 
     switch(ts.dmod_mode) {
         case DEMOD_USB:
@@ -2331,9 +2334,8 @@ void UiDriver_DisplayFreqStepSize()
 	const uint16_t font_width = is_splitmode()?SMALL_FONT_WIDTH:LARGE_FONT_WIDTH;
     const uint16_t x_pos = is_splitmode()?ts.Layout->TUNE_SPLIT_FREQ_X:ts.Layout->TUNE_FREQ.x;
     const uint16_t x_right = x_pos + (9* font_width);
-	const uint32_t color = ts.tune_step?Cyan:White;		// is this a "Temporary" step size from press-and-hold?
-//	const uint32_t stepsize_background = (ts.flags1 & FLAGS1_DYN_TUNE_ENABLE)?Blue:Black;
-	const uint32_t stepsize_background = (ts.flags1 & FLAGS1_DYN_TUNE_ENABLE)?sd.boxes_colour:Black;
+	const uint32_t color = ts.tune_step ? Cyan : sd.txt_colour;		// is this a "Temporary" step size from press-and-hold?
+	const uint32_t stepsize_background = (ts.flags1 & FLAGS1_DYN_TUNE_ENABLE) ? sd.boxes_colour : Black;
 	// dynamic_tuning active -> yes, display on Grey3
 
 	if(step_line)	 	// Remove underline indicating step size if one had been drawn
@@ -2409,23 +2411,18 @@ const BandGenInfo bandGenInfo[] =
         {26960000, 27991250, "11m" },
 		{ 0,  0,             "Gen" }
 };
+
 //*----------------------------------------------------------------------------
-void UiDriver_ClearMemoryLabel()
-{
-#ifdef SDR_AMBER
-#ifdef USE_FREEDV
-        UiLcdHy28_PrintText(ts.Layout->MEMORYLABEL.x,  ts.Layout->MEMORYLABEL.y,"      ",Black,Black,0);
-#else
-        UiLcdHy28_PrintText(ts.Layout->MEMORYLABEL.x,  ts.Layout->MEMORYLABEL.y,"        ",Black,Black,0);
-#endif
-#endif
+
+void UiDriver_ClearMemoryLabel() {
+    UiLcdHy28_DrawFullRect(ts.Layout->MEMORYLABEL.x, ts.Layout->MEMORYLABEL.y, 8, SMALL_FONT_WIDTH * 5, Black);
 }
 
 void UiDriver_DisplayMemoryLabel() {
     char txt[12];
 
     if (ts.expflags1 & EXPFLAGS1_NO_SHOW_BNDMEM) {
-        UiLcdHy28_DrawFullRect(ts.Layout->MEMORYLABEL.x, ts.Layout->MEMORYLABEL.y, 8, SMALL_FONT_WIDTH * 5, sd.boxes_colour);
+        UiLcdHy28_DrawFullRect(ts.Layout->MEMORYLABEL.x, ts.Layout->MEMORYLABEL.y, 8, SMALL_FONT_WIDTH * 5, Black);
         return;
     }
 
@@ -2443,7 +2440,7 @@ void UiDriver_DisplayMemoryLabel() {
 		snprintf(txt, sizeof(txt), " CAT ");
 	}
 
-	UiLcdHy28_PrintText(ts.Layout->MEMORYLABEL.x,  ts.Layout->MEMORYLABEL.y, txt, White, sd.boxes_colour, 4);
+	UiLcdHy28_PrintText(ts.Layout->MEMORYLABEL.x,  ts.Layout->MEMORYLABEL.y, txt, sd.txt_colour, Black, 4);
 }
 
 /**
@@ -2456,7 +2453,7 @@ static void UiDriver_DisplayBand(const BandInfo* band) {
 	    const char* bandName;
 	    bool print_bc_name = true;
 
-		uint16_t col = Orange; // default color for non-bc band
+		uint16_t col = sd.txt_colour; // default color for non-bc band
 
 		// only if we are not in a ham band, we check the name of a broadcast band
 		if (RadioManagement_IsGenericBand(band)) {
@@ -2628,8 +2625,10 @@ static void UiDriver_CreateDesktop(void) {
 	    UiDriver_SetSpectrumMode(SPECTRUM_DUAL);
 	}
 
+	UiMenu_MapColors(ts.box_colour, NULL, &sd.boxes_colour);
+    UiMenu_MapColors(ts.txt_colour, NULL, &sd.txt_colour);
+
 	UiSpectrum_Init();
-	//*(volatile uint32_t*)(0x20000000 + 0x0002FFFC) = 123;
 
 	UiDriver_RefreshEncoderDisplay();
 	UiDriver_DisplayPowerLevel();
@@ -3287,23 +3286,21 @@ static void UiDriver_InitFrequency()
  * @returns band index (0 - (MAX_BANDS-1))
  */
 
-//void UiDriver_DisplayBandForFreq(uint32_t freq)
-void UiDriver_DisplayBandForFreq(uint32_t freq, bool force)
-{
+void UiDriver_DisplayBandForFreq(uint32_t freq, bool force) {
 	// here we maintain our local state of the last band shown
     const BandInfo* band = RadioManagement_GetBand(freq);
 
     // yes, did the tx band actually change?
     // or are we in the generic band (i.e. outside tx bands)
-//	if(band != ts.band_effective || RadioManagement_IsGenericBand(band))
-	if(band != ts.band_effective || RadioManagement_IsGenericBand(band) || force)
-	{
-		UiDriver_DisplayBand(band);    // yes, update the display with the current band
-		UiDriver_HandlePowerLevelChange(band, ts.power_level); // also validate power level if band changes
+
+	if (band != ts.band_effective || RadioManagement_IsGenericBand(band) || force) {
+		UiDriver_DisplayBand(band);
+		UiDriver_HandlePowerLevelChange(band, ts.power_level);
 	}
+
 	ts.band_effective = band;
-    if (ts.lotx_dacs_present)
-    {
+
+    if (ts.lotx_dacs_present) {
         LO_TX_SUPR_DAC_GetBand(freq);
     }
 }
@@ -3375,11 +3372,10 @@ void UiDriver_UpdateFrequency(bool force_update, enum UpdateFrequencyMode_t mode
 
 			if (mode != UFM_SMALL_TX)
 			{
-//				UiDriver_DisplayBandForFreq(dial_freq);
 				UiDriver_DisplayBandForFreq(dial_freq, false);
 				// check which band in which we are currently tuning and update the display
 
-				UiDriver_UpdateLcdFreq(RadioManagement_GetRXDialFrequency() ,White, UFM_SECONDARY);
+				UiDriver_UpdateLcdFreq(RadioManagement_GetRXDialFrequency(), sd.txt_colour, UFM_SECONDARY);
 				// set mode parameter to UFM_SECONDARY to update secondary display (it shows real RX frequency if RIT is being used)
 				// color argument is not being used by secondary display
 			}
@@ -3394,7 +3390,7 @@ void UiDriver_UpdateFrequency(bool force_update, enum UpdateFrequencyMode_t mode
 				break;
 			case OSC_LARGE_STEP:
 			case OSC_OK:
-				clr = White;
+				clr = sd.txt_colour;
 				break;
 			default:
 				clr = Red; // a serious error happened, i.e. I2C not working etc.
@@ -3406,7 +3402,7 @@ void UiDriver_UpdateFrequency(bool force_update, enum UpdateFrequencyMode_t mode
 			// this will turn into the appropriate color the moment the tuning
 			// happens.
 			// Use white in releases, many complained about the  Blue digits
-			clr = White; // Blue;
+			clr = sd.txt_colour; // Blue;
 		}
 		// Update frequency display
 		UiDriver_UpdateLcdFreq(dial_freq, clr, mode);
@@ -3502,7 +3498,7 @@ static void UiDriver_UpdateLcdFreq(uint32_t dial_freq, uint16_t color, uint16_t 
 		color = Grey;
 	}
 
-	if(mode == UFM_AUTOMATIC) {
+	if (mode == UFM_AUTOMATIC) {
 	    mode = is_splitmode() ? UFM_SMALL_RX : UFM_LARGE;
 		// in "split" mode?
 		// yes - update upper, small digits (receive frequency)
@@ -3559,14 +3555,14 @@ static void UiDriver_UpdateLcdFreq(uint32_t dial_freq, uint16_t color, uint16_t 
             break;
         case UFM_SECONDARY:
             digit_font = 4;
-            bg_color = sd.boxes_colour;
+            bg_color = Black;
             pos_y_loc = ts.Layout->TUNE_SFREQ.y;
             pos_x_loc = ts.Layout->TUNE_SFREQ.x;
             break;
         case UFM_LARGE:
         default:			// default:  normal sized (large) digits
     #ifdef USE_8bit_FONT
-            digit_font=ts.FreqDisplayFont==0?1:5;
+            digit_font=(ts.FreqDisplayFont ==0) ? 1 : 5;
     #else
             digit_font = 1;
     #endif
@@ -4859,7 +4855,7 @@ static void UiDriver_DisplaySidetoneGain(uint8_t enc, uint8_t style)
  */
 static void UiDriver_DisplayCmpLevel(uint8_t enc, uint8_t style)
 {
-	ushort 	color = White;
+	ushort 	color = sd.txt_colour;
 	char	temp[5];
 	const char* outs;
 
@@ -4887,7 +4883,7 @@ uint32_t UiDriver_GetActiveDSPFunctions()
 }
 
 static void UiDriver_DisplayDSPMode() {
-    uint32_t    color = White;
+    uint32_t    color = sd.txt_colour;
 	char*       txt;
 
 	switch (ts.dsp.mode) {
@@ -4947,16 +4943,8 @@ static void UiDriver_DisplayDSPMode() {
 static UiDriver_DisplayStateAGC() {
     uint16_t color = Grey5;
 
-    /*
-    if (agc_wdsp_conf.hang_action == 1 && agc_wdsp_conf.hang_enable == 1) {
-        color = Green;
-    } else {
-       color = Yellow;
-    }
-    */
-
     if (agc_wdsp_conf.action == 1) {
-        color = White;
+        color = sd.txt_colour;
     }
 
     UiLcdHy28_DrawEmptyRect(
@@ -4990,15 +4978,15 @@ static void UiDriver_DisplayKeyerSpeed(uint8_t enc, uint8_t style) {
 }
 
 static void UiDriver_DisplayRttySpeed(uint8_t enc, uint8_t style) {
-	UiDriver_EncoderDisplay(0, enc, "BD", style, rtty_speeds[rtty_ctrl_config.speed_idx].label, White);
+	UiDriver_EncoderDisplay(0, enc, "BD", style, rtty_speeds[rtty_ctrl_config.speed_idx].label, sd.txt_colour);
 }
 
 static void UiDriver_DisplayPskSpeed(uint8_t enc, uint8_t style) {
-	UiDriver_EncoderDisplay(0, enc, "PSK", style, psk_speeds[psk_ctrl_config.speed_idx].label, White);
+	UiDriver_EncoderDisplay(0, enc, "PSK", style, psk_speeds[psk_ctrl_config.speed_idx].label, sd.txt_colour);
 }
 
 static void UiDriver_DisplayRttyShift(uint8_t enc, uint8_t style) {
-	UiDriver_EncoderDisplay(0, enc, "SFT", style, rtty_shifts[rtty_ctrl_config.shift_idx].label, White);
+	UiDriver_EncoderDisplay(0, enc, "SFT", style, rtty_shifts[rtty_ctrl_config.shift_idx].label, sd.txt_colour);
 }
 
 static void UiDriver_DisplayInGain(uint8_t enc, uint8_t style) {
@@ -5036,7 +5024,7 @@ static void UiDriver_DisplayInGain(uint8_t enc, uint8_t style) {
 		snprintf(txt_buf,sizeof(txt_buf), "%4d", ts.tx_gain[ts.tx_audio_source]);
 	}
 
-	UiDriver_EncoderDisplay(0, enc, txt, style, txt_buf, White);
+	UiDriver_EncoderDisplay(0, enc, txt, style, txt_buf, sd.txt_colour);
 }
 
 static void UiDriver_DisplayIn(uint8_t enc, uint8_t style) {
@@ -5062,7 +5050,7 @@ static void UiDriver_DisplayIn(uint8_t enc, uint8_t style) {
             txt = "???";
     }
 
-    UiDriver_EncoderDisplay(0, enc, "IN", style, txt, White);
+    UiDriver_EncoderDisplay(0, enc, "IN", style, txt, sd.txt_colour);
 }
 
 static void UiDriver_DisplayMeter(uint8_t enc, uint8_t style) {
@@ -5089,7 +5077,7 @@ static void UiDriver_DisplayMeter(uint8_t enc, uint8_t style) {
             txt = "???";
     }
 
-    UiDriver_EncoderDisplay(0, enc, "MTR", style, txt, White);
+    UiDriver_EncoderDisplay(0, enc, "MTR", style, txt, sd.txt_colour);
 }
 
 static void UiDriver_DisplayRfGain(uint8_t enc, uint8_t style) {
@@ -5111,13 +5099,13 @@ uint32_t UiDriver_GetNBColor()
     else if(ts.dsp.nb_setting >= NB_WARNING1_SETTING)
         retval = Yellow;     // above this value, make it yellow
     else
-        retval = White;      // Otherwise, make it white
+        retval = sd.txt_colour;
 
     return retval;
 }
 
 static void UiDriver_DisplayNoiseBlanker(uint8_t enc, uint8_t style) {
-    uint32_t    color = White;
+    uint32_t    color;
     char        temp[5];
     const char  *val_txt;
     int32_t     value = ts.dsp.nb_setting;
@@ -5161,7 +5149,7 @@ static void UiDriver_DisplayAGC(uint8_t enc, uint8_t style) {
             break;
     }
 
-    UiDriver_EncoderDisplay(0, enc, "AGC", style, val, White);
+    UiDriver_EncoderDisplay(0, enc, "AGC", style, val, sd.txt_colour);
 }
 
 #define NOTCH_DELTA_Y (2*ENC_ROW_H)
@@ -5191,7 +5179,7 @@ static void UiDriver_DisplayRit(uint8_t enc, uint8_t style)
 	char	temp[5];
 
 	snprintf(temp, 5, ts.rit_value ? "%+4i" : "%4i", ts.rit_value);
-	UiDriver_EncoderDisplay(0, enc, "RIT", style, temp, White);
+	UiDriver_EncoderDisplay(0, enc, "RIT", style, temp, sd.txt_colour);
 }
 
 /**
@@ -5217,7 +5205,7 @@ static void UiDriver_DisplayPowerLevel() {
 
     UiDriver_Power2String(txt, sizeof(txt), ts.power);
 
-    uint16_t color = White; // normal operation
+    uint16_t color = sd.txt_colour; // normal operation
 
     if (RadioManagement_IsTxDisabled()) {
         // we'll not transmit, power is irrelevant
@@ -5273,15 +5261,14 @@ static void UiDriver_DisplayDbm(void) {
                 break;
         }
 
-        if ((display_something == true) && (val!=oldVal)) {
+        if ((display_something == true) && (val != oldVal)) {
             snprintf(txt, sizeof(txt), "%4ld", val);
-#ifndef SDR_AMBER_480_320
-#ifndef OVI40_MOD_480_320
+
             UiLcdHy28_PrintText(
                 ts.Layout->DisplayDbm.x,
                 ts.Layout->DisplayDbm.y,
                 txt,
-                White, sd.boxes_colour,
+                sd.txt_colour, Black,
                 4
             );
 
@@ -5289,51 +5276,18 @@ static void UiDriver_DisplayDbm(void) {
                 ts.Layout->DisplayDbm.x + SMALL_FONT_WIDTH * 4,
                 ts.Layout->DisplayDbm.y,
                 unit_label,
-                White, sd.boxes_colour,
+                sd.txt_colour, Black,
                 4
-            );
-#else
-            UiLcdHy28_PrintText(
-                ts.Layout->DisplayDbm.x,
-                ts.Layout->DisplayDbm.y,
-                txt,
-                White, sd.boxes_colour,
-                0
             );
 
-            UiLcdHy28_PrintText(
-                ts.Layout->DisplayDbm.x+SMALL_FONT_WIDTH * 4,
-                ts.Layout->DisplayDbm.y,
-                unit_label,
-                White, sd.boxes_colour,
-                4
-            );
-#endif
-#else
-            UiLcdHy28_PrintText(
-                ts.Layout->DisplayDbm.x,
-                ts.Layout->DisplayDbm.y,
-                txt,
-                White, sd.boxes_colour,
-                0
-            );
-
-            UiLcdHy28_PrintText(
-                ts.Layout->DisplayDbm.x+SMALL_FONT_WIDTH * 4,
-                ts.Layout->DisplayDbm.y,
-                unit_label,
-                White, sd.boxes_colour,
-                4
-           );
-#endif
-            oldVal=val;     //this will prevent from useless redrawing the same
-            dBmShown=1;     //for indicate that dms are shown and erase function may it clear when needed
+            oldVal = val;     //this will prevent from useless redrawing the same
+            dBmShown = 1;     //for indicate that dms are shown and erase function may it clear when needed
         }
     }
 
     // clear the display since we are not showing dBm or dBm/Hz or we are in TX mode
-    if ((display_something == false) && (dBmShown==1)) {
-   		UiLcdHy28_DrawFullRect(ts.Layout->DisplayDbm.x, ts.Layout->DisplayDbm.y, 8, 75, sd.boxes_colour);
+    if ((display_something == false) && (dBmShown == 1)) {
+   		UiLcdHy28_DrawFullRect(ts.Layout->DisplayDbm.x, ts.Layout->DisplayDbm.y, 8, 75, Black);
 
    		dBmShown=0;     //just to indicate that dbm is erased
         oldVal=99999;   //some value that will enforce refresh when user enable display dbm
@@ -5525,14 +5479,14 @@ static void UiDriver_HandleTXMeters(void) {
 }
 
 static void UiDriver_CreateSomeKindDisplay() {
-    UiLcdHy28_DrawFullRect(
+    UiLcdHy28_DrawEmptyRect(
         ts.Layout->INFO_BAR.x,
         ts.Layout->INFO_BAR.y,
         ts.Layout->INFO_BAR.h,
         ts.Layout->INFO_BAR.w,
         sd.boxes_colour);
 
-    UiLcdHy28_DrawFullRect(
+    UiLcdHy28_DrawEmptyRect(
         ts.Layout->MID_BAR.x,
         ts.Layout->MID_BAR.y,
         ts.Layout->MID_BAR.h,
@@ -5649,7 +5603,7 @@ static void UiDriver_PowerDownCleanup(bool saveConfiguration)
  */
 static void UiDriver_DisplayVoltage() {
 	uint32_t low_power_threshold = ((ts.low_power_config & LOW_POWER_THRESHOLD_MASK) + LOW_POWER_THRESHOLD_OFFSET) * 10;
-	uint32_t col = White;
+	uint32_t col = sd.txt_colour;
 
 	if (pwmt.voltage < low_power_threshold + 50) {
 		col = Red;
@@ -5680,7 +5634,7 @@ static void UiDriver_DisplayVoltage() {
 	    ts.Layout->PWR_IND.x,
 	    ts.Layout->PWR_IND.y,
 	    txt,
-	    col, sd.boxes_colour,
+	    col, Black,
 	    4
 	);
 }
@@ -5755,49 +5709,6 @@ static bool UiDriver_HandleVoltage(void)
 	return retval;
 }
 
-#if 0
-/*
- * @brief Displays temp compensation value in a bar
- */
-static void UiDriverUpdateLoMeter(uchar val,uchar active)
-{
-	static int last_active = 99;
-	static uint32_t last_active_val = 99;
-	uchar 	i,v_s = 3;
-	int		clr = White;
-
-	if (last_active != active)
-	{
-		last_active = active;
-		last_active_val = val;
-		// Full redraw
-		for(i = 1; i < 26; i++)
-		{
-			if (active)
-			{
-				clr = val==i?Blue:White;
-			}
-			else
-			{
-				clr = Grey;
-			}
-			UiLcdHy28_DrawStraightLineTriple(((POS_TEMP_IND_X + 1) + i*4),((POS_TEMP_IND_Y + 21) - v_s),v_s,LCD_DIR_VERTICAL,clr);
-		}
-	}
-	else if (active && (last_active_val != val))
-	{
-		// Partial redraw
-		if (val>1 && val < 26) {
-			UiLcdHy28_DrawStraightLineTriple(((POS_TEMP_IND_X + 1) + val*4),((POS_TEMP_IND_Y + 21) - v_s),v_s,LCD_DIR_VERTICAL,Blue);
-		}
-		if (last_active_val>1 && last_active_val < 26) {
-			UiLcdHy28_DrawStraightLineTriple(((POS_TEMP_IND_X + 1) + last_active_val*4),((POS_TEMP_IND_Y + 21) - v_s),v_s,LCD_DIR_VERTICAL,White);
-		}
-		last_active_val = val;
-	}
-}
-#endif
-
 /**
  * @brief display measured temperature and current state of TCXO
  * @param temp in tenth of degrees Celsius (10 == 1 degree C)
@@ -5831,7 +5742,7 @@ static void UiDriver_DisplayTemperature(int temp) {
 		    ts.Layout->TEMP_IND.x,
 		    ts.Layout->TEMP_IND.y,
 		    txt_ptr,
-		    White, sd.boxes_colour,
+		    sd.txt_colour, Black,
 		    4
 		);
 	}
@@ -6789,7 +6700,11 @@ void UiDriver_StartUpScreenFinish() {
 
 	HAL_Delay(hold_time);
 
-	ts.Layout = &LcdLayouts[LcdLayout_320x240];
+#ifdef USE_DISP_480_320
+	ts.Layout = &LcdLayouts[LcdLayout_480x320];
+#else
+    ts.Layout = &LcdLayouts[LcdLayout_320x240];
+#endif
 
 	if (!(ts.expflags1 & EXPFLAGS1_TUNE_HELPER_DEFENABLE)) {
 		cw_decoder_config.snap_enable = true;
@@ -7919,10 +7834,13 @@ static void UiDriver_HandleTouchScreen(bool is_long_press) {
 			TouchProcessed = UiVk_Process_VirtualKeypad(is_long_press);
 		}
 
+#if 0
+		// Temporarily disabled
+
 		if (!TouchProcessed) {
 			UiDriver_ProcessTouchActions(&ts.Layout->touchaction_list[touchaction_idx], is_long_press);
 		}
-
+#endif
 		ts.tp->state = TP_DATASETS_PROCESSED;							// set statemachine to data fetched
 	}
 }
@@ -8524,21 +8442,21 @@ void UiDriver_TaskHandler_MainTasks()
 				}
 #endif
 			}
-			if (UiDriver_TimerExpireAndRewind(SCTimer_RTC,now,100))
-			{
-				if (ts.rtc_present)
-				{
-					RTC_TimeTypeDef sTime;
 
+			if (UiDriver_TimerExpireAndRewind(SCTimer_RTC,now,100)) {
+				if (ts.rtc_present) {
+					RTC_TimeTypeDef sTime;
 
 					Rtc_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
 
 					char str[20];
-					snprintf(str,20,"%2u:%02u:%02u",sTime.Hours,sTime.Minutes,sTime.Seconds);
-					UiLcdHy28_PrintText(ts.Layout->RTC_IND.x, ts.Layout->RTC_IND.y, str, White, Black, 0);
+
+					snprintf(str, sizeof(str), "%2u:%02u:%02u", sTime.Hours, sTime.Minutes, sTime.Seconds);
+					UiLcdHy28_PrintText(ts.Layout->RTC_IND.x, ts.Layout->RTC_IND.y, str, sd.txt_colour, Black, 4);
 				}
 			}
 			break;
+
 		case STATE_TASK_CHECK:
 		    RadioManagement_TxRxSwitching_Disable();
 			UiDriver_TimeScheduler();
@@ -8603,46 +8521,6 @@ void UiDriver_TaskHandler_MainTasks()
 				}
                 UiDriver_DisplayStateAGC();
 
-#ifdef SDR_AMBER
-                char* input_label = "   ";
-
-                switch (ts.amber_input_state) {
-                    case 0:
-                        input_label = "PRE";
-                        break;
-
-                    case 1:
-                        input_label = "NoPRE";
-                        break;
-
-                    case 2:
-                        input_label = "ATT12";
-                        break;
-
-                    case 3:
-                        input_label = "ATT24";
-                        break;
-
-                }
-
-                UiLcdHy28_PrintTextCentered(
-                    ts.Layout->AGC_MASK.x,
-                    ts.Layout->AGC_MASK.y,
-                    46,
-                    input_label,
-                    White, AGC_bg_clr,
-                    0
-                );
-
-                UiLcdHy28_PrintTextCentered(
-                    ts.Layout->AGC_MASK.x + 46,
-                    ts.Layout->AGC_MASK.y,
-                    34,
-                    txt,
-                    AGC_fg_clr, AGC_bg_clr,
-                    0
-                );
-#endif
 				// display CW decoder WPM speed
 				if (ts.cw_decoder_enable && ts.dmod_mode == DEMOD_CW) {
 					CwDecoder_WpmDisplayUpdate(false);

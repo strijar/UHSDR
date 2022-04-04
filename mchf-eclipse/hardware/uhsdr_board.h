@@ -481,7 +481,7 @@ typedef struct TransceiverState
     struct mchf_waterfall waterfall;
 
     uint8_t box_colour;             // screen boxes color
-    uint8_t txtline_colour;         // ticker color
+    uint8_t txt_colour;             // text color
     uint8_t cw_smooth;              // smooth of CW signal edges
     uint8_t cw_smooth_len;          // duration of CW signal edges
     uint8_t cw_smooth_steps;        // duration steps of CW signal edges
