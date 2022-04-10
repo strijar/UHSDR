@@ -955,48 +955,43 @@ void UiDriver_Init()
         ts.enc_mode[ENC3][4] = ENC_MODE_INPUT_GAIN;
     }
 
-	if(mchf_touchscreen.present)
-	{
+	if (mchf_touchscreen.present) {
 		//Touchscreen calibration test.
 		//We cannot distinguish when touchscreen is uncalibrated with other method than comparing calibration values to empty state of EEPROM (0xff).
 	    //It would be nice if someone has better idea how to do it without digging into calibration matrix computation to describe the allowed range of coefficients. Feb 2018, SP9BSL.
 		bool IS_TSCalibrated=0;
-		for(int16_t m=0; m<6; m++)
-		{
+
+		for(int16_t m=0; m<6; m++) {
 			IS_TSCalibrated|=ts.tp->cal[m]!=0xffffffff;
 		}
 
 		UiDriver_StartupScreen_LogIfProblem(IS_TSCalibrated == 0,
 				"WARNING:  TOUCHSCREEN NOT CALIBRATED!!!\nRun calibration first!");
 	}
-	if (ts.special_functions_enabled != 1)
-	{
+
+	if (ts.special_functions_enabled != 1) {
 	  UiDriver_StartupScreen_LogIfProblem(ts.iq_freq_mode == FREQ_IQ_CONV_MODE_OFF,
 			"WARNING:  Freq. Translation is OFF!!!\nTranslation is STRONGLY recommended!!");
 	}
 
 	// now run all inits which need to be done BEFORE going into test screen mode
 	uint8_t mirtemp;
-	if(ts.flags1 & FLAGS1_REVERSE_X_TOUCHSCREEN)
-	{
+
+	if(ts.flags1 & FLAGS1_REVERSE_X_TOUCHSCREEN) {
 		mirtemp = 1;
-	}
-	else
-	{
+	} else {
 		mirtemp = 0;
 	}
-	if(ts.flags1 & FLAGS1_REVERSE_Y_TOUCHSCREEN)
-	{
+
+	if(ts.flags1 & FLAGS1_REVERSE_Y_TOUCHSCREEN) {
 		mirtemp += 2;
 	}
 
 	UiLcdHy28_TouchscreenInit(mirtemp);
 
-	if (run_keytest)
-	{
+	if (run_keytest) {
 		UiDriver_KeyTestScreen();
 	}
-
 
 	osc->setPPM((float)ts.freq_cal/10.0);
 
@@ -1004,7 +999,6 @@ void UiDriver_Init()
 	df.tune_old = 0; // with this we force a frequency change once the main loop becomes active
 
 	ts.cw_lsb = RadioManagement_CalculateCWSidebandMode();			// determine CW sideband mode from the restored frequency
-
 
 	UiDriver_DspModeMaskInit();
 
@@ -1017,7 +1011,6 @@ void UiDriver_Init()
 
 	// Extra HW init
 	Board_PostInit();
-
 
 	UiDriver_LcdBlankingStartTimer();			// init timing for LCD blanking
 	ts.lcd_blanking_time = ts.sysclock + LCD_STARTUP_BLANKING_TIME;
@@ -2581,12 +2574,12 @@ void UiDriver_CreateFunctionButtons(bool full_repaint) {
 	UiDriver_FButton_F4ActiveVFO();
 	// Button F5
 	UiDriver_FButton_F5Tune();
+
 #ifdef SDR_AMBER_480_320
-	//Button F6 (480*320)
 	UiDriver_FButton_F6Illum();
 #endif
+
 #ifdef SDR_AMBER_4INCH
-	//Button F7 (480*320 4 inch)
 	UiDriver_FButton_F7AT();
 #endif
 }
@@ -4574,7 +4567,12 @@ static void UiDriver_RotateNormalEncoder(int8_t pot_diff, uint8_t enc) {
             break;
 
         case ENC_MODE_INPUT:
-            incr_wrap_uint8(&ts.tx_audio_source, 0, TX_AUDIO_MAX_ITEMS);
+            ts.tx_audio_source = change_and_limit_uint(
+                ts.tx_audio_source,
+                pot_diff_step,
+                0, TX_AUDIO_NUM-1
+            );
+
             UiDriver_DisplayIn(enc, ENC_STATE_NORM);
             break;
 
@@ -4601,7 +4599,7 @@ static void UiDriver_RotateTuneEncoder(int8_t pot_diff, uint8_t enc) {
     ts.enc_mode[enc][state] = change_and_limit_uint(
         ts.enc_mode[enc][state],
         pot_diff < 0 ? -1 : 1,
-        0, ENC_NUM_MODES
+        0, ENC_NUM_MODES-1
     );
 
     UiDriver_DisplayEncoderMode(enc);
@@ -4613,7 +4611,7 @@ static void UiDriver_RotateCarouselEncoder(int8_t pot_diff, uint8_t enc) {
     state = change_and_limit_uint(
         state,
         pot_diff < 0 ? -1 : 1,
-        0, ENC_STATE_NUM
+        0, ENC_STATE_NUM-1
     );
 
     ts.enc_state[enc] = (ENC_STATE_CAROUSEL << ENC_STATE_BITS) | state;
@@ -7737,49 +7735,6 @@ static void UiAction_StepPlusHold(void)
 	}
 }
 
-static bool UiDriver_Process_WFscope_RatioChange(void) {
-	bool TouchProcessed = false;
-
-	UiArea_t OKArea = {
-	    .x = sd.Slayout->graticule.x + sd.Slayout->graticule.w - 65,
-	    .y = sd.Slayout->graticule.y,
-	    .h = sd.Slayout->graticule.h,
-	    .w = 25
-	};
-
-	UiArea_t ExitArea = {
-	    .x = sd.Slayout->graticule.x + sd.Slayout->graticule.w - 30,
-	    .y = sd.Slayout->graticule.y,
-	    .h = sd.Slayout->graticule.h,
-	    .w = 30
-	};
-
-	if (UiDriver_CheckTouchRegion(&OKArea)) {
-		ts.SpectrumResize_flag = 0;
-		ts.graticulePowerupYpos = sd.Slayout->graticule.y;		//store current graticule position for future eeprom save
-		UiDriver_DisplayFButton_F1MenuExit();		            //redraw the menu button to indicate the changed item
-		ts.menu_var_changed = 1;
-		ts.flags1 |= FLAGS1_SCOPE_ENABLED;
-		ts.flags1 |= FLAGS1_WFALL_ENABLED;
-
-		UiSpectrum_Init();
-		TouchProcessed = true;
-	} else if (UiDriver_CheckTouchRegion(&ExitArea)) {
-		ts.SpectrumResize_flag = 0;
-
-		UiSpectrum_Init();
-		TouchProcessed = true;
-	} else if (UiDriver_CheckTouchRegion(&sd.Slayout->full)) {
-		UiDriver_DrawGraticule_Rect(false);
-		sd.Slayout->graticule.y = UiSprectrum_CheckNewGraticulePos(ts.tp->hr_y);
-		UiDriver_DrawGraticule_Rect(true);
-
-		TouchProcessed = true;
-	}
-
-	return TouchProcessed;
-}
-
 #ifdef SDR_AMBER
 static void UiAction_ToggleIllumButt(void)
 {
@@ -7828,9 +7783,7 @@ static void UiDriver_HandleTouchScreen(bool is_long_press) {
 
 		bool TouchProcessed = 0;
 
-		if (ts.SpectrumResize_flag && ts.menu_mode==0) {
-			TouchProcessed = UiDriver_Process_WFscope_RatioChange();
-		} else if(ts.VirtualKeysShown_flag) {
+		if(ts.VirtualKeysShown_flag) {
 			TouchProcessed = UiVk_Process_VirtualKeypad(is_long_press);
 		}
 

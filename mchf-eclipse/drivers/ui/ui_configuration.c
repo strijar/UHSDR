@@ -20,6 +20,7 @@
 #include "audio_driver.h"
 #include "audio_agc.h"
 #include "cw_decoder.h"
+#include "rtty.h"
 
 #include "ui_spectrum.h"
 #include "radio_management.h"
@@ -248,7 +249,7 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
     { ConfigEntry_Int16 | Calib_Val, EEPROM_RTC_CALIB,&ts.rtc_calib,RTC_CALIB_PPM_DEFAULT, RTC_CALIB_PPM_MIN, RTC_CALIB_PPM_MAX},
     { ConfigEntry_UInt8, EEPROM_CW_DECODER_ENABLE,&ts.cw_decoder_enable,1,0,1},
     { ConfigEntry_UInt8, EEPROM_PEAK_IND_TUNE,&ts.peak_ind_tune,3,0,24},
-	{ ConfigEntry_UInt16, EEPROM_Scope_Graticule_Ypos,&ts.graticulePowerupYpos,0,0,480},
+	{ ConfigEntry_UInt16, EEPROM_Scope_Graticule_Ypos,&ts.graticulePowerupYpos,50,20,80},
 	{ ConfigEntry_UInt8, EEPROM_Freq_Display_Font,&ts.FreqDisplayFont,0,0,1},
 
 
@@ -351,6 +352,8 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
     { ConfigEntry_UInt8, EEPROM_TX_REVERB_GAIN, &ts.reverb_gain, 0, 0, 100},
     { ConfigEntry_UInt8, EEPROM_TX_REVERB_DELAY, &ts.reverb_delay, 25, 25, 100},
     { ConfigEntry_Int32_16, EEPROM_IQ_FREQ_DELTA, &ts.iq_freq_delta, 1000, -18000, 18000},
+    { ConfigEntry_UInt8, EEPROM_RTTY_SHIFT, &rtty_ctrl_config.shift_idx, RTTY_SHIFT_170, RTTY_SHIFT_85, RTTY_SHIFT_850},
+    { ConfigEntry_UInt8, EEPROM_RTTY_SPEED, &rtty_ctrl_config.speed_idx, RTTY_SPEED_45, RTTY_SPEED_45, RTTY_SPEED_50},
     // the entry below MUST be the last entry, and only at the last position Stop is allowed
     {
         ConfigEntry_Stop

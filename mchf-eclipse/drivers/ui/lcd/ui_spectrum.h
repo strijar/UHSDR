@@ -40,7 +40,6 @@ void UiSpectrum_DisplayFilterBW(void);
 
 void UiSpectrum_InitCwSnapDisplay (bool visible);
 void UiSpectrum_ResetSpectrum(void);
-uint16_t UiSprectrum_CheckNewGraticulePos(uint16_t new_y);
 
 // Settings for dB/division for spectrum display
 enum

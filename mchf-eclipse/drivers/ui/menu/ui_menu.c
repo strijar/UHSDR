@@ -2402,6 +2402,16 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
         }
 //        break;
 	}
+    else if(select==MENU_SCOPE_GRATICULE)
+    {
+        var_change = UiDriverMenuItemChangeUInt8(var, mode, &ts.graticulePowerupYpos,
+                                              20,
+                                              80,
+                                              50,
+                                              5
+                                             );
+        snprintf(options, 32, "  %u%%", ts.graticulePowerupYpos);
+    }
 //    case MENU_SPECTRUM_CENTER_LINE_COLOUR:  // spectrum scope grid center line colour
 	else if(select==MENU_SPECTRUM_CENTER_LINE_COLOUR)
 	{
