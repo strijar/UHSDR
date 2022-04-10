@@ -112,6 +112,10 @@ static void     UiDriver_DisplayInGain(uint8_t enc, uint8_t style);
 static void     UiDriver_DisplayIn(uint8_t enc, uint8_t style);
 static void     UiDriver_DisplayMeter(uint8_t enc, uint8_t style);
 
+#ifdef SDR_AMBER
+static void     UiDriver_DisplayPre(uint8_t enc, uint8_t style);
+#endif
+
 static void     UiDriver_DisplayDSPMode(void);
 static void 	UiDriver_DisplayPowerLevel(void);
 static void     UiDriver_DisplayTemperature(int temp);
@@ -141,9 +145,11 @@ static bool UiDriver_SaveConfiguration(void);
 static inline void UiDriver_FButton_F4ActiveVFO(void);
 static inline void UiDriver_FButton_F5Tune(void);
 static void UiAction_ShowMems(void);
+
 #ifdef SDR_AMBER
 static void UiDriver_ShowGreeting(uint8_t variant);
 #endif
+
 static void UiDriver_LoadXVTR1(void);
 static void UiDriver_LoadXVTR2(void);
 static void UiDriver_LoadXVTR3(void);
@@ -183,6 +189,9 @@ typedef enum {
     ENC_MODE_INPUT_GAIN,
     ENC_MODE_INPUT,
     ENC_MODE_METER,
+#ifdef SDR_AMBER
+    ENC_MODE_PRE,
+#endif
     ENC_NUM_MODES
 } EncoderModes;
 
@@ -4588,6 +4597,18 @@ static void UiDriver_RotateNormalEncoder(int8_t pot_diff, uint8_t enc) {
             UiDriver_DisplayMeter(enc, ENC_STATE_NORM);
             break;
 
+#ifdef SDR_AMBER
+        case ENC_MODE_PRE:
+            ts.amber_input_state = change_and_limit_uint(
+                ts.amber_input_state,
+                pot_diff_step,
+                0, 3
+            );
+            Board_Amber_InputStateSet(ts.amber_input_state);
+            UiDriver_DisplayPre(enc, ENC_STATE_NORM);
+            break;
+#endif
+
         default:
             break;
     }
@@ -4768,6 +4789,12 @@ static void UiDriver_DisplayEncoderMode(uint8_t enc) {
 	    case ENC_MODE_METER:
             UiDriver_DisplayMeter(enc, style);
             break;
+
+#ifdef SDR_AMBER
+        case ENC_MODE_PRE:
+            UiDriver_DisplayPre(enc, style);
+            break;
+#endif
 
 	    default:
 	        break;
@@ -5077,6 +5104,35 @@ static void UiDriver_DisplayMeter(uint8_t enc, uint8_t style) {
 
     UiDriver_EncoderDisplay(0, enc, "MTR", style, txt, sd.txt_colour);
 }
+
+#ifdef SDR_AMBER
+static void UiDriver_DisplayPre(uint8_t enc, uint8_t style) {
+    const char* txt;
+
+    switch (ts.amber_input_state) {
+        case 0:
+            txt = "  ON";
+            break;
+
+        case 1:
+            txt = " OFF";
+            break;
+
+        case 2:
+            txt = " -12";
+            break;
+
+        case 3:
+            txt = " -24";
+            break;
+
+        default:
+            txt = "???";
+    }
+
+    UiDriver_EncoderDisplay(0, enc, "PRE", style, txt, sd.txt_colour);
+}
+#endif
 
 static void UiDriver_DisplayRfGain(uint8_t enc, uint8_t style) {
 	UiDriver_EncoderDisplaySimple(0, enc, "RFG", style, agc_wdsp_conf.thresh);
