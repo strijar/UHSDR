@@ -176,15 +176,7 @@ enum
     #endif
 #endif
 
-// FIXME: This is a temporary hack
-// this needs to be as long at the longest scope width (in case of multiple resolutions)
-// list highest resolution first
-
-#ifdef USE_DISP_480_320
-    #define SPECTRUM_WIDTH_MAX 480
-#elif defined(USE_DISP_320_240)
-    #define SPECTRUM_WIDTH_MAX 480
-#endif
+#define SPECTRUM_WIDTH_MAX 480
 
 // Spectrum display
 typedef struct SpectrumDisplay

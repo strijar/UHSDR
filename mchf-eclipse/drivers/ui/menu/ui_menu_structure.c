@@ -582,8 +582,10 @@ const MenuDescriptor debugGroup[] =
 	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_DISABLE_TP, NULL, "Disable touchscreen", UiMenuDesc("Disable touchscreen actions.") },
 	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_FMENUS_SEL, NULL, "Choice of F-menu", UiMenuDesc("Type of F-menus selection.") },
 	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_IMPROV_IQ_ADJ, NULL, "Improved I/Q Adj.", UiMenuDesc("Improved I/Q adjusting. Added 160, 40, 30, 17, 12m.") },
-#ifdef SDR_AMBER_4INCH
+#if  BOTTOM_BUTTON > 5
 	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_F6_IND_SEL, NULL, "F6 Ind.", UiMenuDesc("Amber 4'' - Indication of F6 button.") },
+#endif
+#if BOTTOM_BUTTON > 6
 	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_F7_IND_SEL, NULL, "F7 Ind.", UiMenuDesc("Amber 4'' - Indication of F7 button.") },
 #endif
 	{ MENU_DEBUG, MENU_STOP, 0, NULL, NULL, UiMenuDesc("") }

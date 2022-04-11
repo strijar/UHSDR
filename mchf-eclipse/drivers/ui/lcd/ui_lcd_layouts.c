@@ -341,11 +341,7 @@ const LcdLayout LcdLayouts[LcdLayoutsCount] = {
                 .LOAD_X = 280,
 
                 .PWR_NUM_IND = { 1, 100 },
-#ifdef SDR_AMBER_4INCH
-                .BOTTOM_BAR = { .x = 2, .y = 320-16, .h = 16, .w = 67 },
-#else
-                .BOTTOM_BAR = { .x = 2, .y = 320-16, .h = 16, .w = 79 },
-#endif
+                .BOTTOM_BAR = { .x = 2, .y = 320-16, .h = 16, .w = (480 - 4) / BOTTOM_BUTTON - 1 },
 
 				.touchaction_list = R480320_touch_regions
 		},
@@ -416,7 +412,7 @@ const LcdLayout LcdLayouts[LcdLayoutsCount] = {
 				.LOAD_X = 280,
 
 				.PWR_NUM_IND = { 1, 100 },
-				.BOTTOM_BAR = { .x = 2, .y = 231, .h = 13, .w = 62 },
+				.BOTTOM_BAR = { .x = 2, .y = 231, .h = 13, .w = (320 - 4) / BOTTOM_BUTTON - 1 },
 
 				.touchaction_list = R320240__touch_regions_widespectrum
 		},

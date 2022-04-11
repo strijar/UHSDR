@@ -121,12 +121,12 @@
 //#define SEPIA_STYLE           // ********************************** Monochrome display style
 //#define SDR_AMBER			    // ********************************** Russian clone from UB8JDC (SDR)
 //#define SDR_AMBER_480_320	    // ********************************** Display 480x320
-//#define SDR_AMBER_4INCH		// ********************************** Display 480x320 4 inches
 //#define SDR_AMBER_PTT_ALT		// ********************************** Option of PTT_Alt (work CW with pedal) is ON
 //#define DDC_AXIS				// ********************************** Russian clone from UB8JDC (DDC/DUC)
 //#define OVI40_DISP_320_240    // ********************************** UHSDR don't love displays 320*240 now. Why?
 //#define OVI40_MOD_480_320		// ********************************** Interface like Amber 480x320
 //#define USE_FREEDV            // ********************************** FreeDV disabled by default
+//#define BOTTOM_BUTTON         // ********************************** Number of hardware menu buttons (5-7)
 #define FAST_FREQ_ENC           // ********************************** The freq encoder is polled more often than 10ms.
 
 #if !defined(IS_SMALL_BUILD)
@@ -134,10 +134,6 @@
     #define USE_PREDEFINED_WINDOW_DATA
     // OPTION with IS_SMALL_BUILD we are not automatically including USE_FREEDV as it uses lot of memory, both RAM and flash
 #endif // IS_SMALL_BUILD
-
-#ifdef SDR_AMBER_4INCH
-    #define SDR_AMBER_480_320
-#endif
 
 #ifdef SDR_AMBER_480_320
     #define SDR_AMBER
@@ -151,6 +147,10 @@
 	#define DAC_2W  438
 	#define DAC_4W  758
 	#define DAC_5W 2048
+#endif
+
+#ifndef BOTTOM_BUTTON
+    #define BOTTOM_BUTTON   5
 #endif
 
 // some special switches

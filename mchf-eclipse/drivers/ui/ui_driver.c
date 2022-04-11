@@ -1866,38 +1866,32 @@ static inline void UiDriver_FButton_F5Tune()
 
 static inline void UiDriver_FButton_F6Illum()
 {
-#ifdef	SDR_AMBER_480_320
+#ifdef BOTTOM_BUTTON > 5
 	const char* cap;
 	uint32_t color = White;
 	cap = "ILLUM";
-	#ifdef SDR_AMBER_4INCH
-	if(ts.expflags2 & EXPFLAGS2_AMBER_4INCH_F6_IND)
-	{
+
+	if (ts.expflags2 & EXPFLAGS2_AMBER_4INCH_F6_IND) {
 		cap = "AT";
-	}
-	else
-	{
+	} else {
 		cap = "ILLUM";
 	}
-	#endif
 	UiDriver_DrawFButtonLabel(6, cap, color);
 #endif
 }
 
-static inline void UiDriver_FButton_F7AT()
-{
-#ifdef SDR_AMBER_4INCH
+static inline void UiDriver_FButton_F7AT() {
+#if BOTTOM_BUTTON > 6
 	const char* cap;
 	uint32_t color = White;
-if(ts.expflags2 & EXPFLAGS2_AMBER_4INCH_F7_IND)
-{
-	cap = "POWER";
-}
-else
-{
-	cap = "AT";
-}
-UiDriver_DrawFButtonLabel(7, cap, color);
+
+	if (ts.expflags2 & EXPFLAGS2_AMBER_4INCH_F7_IND) {
+	    cap = "POWER";
+	} else {
+	    cap = "AT";
+	}
+
+	UiDriver_DrawFButtonLabel(7, cap, color);
 #endif
 }
 
@@ -2553,16 +2547,7 @@ void UiDriver_CreateMainFreqDisplay(bool all_digits)
 void UiDriver_CreateFunctionButtons(bool full_repaint) {
 	// Create bottom bar
 	if (full_repaint) {
-#ifndef SDR_AMBER_480_320
-		for (int i = 0; i < 5; i++)
-#else
-    #ifdef SDR_AMBER_4INCH
-		for (int i = 0; i < 7; i++)
-    #else
-		for (int i = 0; i < 6; i++)
-    #endif
-#endif
-		{
+		for (int i = 0; i < BOTTOM_BUTTON; i++) {
 			UiLcdHy28_DrawBottomButton(
 			    (ts.Layout->BOTTOM_BAR.x + (ts.Layout->BOTTOM_BAR.w+1)*i),
 			    (ts.Layout->BOTTOM_BAR.y - 4),
@@ -2584,11 +2569,11 @@ void UiDriver_CreateFunctionButtons(bool full_repaint) {
 	// Button F5
 	UiDriver_FButton_F5Tune();
 
-#ifdef SDR_AMBER_480_320
+#if BOTTOM_BUTTON > 5
 	UiDriver_FButton_F6Illum();
 #endif
 
-#ifdef SDR_AMBER_4INCH
+#if BOTTOM_BUTTON > 6
 	UiDriver_FButton_F7AT();
 #endif
 }
