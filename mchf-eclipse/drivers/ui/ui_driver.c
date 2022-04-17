@@ -2322,25 +2322,21 @@ void UiDriver_DisplayDemodMode() {
  * This function gives a visual indication of the selected step size for the tuning knob. It draws a line under the respective digit in the frequency.
  * This function is closely coupled to the code for displaying the frequency digits.
  */
-void UiDriver_DisplayFreqStepSize()
-{
-
+void UiDriver_DisplayFreqStepSize() {
 	static	bool	step_line = 0;	// used to indicate the presence of a step line
 
 	const uint16_t font_width = is_splitmode()?SMALL_FONT_WIDTH:LARGE_FONT_WIDTH;
-    const uint16_t x_pos = is_splitmode()?ts.Layout->TUNE_SPLIT_FREQ_X:ts.Layout->TUNE_FREQ.x;
-    const uint16_t x_right = x_pos + (9* font_width);
+    const uint16_t x_pos = is_splitmode() ? ts.Layout->TUNE_SPLIT_FREQ_X : ts.Layout->TUNE_FREQ.x;
+    const uint16_t x_right = x_pos + (9 * font_width);
 	const uint32_t color = ts.tune_step ? Cyan : sd.txt_colour;		// is this a "Temporary" step size from press-and-hold?
 	const uint32_t stepsize_background = (ts.flags1 & FLAGS1_DYN_TUNE_ENABLE) ? sd.boxes_colour : Black;
-	// dynamic_tuning active -> yes, display on Grey3
 
-	if(step_line)	 	// Remove underline indicating step size if one had been drawn
-	{
+	if (step_line) {	 	// Remove underline indicating step size if one had been drawn
         const int32_t space_l = 3*(LARGE_FONT_WIDTH * 3 + LARGE_FONT_WIDTH/2); //3 digits plus a half width dot
         const int32_t space_s = 3*(SMALL_FONT_WIDTH * 3 + SMALL_FONT_WIDTH/2); //3 digits plus a half width dot
 
-		UiLcdHy28_DrawStraightLineDouble(ts.Layout->TUNE_FREQ.x,(ts.Layout->TUNE_FREQ.y + 24),space_l,LCD_DIR_HORIZONTAL,Black);
-		UiLcdHy28_DrawStraightLineDouble(ts.Layout->TUNE_SPLIT_FREQ_X,(ts.Layout->TUNE_FREQ.y + 24),space_s,LCD_DIR_HORIZONTAL,Black);
+		UiLcdHy28_DrawStraightLineDouble(ts.Layout->TUNE_FREQ.x, (ts.Layout->TUNE_FREQ.y + 24), space_l, LCD_DIR_HORIZONTAL, Black);
+		UiLcdHy28_DrawStraightLineDouble(ts.Layout->TUNE_SPLIT_FREQ_X, (ts.Layout->TUNE_FREQ.y + 24), space_s, LCD_DIR_HORIZONTAL, Black);
 	}
 
 	// Blank old step size
@@ -2355,25 +2351,18 @@ void UiDriver_DisplayFreqStepSize()
 	const int32_t digit_group = pow10/3;
 	const int32_t digit_idx = pow10%3;
 
-//	const char* stepUnitPrefix[] = { "","k","M","G","T"};
-//	snprintf(step_name,10,"%d%sHz",(int)(df.tuning_step/exp10((digit_group)*3)), stepUnitPrefix[digit_group]);
 	const char* stepUnitPrefix[] = { "Hz","k","M","G","T"};
 	snprintf(step_name,10,"%d%s",(int)(df.tuning_step/exp10((digit_group)*3)), stepUnitPrefix[digit_group]);
 
 	UiLcdHy28_PrintTextCentered(ts.Layout->TUNE_STEP.x,ts.Layout->TUNE_STEP.y,ts.Layout->TUNE_STEP.w,step_name,color,stepsize_background,0);
 
-	if((ts.freq_step_config & FREQ_STEP_SHOW_MARKER) && pow10 < MAX_DIGITS)          // is frequency step marker line enabled?
-	{
-
+	if ((ts.freq_step_config & FREQ_STEP_SHOW_MARKER) && pow10 < MAX_DIGITS) {         // is frequency step marker line enabled?
 	    const int32_t group_space = (font_width * 3) + font_width/2; //3 digits plus a half width dot
-
 	    const uint32_t line_pos =  x_right -  digit_idx * font_width - (digit_group * group_space);
 
-	    UiLcdHy28_DrawStraightLineDouble(line_pos, (ts.Layout->TUNE_FREQ.y + 24),font_width,LCD_DIR_HORIZONTAL,White);
+	    UiLcdHy28_DrawStraightLineDouble(line_pos, (ts.Layout->TUNE_FREQ.y + 24), font_width, LCD_DIR_HORIZONTAL, sd.txt_colour);
 	    step_line = 1;	// indicate that a line under the step size had been drawn
-	}
-	else	// marker line not enabled
-	{
+	} else {	// marker line not enabled
 	    step_line = 0;	// we don't need to erase "step size" marker line in the future
 	}
 }

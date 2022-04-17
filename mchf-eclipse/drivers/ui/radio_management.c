@@ -809,7 +809,10 @@ void RadioManagement_SetPaBias()
     }
 #endif
 
-    Board_SetPaBiasValue(calc_var);
+    for (uint8_t i = 1; i <= 10; i++) {
+        Board_SetPaBiasValue((calc_var * i) / 10);
+        HAL_Delay(1);
+    }
 }
 
 
@@ -1051,8 +1054,7 @@ bool RadioManagement_SwitchTxRx_Possible()
     return RadioManagement_TxRxSwitching_IsEnabled() && osc->readyForIrqCall() && Codec_ReadyForIrqCall() && radioManagement_SwitchTxRx_running == false;
 }
 
-void RadioManagement_SwitchTxRx(uint8_t txrx_mode, bool tune_mode)
-{
+void RadioManagement_SwitchTxRx(uint8_t txrx_mode, bool tune_mode) {
     radioManagement_SwitchTxRx_running = true;
     uint32_t tune_new;
     bool tx_ok = false;
@@ -1060,102 +1062,73 @@ void RadioManagement_SwitchTxRx(uint8_t txrx_mode, bool tune_mode)
 
     // ts.last_tuning = 0;                  // prevents transmitting on wrong frequency during "RX bk phases"
 
-    if(is_splitmode())                  // is SPLIT mode active?
-    {
+    if (is_splitmode()) {                  // is SPLIT mode active?
         uint8_t vfo_tx,vfo_rx;
-        if (is_vfo_b())
-        {
+
+        if (is_vfo_b()) {
             vfo_rx = VFO_B;
             vfo_tx = VFO_A;
-        }
-        else
-        {
+        } else {
             vfo_rx = VFO_A;
             vfo_tx = VFO_B;
         }
-        if(txrx_mode == TRX_MODE_TX)     // are we in TX mode?
-        {
-            if(ts.txrx_mode == TRX_MODE_RX)                         // did we want to enter TX mode?
-            {
+
+        if (txrx_mode == TRX_MODE_TX) {     // are we in TX mode?
+            if (ts.txrx_mode == TRX_MODE_RX) {                        // did we want to enter TX mode?
                 vfo[vfo_rx].band[ts.band->band_mode].dial_value = df.tune_new; // yes - save current RX frequency in RX VFO location
             }
             tune_new = vfo[vfo_tx].band[ts.band->band_mode].dial_value;    // load with TX VFO frequency
-        }
-        else                    // we are in RX mode
-        {
+        } else {                    // we are in RX mode
             tune_new = vfo[vfo_rx].band[ts.band->band_mode].dial_value;    // load with RX VFO frequency
         }
-    }
-    else
-    {
+    } else {
         // we just take the current one if not in split mode
         tune_new = df.tune_new;
     }
 
-    if(txrx_mode == TRX_MODE_TX)
-    {
+    if (txrx_mode == TRX_MODE_TX) {
         // FIXME: Not very robust code, make sure Validate always returns TUNE_IMPOSSIBLE in case of issues
         tx_ok = RadioManagement_ValidateFrequencyForTX(tune_new) != OSC_TUNE_IMPOSSIBLE;
-
 
         // this code handles the ts.tx_disable
         // even if ts.tx_disble is set in CW and only in CW we still switch to TX
         // but leave the PA disabled. This is for support of CW training right with the mcHF.
-        if (RadioManagement_IsTxDisabled() || ts.cw_text_entry)
-        {
-            if ((tx_ok == true && ts.dmod_mode == DEMOD_CW) || ts.cw_text_entry)
-            {
+        if (RadioManagement_IsTxDisabled() || ts.cw_text_entry) {
+            if ((tx_ok == true && ts.dmod_mode == DEMOD_CW) || ts.cw_text_entry) {
                 tx_pa_disabled = true;
-            }
-            else
-            {
+            } else {
                 // in any other case, it is not okay to transmit with ts.tx_disable == true
                 tx_ok = false;
             }
         }
 
-        if (is_demod_psk())
-        {
+        if (is_demod_psk()) {
         	Psk_Modulator_PrepareTx();
         }
     }
 
-    uint8_t txrx_mode_final = tx_ok?txrx_mode:TRX_MODE_RX;
+    uint8_t txrx_mode_final = tx_ok ? txrx_mode : TRX_MODE_RX;
 
     // only switch mode if tx was permitted or rx was requested
-    if (txrx_mode_final != ts.txrx_mode || txrx_mode_final == TRX_MODE_RX)
-    {
+    if (txrx_mode_final != ts.txrx_mode || txrx_mode_final == TRX_MODE_RX) {
         // there is in fact a switch happening
         // which may cause audio issues
-        if (txrx_mode_final != ts.txrx_mode)
-        {
-
+        if (txrx_mode_final != ts.txrx_mode) {
             ts.audio_dac_muting_buffer_count = 2; // wait at least 2 buffer cycles
             ts.audio_dac_muting_flag = true; // let the audio being muted initially as long as we need it
             RadioManagement_DisablePaBias(); // kill bias to mute the HF output quickly
         }
 
-        if(txrx_mode_final == TRX_MODE_TX)
-        {
-
-
+        if (txrx_mode_final == TRX_MODE_TX) {
             // We mute the audio BEFORE we activate the PTT.
             // This is necessary since U3 is switched the instant that we do so,
             // rerouting audio paths and causing all sorts of disruption including CLICKs and squeaks.
             Codec_PrepareTx(ts.txrx_mode); // 5ms
 
-            while (ts.audio_dac_muting_buffer_count >0)
-            {
-                // TODO: Find a better solution here
-                asm("nop"); // just wait a little for the silence to come out of the audio path
-                // this can take up to 1.2ms (time for processing two audio buffer dma requests
-            }
-
             // this is here to allow CW training
             // with ts.tx_disabled on nothing will be transmitted but you can hear the sidetone
-            if (tx_pa_disabled == false)
-            {
-                Board_RedLed(LED_STATE_ON); // TX
+            if (tx_pa_disabled == false) {
+                Board_RedLed(LED_STATE_ON);
                 Board_GreenLed(LED_STATE_OFF);
                 Board_EnableTXSignalPath(true); // switch antenna to output and codec output to QSE mixer
             }
@@ -1166,77 +1139,59 @@ void RadioManagement_SwitchTxRx(uint8_t txrx_mode, bool tune_mode)
         // ts.audio_dac_muting_flag = true; // let the audio being muted initially as long as we need it
 
         // there might have been a band change between the modes, make sure to have the power settings fitting the mode
-        if (txrx_mode_final == TRX_MODE_TX)
-        {
+        if (txrx_mode_final == TRX_MODE_TX) {
             RadioManagement_SetPowerLevel(RadioManagement_GetBand(tune_new),ts.power_level);
         }
 
         AudioManagement_SetSidetoneForDemodMode(ts.dmod_mode,txrx_mode_final == TRX_MODE_RX?false:tune_mode);
         // make sure the audio is set properly according to txrx and tune modes
 
-        if (txrx_mode_final == TRX_MODE_RX)
-        {
-
-            while (ts.audio_dac_muting_buffer_count >0)
-            {
-                // TODO: Find a better solution here
-                asm("nop"); // just wait a little for the silence to come out of the audio path
-                // this can take up to 1.2ms (time for processing two audio buffer dma requests
+        if (txrx_mode_final == TRX_MODE_RX) {
+            while (ts.audio_dac_muting_buffer_count > 0) {
+                asm("nop");
             }
 
-            Board_EnableTXSignalPath(false); // switch antenna to input and codec output to lineout
-            Board_RedLed(LED_STATE_OFF);      // TX led off
-            Board_GreenLed(LED_STATE_ON);      // TX led off
-            ts.audio_dac_muting_flag = false; // unmute audio output
-            //CwGen_PrepareTx(); // make sure the keyer is set correctly for next round
-            // commented out as resetting now part of cw_gen state machine
+            Board_EnableTXSignalPath(false);    // switch antenna to input and codec output to lineout
+            Board_RedLed(LED_STATE_OFF);
+            Board_GreenLed(LED_STATE_ON);
+            ts.audio_dac_muting_flag = false;   // unmute audio output
         }
 
-        if (ts.txrx_mode != txrx_mode_final)
-        {
-            Codec_SwitchTxRxMode(txrx_mode_final);
+        if (ts.txrx_mode != txrx_mode_final) {
+            if (txrx_mode_final == TRX_MODE_TX) {
+                uint32_t mute_time = ts.txrx_switch_audio_muting_timing;
 
-            if (txrx_mode_final == TRX_MODE_TX)
-            {
-                RadioManagement_SetPaBias();
-                uint32_t input_mute_time = 0, dac_mute_time = 0, dac_mute_time_mode = 0, input_mute_time_mode = 0; // aka 1.3ms
-                // calculate expire time for audio muting in interrupts, it is 15 interrupts per 10ms
-                dac_mute_time = ts.txrx_switch_audio_muting_timing * 15;
-
-                if (ts.dmod_mode != DEMOD_CW)
-                {
-                    switch(ts.tx_audio_source)
-                    {
-
-                    case TX_AUDIO_DIG:
-                        dac_mute_time_mode = 0* 15; // Minimum time is 0ms
-                        break;
-                    case TX_AUDIO_LINEIN_L:
-                    case TX_AUDIO_LINEIN_R:
-                        dac_mute_time_mode = 4 * 15; // Minimum time is 40ms
-                        input_mute_time_mode = dac_mute_time_mode;
-                        break;
-                    case TX_AUDIO_MIC:
-                        dac_mute_time_mode = 4* 15; // Minimum time is 40ms
-                        input_mute_time_mode = dac_mute_time_mode;
-                        break;
+                if (ts.dmod_mode != DEMOD_CW) {
+                    switch (ts.tx_audio_source) {
+                        case TX_AUDIO_MIC:
+                        case TX_AUDIO_LINEIN_L:
+                        case TX_AUDIO_LINEIN_R:
+                            if (mute_time < 4) { // Minimum time is 40ms
+                                mute_time = 4;
+                            }
+                            break;
                     }
                 }
 
-                dac_mute_time = (dac_mute_time > dac_mute_time_mode)? dac_mute_time : dac_mute_time_mode;
-                input_mute_time = (input_mute_time > input_mute_time_mode)? input_mute_time : input_mute_time_mode;
+                mute_time *= 15; // 15 == 10ms
 
-                ts.audio_processor_input_mute_counter = input_mute_time;
-                ts.audio_dac_muting_buffer_count =   dac_mute_time; // 15 == 10ms
+                ts.audio_processor_input_mute_counter = mute_time;
+                ts.audio_dac_muting_buffer_count = mute_time;
+                ts.audio_dac_muting_flag = false;
 
-                ts.audio_dac_muting_flag = false; // unmute audio output unless timed muting is active
+                RadioManagement_SetPaBias();
+
+                while (ts.audio_dac_muting_buffer_count > 0) {
+                    asm("nop");
+                }
             }
+
+            Codec_SwitchTxRxMode(txrx_mode_final);
             ts.txrx_mode = txrx_mode_final;
         }
     }
     radioManagement_SwitchTxRx_running = false;
 }
-
 
 
 /*
