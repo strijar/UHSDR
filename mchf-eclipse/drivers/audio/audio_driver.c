@@ -2623,6 +2623,11 @@ static void RxProcessor_DemodAudioPostprocessing(float32_t (*a_buffer)[AUDIO_BLO
 
 }
 
+void AudioDriver_SetFade(float32_t speed) {
+    ads.audio_fade_speed = speed;
+    ads.audio_fade = 1.0f;
+}
+
 
 /**
  * Gets IQ data as input, runs the rx processing on the input signal, leaves audio data in DMA buffer
@@ -2898,6 +2903,15 @@ static void AudioDriver_RxProcessor(IqSample_t * const srcCodec, AudioSample_t *
     }
     else
     {
+       if (ads.audio_fade > 0.0f) {
+           ads.audio_fade -= ads.audio_fade_speed;
+
+           if (ads.audio_fade < 0.01f)
+               ads.audio_fade = 0.0f;
+
+           arm_scale_f32(adb.a_buffer[1], 1.0f - ads.audio_fade, adb.a_buffer[1], blockSize);
+       }
+
 #ifdef USE_TWO_CHANNEL_AUDIO
         // BOTH CHANNELS "FIXED" GAIN as input for audio amp and headphones/lineout
         // each output path has its own gain control.

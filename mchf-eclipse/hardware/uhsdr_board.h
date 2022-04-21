@@ -332,7 +332,6 @@ typedef struct TransceiverState
     // timer for muting of input into signal processing chains (TX/RX)
     uint16_t    audio_processor_input_mute_counter;
 
-
     iq_float_t tx_adj_gain_var[IQ_TRANS_NUM];    // active variables for adjusting tx gain balance
     iq_float_t rx_adj_gain_var;    // active variables for adjusting rx gain balance
 

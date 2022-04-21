@@ -69,18 +69,16 @@ void UiSpectrum_CalculateLayout(const bool is_big, const UiArea_t* full_ptr, con
     slayout.title.x = slayout.draw.x;
     slayout.title.y = slayout.draw.y;
     slayout.title.w = slayout.draw.w;
-    slayout.title.h = is_big?0:16; // hide title if big
+    slayout.title.h = is_big ? 0 : 16;  // hide title if big
 
     slayout.graticule.x = slayout.draw.x;
     slayout.graticule.w = slayout.draw.w;
-//    slayout.graticule.h = 16;
-    slayout.graticule.h = 13;
+    slayout.graticule.h = 16;
 
     slayout.scope.x = slayout.draw.x;
     slayout.scope.y = slayout.title.y + slayout.title.h;
     slayout.scope.w = slayout.draw.w;
 
-   // UiSpectrum_SetNewGraticulePosition(ts.graticulePowerupYpos);
     UiSpectrum_ResetSpectrum();
 
     slayout.scope.h = slayout.graticule.y - slayout.scope.y;
@@ -88,7 +86,7 @@ void UiSpectrum_CalculateLayout(const bool is_big, const UiArea_t* full_ptr, con
     slayout.wfall.x = slayout.draw.x;
     slayout.wfall.y = slayout.graticule.y + slayout.graticule.h;
     slayout.wfall.w = slayout.draw.w;
-    slayout.wfall.h = slayout.draw.y+slayout.draw.h-slayout.wfall.y;
+    slayout.wfall.h = slayout.draw.y + slayout.draw.h - slayout.wfall.y;
 }
 
 //sets graticule position according to control bits (to default for particular case)
@@ -161,9 +159,6 @@ const pos_spectrum_display_t pos_spectrum_set[] =
 // const pos_spectrum_display_t* pos_spectrum = &pos_spectrum_set[0];
 // const disp_resolution_t disp_resolution;
 const pos_spectrum_display_t* pos_spectrum = &pos_spectrum_set[0];
-
-
-
 
 // ------------------------------------------------
 // Spectrum display public
@@ -1646,15 +1641,12 @@ void UiSpectrum_DisplayFilterBW()
 /**
  * @brief Draw the frequency information on the frequency bar at the bottom of the spectrum scope based on the current frequency
  */
-static void UiSpectrum_DrawFrequencyBar()
-{
-
+static void UiSpectrum_DrawFrequencyBar() {
     char    txt[16];
 
     UiSpectrum_UpdateSpectrumPixelParameters();
 
-    if (ts.spectrum_freqscale_colour != SPEC_BLACK)     // don't bother updating frequency scale if it is black (invisible)!
-    {
+    if (ts.spectrum_freqscale_colour != SPEC_BLACK) {     // don't bother updating frequency scale if it is black (invisible)!
         float32_t grat = 6.0f / (float32_t)(1 << sd.magnify);
 
         // This function draws the frequency bar at the bottom of the spectrum scope, putting markers every at every graticule and the full frequency
@@ -1662,89 +1654,72 @@ static void UiSpectrum_DrawFrequencyBar()
 
         // get color for frequency scale
         uint32_t  clr;
-        UiMenu_MapColors(ts.spectrum_freqscale_colour,NULL, &clr);
+        UiMenu_MapColors(ts.spectrum_freqscale_colour, NULL, &clr);
 
         float32_t freq_calc = RadioManagement_GetRXDialFrequency() + (ts.dmod_mode == DEMOD_CW ? RadioManagement_GetCWDialOffset() : 0 );      // get current tune frequency in Hz
 
-        if (sd.magnify == 0 || ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE)
-        {
+        if (sd.magnify == 0 || ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE) {
             freq_calc += AudioDriver_GetTranslateFreq();
             // correct for display center not being RX center frequency location
         }
-        if(sd.magnify < 3)
-        {
+
+        if (sd.magnify < 3) {
             freq_calc = roundf(freq_calc/1000); // round graticule frequency to the nearest kHz
-        }
-        else if (sd.magnify < 5)
-        {
+        } else if (sd.magnify < 5) {
             freq_calc = roundf(freq_calc/100) / 10; // round graticule frequency to the nearest 100Hz
-        }
-        else if(sd.magnify == 5)
-        {
+        } else if (sd.magnify == 5) {
             freq_calc = roundf(freq_calc/50) / 20; // round graticule frequency to the nearest 50Hz
         }
-
 
         int16_t centerIdx = -100; // UiSpectrum_GetGridCenterLine(0);
 
         uint16_t idx2pos[pos_spectrum->SCOPE_GRID_VERT_COUNT+1];
 
         // remainder of frequency/graticule markings
-        for(int i=1;i<pos_spectrum->SCOPE_GRID_VERT_COUNT;i++)
-        {
+        for (int i=1; i < pos_spectrum->SCOPE_GRID_VERT_COUNT; i++) {
             idx2pos[i]=sd.vert_grid_id[i-1];
         }
 
         idx2pos[0]=0;
         idx2pos[pos_spectrum->SCOPE_GRID_VERT_COUNT]=slayout.scope.w-1;
 
-        if(sd.magnify > 2)
-        {
+        if (sd.magnify > 2) {
             idx2pos[pos_spectrum->SCOPE_GRID_VERT_COUNT-1]-=9;
         }
 
        // FIXME: This code expect 8 vertical lines)
-        for (int idx = -4; idx < 5; idx += (sd.magnify < 2) ? 1 : 2 )
-        {
+        for (int idx = -4; idx < 5; idx += (sd.magnify < 2) ? 1 : 2 ) {
             int pos = idx2pos[idx+4];
             const uint8_t graticule_font = 4;
-            const uint16_t number_width = UiLcdHy28_TextWidth("    ",graticule_font);
-            const uint16_t pos_number_y = (slayout.graticule.y +  (slayout.graticule.h - UiLcdHy28_TextHeight(graticule_font))/2);
-            if (idx != centerIdx)
-            {
+            const uint16_t number_width = UiLcdHy28_TextWidth("    ", graticule_font);
+            const uint16_t pos_number_y = (slayout.graticule.y + (slayout.graticule.h - UiLcdHy28_TextHeight(graticule_font))/2);
+
+            if (idx != centerIdx) {
                 char *c;
-                if(sd.magnify < 3)
-                {
-                    snprintf(txt,16, "%02lu", ((uint32_t)(freq_calc+(idx*grat)))%100);   // build string for middle-left frequency (1khz precision)
+
+                if (sd.magnify < 3) {
+                    snprintf(txt, sizeof(txt), "%02lu", ((uint32_t)(freq_calc + (idx*grat))) % 100);   // build string for middle-left frequency (1khz precision)
                     c = txt;  // point at 2nd character from the end
-                }
-                else
-                {
+                } else {
                     float32_t disp_freq = freq_calc+(idx*grat);
                     int bignum = disp_freq;
                     int smallnum = roundf((disp_freq-bignum)*100);
-                    snprintf(txt,16, " %u.%02u", bignum, smallnum);   // build string for middle-left frequency (10Hz precision)
-                    c = &txt[strlen(txt)-4];  // point at 5th character from the end
-                }
-                if (idx == -4) // left border
-                {
-                    UiLcdHy28_PrintText( slayout.graticule.x + pos, pos_number_y,c,clr,Black,graticule_font);
-                }
-                else if (idx == 4) // right border
-                {
-                    UiLcdHy28_PrintTextRight( slayout.graticule.x + pos, pos_number_y,c,clr,Black,graticule_font);
+
+                    snprintf(txt, sizeof(txt), " %u.%02u", bignum, smallnum);   // build string for middle-left frequency (10Hz precision)
+                    c = &txt[strlen(txt)-4];                                    // point at 5th character from the end
                 }
 
-                else
-                {
-                    UiLcdHy28_PrintTextCentered(slayout.graticule.x +  pos - number_width/2,pos_number_y, number_width,c,clr,Black,graticule_font);
+                if (idx == -4) {        // left border
+                    UiLcdHy28_PrintText(slayout.graticule.x + pos, pos_number_y, c, clr, Black, graticule_font);
+                } else if (idx == 4) {  // right border
+                    UiLcdHy28_PrintTextRight(slayout.graticule.x + pos, pos_number_y, c, clr, Black, graticule_font);
+                } else {
+                    UiLcdHy28_PrintTextCentered(slayout.graticule.x +  pos - number_width/2, pos_number_y, number_width, c, clr, Black, graticule_font);
                 }
             }
         }
     }
 }
-
-
 
 void UiSpectrum_Redraw()
 {

@@ -4578,6 +4578,7 @@ static void UiDriver_RotateNormalEncoder(int8_t pot_diff, uint8_t enc) {
                 pot_diff_step,
                 0, 3
             );
+            RadioManagement_MuteTemporarilyRxAudio();
             Board_Amber_InputStateSet(ts.amber_input_state);
             UiDriver_DisplayPre(enc, ENC_STATE_NORM);
             break;
@@ -6739,6 +6740,7 @@ void UiDriver_StartUpScreenFinish() {
 	}
 
 	UiDriver_CreateDesktop();
+	AudioDriver_SetFade(1.0f / 10000.0f);
 }
 
 // UiAction_... are typically small functions to execute a specific ui function initiate by a key press or touch event

@@ -79,38 +79,282 @@ SWRMeter                    swrm;
 // Frequency public
 DialFrequency               df;
 
-//
 // Bands definition
-//
-//
-// We first define all individual band definitions
-static const BandInfo bi_2200m_all =   { .tune = 135700,       .size = 2100,       .name = "2200m", BAND_MODE_2200};
-static const BandInfo bi_630m_all =    { .tune = 472000,       .size = 7000,       .name = "630m",  BAND_MODE_630};
-static const BandInfo bi_160m_all =    { .tune = 1810000,      .size = 190000,     .name = "160m",  BAND_MODE_160};
-static const BandInfo bi_80m_r1 =      { .tune = 3500000,      .size = 300000,     .name = "80m",   BAND_MODE_80};
-static const BandInfo bi_80m_r2 =      { .tune = 3500000,      .size = 500000,     .name = "80m",   BAND_MODE_80};
-static const BandInfo bi_80m_r3 =      { .tune = 3500000,      .size = 400000,     .name = "80m",   BAND_MODE_80};
-static const BandInfo bi_60m_gen =     { .tune = 5250000,      .size = 200000,     .name = "60m",   BAND_MODE_60};
-static const BandInfo bi_40m_r1 =      { .tune = 7000000,      .size = 200000,     .name = "40m",   BAND_MODE_40};
-static const BandInfo bi_40m_r2_3 =    { .tune = 7000000,      .size = 300000,     .name = "40m",   BAND_MODE_40};
-static const BandInfo bi_30m_all =     { .tune = 10100000,     .size = 50000,      .name = "30m",   BAND_MODE_30};
-static const BandInfo bi_20m_all =     { .tune = 14000000,     .size = 350000,     .name = "20m",   BAND_MODE_20};
-static const BandInfo bi_17m_all =     { .tune = 18068000,     .size = 100000,     .name = "17m",   BAND_MODE_17};
-static const BandInfo bi_15m_all =     { .tune = 21000000,     .size = 450000,     .name = "15m",   BAND_MODE_15};
-static const BandInfo bi_12m_all =     { .tune = 24890000,     .size = 100000,     .name = "12m",   BAND_MODE_12};
-static const BandInfo bi_10m_all =     { .tune = 28000000,     .size = 1700000,    .name = "10m",   BAND_MODE_10};
-static const BandInfo bi_6m_r2_3 =     { .tune = 50000000,     .size = 4000000,    .name = "6m",    BAND_MODE_6};
-static const BandInfo bi_4m_gen =      { .tune = 70000000,     .size = 500000,     .name = "4m",    BAND_MODE_4};
-static const BandInfo bi_2m_r1 =       { .tune = 144000000,    .size = 2000000,    .name = "2m",    BAND_MODE_2};
-static const BandInfo bi_2m_r2_3 =     { .tune = 144000000,    .size = 4000000,    .name = "2m",    BAND_MODE_2};
-static const BandInfo bi_70cm_r1 =     { .tune = 430000000,    .size = 10000000,   .name = "70cm",  BAND_MODE_70};
-static const BandInfo bi_70cm_r2_3 =   { .tune = 430000000,    .size = 20000000,   .name = "70cm",  BAND_MODE_70};
-static const BandInfo bi_23cm_all =    { .tune = 1240000000,   .size = 60000000,   .name = "23cm",  BAND_MODE_23};
-static const BandInfo bi_160m_r3_thai ={ .tune = 1800000,      .size = 200000,     .name = "160m",  BAND_MODE_160};
-static const BandInfo bi_80m_r3_thai = { .tune = 3500000,      .size = 100000,     .name = "80m",   BAND_MODE_80};
-static const BandInfo bi_2m_r3_thai =  { .tune = 144000000,    .size = 3000000,    .name = "2m",    BAND_MODE_2};
-static const BandInfo bi_60m_rx =     { .tune = 5250000,      .size = 200000,     .name = "60m",   .band_mode = BAND_MODE_60, .rx_only = true };
-static const BandInfo bi_gen_all =     { .tune = 0,            .size = 0,          .name = "Gen",   BAND_MODE_GEN};
+
+static const BandInfo bi_2200m_all = {
+    .tune = 135700,
+    .size = 2100,
+    .name = "2200m",
+    .band_mode = BAND_MODE_2200,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_630m_all = {
+    .tune = 472000,
+    .size = 7000,
+    .name = "630m",
+    .band_mode = BAND_MODE_630,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_160m_all = {
+    .tune = 1810000,
+    .size = 190000,
+    .name = "160m",
+    .band_mode = BAND_MODE_160,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_80m_r1 = {
+    .tune = 3500000,
+    .size = 300000,
+    .name = "80m",
+    .band_mode = BAND_MODE_80,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_80m_r2 = {
+    .tune = 3500000,
+    .size = 500000,
+    .name = "80m",
+    .band_mode = BAND_MODE_80,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_80m_r3 = {
+    .tune = 3500000,
+    .size = 400000,
+    .name = "80m",
+    .band_mode = BAND_MODE_80,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_60m_gen = {
+    .tune = 5250000,
+    .size = 200000,
+    .name = "60m",
+    .band_mode = BAND_MODE_60,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_40m_r1 = {
+    .tune = 7000000,
+    .size = 200000,
+    .name = "40m",
+    .band_mode = BAND_MODE_40,
+    .subband = {
+        { .start = 7000000, .stop = 7040000, .mode = SUBBAND_CW },
+        { .start = 7030000, .stop = 7030000, .mode = SUBBAND_CW_QRP },
+        { .start = 7050000, .stop = 7200000, .mode = SUBBAND_SSB },
+        { .start = 7090000, .stop = 7090000, .mode = SUBBAND_SSB_QRP },
+        { .mode = SUBBAND_NONE },
+    }
+};
+
+static const BandInfo bi_40m_r2_3 = {
+    .tune = 7000000,
+    .size = 300000,
+    .name = "40m",
+    .band_mode = BAND_MODE_40,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_30m_all = {
+    .tune = 10100000,
+    .size = 50000,
+    .name = "30m",
+    .band_mode = BAND_MODE_30,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_20m_all = {
+    .tune = 14000000,
+    .size = 350000,
+    .name = "20m",
+    .band_mode = BAND_MODE_20,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_17m_all = {
+    .tune = 18068000,
+    .size = 100000,
+    .name = "17m",
+    .band_mode = BAND_MODE_17,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_15m_all = {
+    .tune = 21000000,
+    .size = 450000,
+    .name = "15m",
+    .band_mode = BAND_MODE_15,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_12m_all = {
+    .tune = 24890000,
+    .size = 100000,
+    .name = "12m",
+    .band_mode = BAND_MODE_12,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_10m_all = {
+    .tune = 28000000,
+    .size = 1700000,
+    .name = "10m",
+    .band_mode = BAND_MODE_10,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_6m_r2_3 = {
+    .tune = 50000000,
+    .size = 4000000,
+    .name = "6m",
+    .band_mode = BAND_MODE_6,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_4m_gen = {
+    .tune = 70000000,
+    .size = 500000,
+    .name = "4m",
+    .band_mode = BAND_MODE_4,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_2m_r1 = {
+    .tune = 144000000,
+    .size = 2000000,
+    .name = "2m",
+    .band_mode = BAND_MODE_2,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_2m_r2_3 = {
+    .tune = 144000000,
+    .size = 4000000,
+    .name = "2m",
+    .band_mode = BAND_MODE_2,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_70cm_r1 = {
+    .tune = 430000000,
+    .size = 10000000,
+    .name = "70cm",
+    .band_mode = BAND_MODE_70,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_70cm_r2_3 = {
+    .tune = 430000000,
+    .size = 20000000,
+    .name = "70cm",
+    .band_mode = BAND_MODE_70,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_23cm_all = {
+    .tune = 1240000000,
+    .size = 60000000,
+    .name = "23cm",
+    .band_mode = BAND_MODE_23,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_160m_r3_thai = {
+    .tune = 1800000,
+    .size = 200000,
+    .name = "160m",
+    .band_mode = BAND_MODE_160,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_80m_r3_thai = {
+    .tune = 3500000,
+    .size = 100000,
+    .name = "80m",
+    .band_mode = BAND_MODE_80,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_2m_r3_thai =  {
+    .tune = 144000000,
+    .size = 3000000,
+    .name = "2m",
+    .band_mode = BAND_MODE_2,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_60m_rx = {
+    .tune = 5250000,
+    .size = 200000,
+    .name = "60m",
+    .band_mode = BAND_MODE_60,
+    .rx_only = true,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
+
+static const BandInfo bi_gen_all = {
+    .tune = 0,
+    .size = 0,
+    .name = "Gen",
+    .band_mode = BAND_MODE_GEN,
+    .subband = {
+        { .mode = SUBBAND_NONE }
+    }
+};
 
 // now we combine from the above defined bands the set of bands for each region
 // to be backwards compatible we provide the original set of bands which are
@@ -504,49 +748,16 @@ bool RadioManagement_SetPowerLevel(const BandInfo* band, power_level_t power_lev
     if (power != -1 && band != NULL)
     {
         if (RadioManagement_IsGenericBand(band))
-//        {
-//            if(ts.flags1 & FLAGS1_TX_OUTSIDE_BANDS)
-//            {
-//            	power = 50; // ~50 mW limit;
-//                power_modified = true;
-//                // I never will use this function (DF8OE)
-//            }
-//            else
-//            {
-//                power = 5; // 5mW, use very low value in case of wrong call to this function
-//                power_modified = true;
-//            }
-//        }
-//
-//        if(ts.dmod_mode == DEMOD_AM)                // in AM mode?
-//        {
-//            if(power > mchf_pa.max_am_power || power == 0)     // yes, power over am limits?
-//            {
-//                power = mchf_pa.max_am_power;  // force to keep am limits
-//                power_modified = true;
-//            }
-//        }
-//        else if(power > mchf_pa.reference_power)
-//        {
-//            power = 0; //  0 == full power
-//            power_level = PA_LEVEL_FULL;
-//        }
         {
-//        	HereIsEnableCBband = ((ts.expflags1 & EXPFLAGS1_CB_27MC_TX_ENABLE) && (t_freq >= 26960000) && (t_freq <= 27860000)) || ((ts.expflags1 & EXPFLAGS1_CB_26MC_TX_ENABLE) && (t_freq >= 25670000) && (t_freq <= 26100000));
-//        	ts.HereIsEnableCB26Mc = ((ts.expflags1 & EXPFLAGS1_CB_26MC_TX_ENABLE) && (t_freq >= 25670000) && (t_freq <= 26100000));
         	ts.HereIsEnableCB26Mc = ((ts.expflags1 & EXPFLAGS1_CB_26MC_TX_ENABLE) && (t_freq >= 25670000) && (t_freq < 26960000));
-//        	ts.HereIsEnableCB27Mc = ((ts.expflags1 & EXPFLAGS1_CB_27MC_TX_ENABLE) && (t_freq >= 26960000) && (t_freq <= 27860000));
         	ts.HereIsEnableCB27Mc = ((ts.expflags1 & EXPFLAGS1_CB_27MC_TX_ENABLE) && (t_freq >= 26960000) && (t_freq <= 27991250));
         	HereIsEnableCBband = ts.HereIsEnableCB26Mc || ts.HereIsEnableCB27Mc;
-//        	if (HereIsEnableCBband && ((ts.dmod_mode == DEMOD_AM) || (ts.dmod_mode == DEMOD_FM) || (ts.dmod_mode == DEMOD_USB))) // We are working in enable CB band & mode
         	if (!(ts.flags1 & FLAGS1_TX_OUTSIDE_BANDS) && (HereIsEnableCBband && ((ts.dmod_mode == DEMOD_AM) || (ts.dmod_mode == DEMOD_FM) || (ts.dmod_mode == DEMOD_USB) || (ts.dmod_mode == DEMOD_CW)))) // We are working in enable CB band & mode
         	{
         	    if (ts.expflags1 & EXPFLAGS1_CB_10W_TX_ENABLE) // enabled any mode 10W
         	    {
         	        // no restrictions
         	    }
-//        		if((ts.dmod_mode == DEMOD_AM) || (ts.dmod_mode == DEMOD_FM))
-//        		if((ts.dmod_mode == DEMOD_AM) || (ts.dmod_mode == DEMOD_FM) || (ts.dmod_mode == DEMOD_CW))
         	    else if((ts.dmod_mode == DEMOD_AM) || (ts.dmod_mode == DEMOD_FM) || (ts.dmod_mode == DEMOD_CW))
 				{
 					if (power > 4000.0 || power == 0)
@@ -630,10 +841,7 @@ bool RadioManagement_CBFullPwrEnabled()
 {
     bool retval = false;
     uint32_t t_freq = df.tune_new;
-/*
-    bool HereIsEnableCBband = ((ts.expflags1 & EXPFLAGS1_CB_26MC_TX_ENABLE) && (t_freq >= 25670000) && (t_freq <= 26100000)) || \
-            ((ts.expflags1 & EXPFLAGS1_CB_27MC_TX_ENABLE) && (t_freq >= 26960000) && (t_freq <= 27860000));
-*/
+
     bool HereIsEnableCBband = ((ts.expflags1 & EXPFLAGS1_CB_26MC_TX_ENABLE) && (t_freq >= 25670000) && (t_freq < 26960000)) || \
             ((ts.expflags1 & EXPFLAGS1_CB_27MC_TX_ENABLE) && (t_freq >= 26960000) && (t_freq <= 27991250));
 
@@ -908,8 +1116,14 @@ bool RadioManagement_ChangeFrequency(bool force_update, uint32_t dial_freq,uint8
 void RadioManagement_MuteTemporarilyRxAudio()
 {
     // save us from the loud "POP" that will occur when we change bands
-    ts.audio_processor_input_mute_counter = 5 * 15;
-    ts.audio_dac_muting_buffer_count = 13 * 15;
+    ts.audio_processor_input_mute_counter = 15 * 15;
+    ts.audio_dac_muting_buffer_count = 30 * 15;
+
+    while (ts.audio_processor_input_mute_counter > 0) {
+        asm("NOP");
+    }
+
+    AudioDriver_SetFade(1.0f / 2000.0f);
 }
 
 Oscillator_ResultCodes_t RadioManagement_ValidateFrequencyForTX(uint32_t dial_freq)
@@ -1155,6 +1369,7 @@ void RadioManagement_SwitchTxRx(uint8_t txrx_mode, bool tune_mode) {
             Board_RedLed(LED_STATE_OFF);
             Board_GreenLed(LED_STATE_ON);
             ts.audio_dac_muting_flag = false;   // unmute audio output
+            AudioDriver_SetFade(1.0f / 1000.0f);
         }
 
         if (ts.txrx_mode != txrx_mode_final) {

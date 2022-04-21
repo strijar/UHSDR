@@ -135,8 +135,7 @@ extern const pa_info_t mchf_pa;
 #define DEFAULT_FREQ_OFFSET     3000              // Amount of offset (at LO freq) when loading "default" frequency
 
 // this list MUST fit the order in the bandInfo structure defined in RadioManagement.h
-typedef enum
-{
+typedef enum {
     BAND_MODE_80 = 0,
     BAND_MODE_60 = 1,
     BAND_MODE_40 = 2,
@@ -154,9 +153,19 @@ typedef enum
     BAND_MODE_2200 = 14,
     BAND_MODE_630 = 15,
     BAND_MODE_160 = 16,
-    BAND_MODE_GEN = 17          // General Coverage
+    BAND_MODE_GEN = 17
 } band_mode_t;
 
+typedef enum {
+    SUBBAND_NONE = 0,
+    SUBBAND_CW,
+    SUBBAND_CW_QRP,
+    SUBBAND_SSB,
+    SUBBAND_SSB_QRP,
+    SUBBAND_FT8,
+    SUBBAND_WSPR,
+    SUBBAND_BEACON
+} subband_mode_t;
 
 typedef enum
 {
@@ -175,13 +184,20 @@ typedef enum
     COUPLING_MAX
 } filter_band_t;
 
+typedef struct SubBandInfo {
+    uint32_t        start;
+    uint32_t        stop;
+    subband_mode_t  mode;
+} SubBandInfo;
+
 typedef struct BandInfo
 {
-    uint32_t tune;
-    uint32_t size;
+    uint32_t    tune;
+    uint32_t    size;
     const char* name;
-    uint32_t band_mode;
-    bool    rx_only;
+    uint32_t    band_mode;
+    bool        rx_only;
+    SubBandInfo subband[];
 } BandInfo;
 
 /**

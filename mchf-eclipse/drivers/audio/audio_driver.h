@@ -268,6 +268,9 @@ typedef struct AudioDriverState
     float32_t               iq_phase_balance_rx;
     float32_t               iq_phase_balance_tx[IQ_TRANS_NUM];
 
+    float32_t               audio_fade;
+    float32_t               audio_fade_speed;
+
     ulong snap_carrier_freq; // used for passing the estimated carrier freq in SNAP mode to the print routine in UI_Driver
     bool CW_signal; // if CW decoder is enabled and carrier snap is wanted, this indicates whenever a pulse is received
     // only in that case, the carrier frequency is estimated and the display refreshed
@@ -678,5 +681,6 @@ void AudioDriver_SetBiquadCoeffs(float32_t* coeffsTo,const float32_t* coeffsFrom
 
 void AudioDriver_IQPhaseAdjust(uint16_t txrx_mode, float32_t* i_buffer, float32_t* q_buffer, const uint16_t blockSize);
 void AudioDriver_AgcWdsp_Set(void);
+void AudioDriver_SetFade(float32_t speed);
 
 #endif
