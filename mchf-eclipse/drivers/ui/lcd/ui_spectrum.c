@@ -1012,6 +1012,9 @@ static void UiSpectrum_InitSpectrumDisplayData(void)
     case WFALL_SUNSET:
         wfall_scheme = &waterfall_sunset[0];
         break;
+    case WFALL_MATRIX:
+        wfall_scheme = &waterfall_matrix[0];
+        break;
     case WFALL_RAINBOW:
         wfall_scheme = &waterfall_rainbow[0];
         break;
