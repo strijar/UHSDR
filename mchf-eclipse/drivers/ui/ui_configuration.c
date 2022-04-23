@@ -338,7 +338,8 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
 	{ ConfigEntry_UInt8, EEPROM_PWR_SCALE_GEN,&ts.power_scale_gen,100, 3, 200},
 	{ ConfigEntry_UInt8, EEPROM_PWR_SCALE_GEN_FULL,&ts.power_scale_gen_full,100, 3, 250},
 #ifdef SDR_AMBER
-	{ ConfigEntry_UInt8, EEPROM_AMBER_BANDCODE,&ts.amber_pa_bandcode_mode,0, 0, 255},
+	{ ConfigEntry_UInt8, EEPROM_AMBER_BANDCODE,&ts.amber_pa_bandcode_mode, 0, 0, 255},
+    { ConfigEntry_UInt8, EEPROM_AMBER_INPUT, &ts.amber_input_state, 0, 0, 3},
 #else
 	{ ConfigEntry_UInt8, EEPROM_AMBER_BANDCODE,0,0, 0, 255},
 #endif
@@ -353,6 +354,7 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
     { ConfigEntry_UInt8, EEPROM_TX_REVERB_DELAY, &ts.reverb_delay, 25, 25, 100},
     { ConfigEntry_Int32_16, EEPROM_IQ_FREQ_DELTA, &ts.iq_freq_delta, 1000, -18000, 18000},
     { ConfigEntry_UInt8, EEPROM_RTTY_SHIFT, &rtty_ctrl_config.shift_idx, RTTY_SHIFT_170, RTTY_SHIFT_85, RTTY_SHIFT_850},
+    { ConfigEntry_UInt8, EEPROM_RTTY_SPEED, &rtty_ctrl_config.speed_idx, RTTY_SPEED_45, RTTY_SPEED_45, RTTY_SPEED_50},
     { ConfigEntry_UInt8, EEPROM_RTTY_SPEED, &rtty_ctrl_config.speed_idx, RTTY_SPEED_45, RTTY_SPEED_45, RTTY_SPEED_50},
     // the entry below MUST be the last entry, and only at the last position Stop is allowed
     {

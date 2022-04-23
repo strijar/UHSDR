@@ -711,8 +711,9 @@ void		UiConfiguration_UpdateMacroCap(void);
 
 #define EEPROM_RTTY_SHIFT                            517
 #define EEPROM_RTTY_SPEED                            518
+#define EEPROM_AMBER_INPUT                           519
 
-#define EEPROM_FIRST_UNUSED                          519  // change this if new value ids are introduced, must be correct at any time
+#define EEPROM_FIRST_UNUSED                          520  // change this if new value ids are introduced, must be correct at any time
 
 #define MAX_VAR_ADDR (EEPROM_FIRST_UNUSED - 1) // Max 511
 
