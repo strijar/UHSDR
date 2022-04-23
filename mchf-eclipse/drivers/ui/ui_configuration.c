@@ -355,7 +355,6 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
     { ConfigEntry_Int32_16, EEPROM_IQ_FREQ_DELTA, &ts.iq_freq_delta, 1000, -18000, 18000},
     { ConfigEntry_UInt8, EEPROM_RTTY_SHIFT, &rtty_ctrl_config.shift_idx, RTTY_SHIFT_170, RTTY_SHIFT_85, RTTY_SHIFT_850},
     { ConfigEntry_UInt8, EEPROM_RTTY_SPEED, &rtty_ctrl_config.speed_idx, RTTY_SPEED_45, RTTY_SPEED_45, RTTY_SPEED_50},
-    { ConfigEntry_UInt8, EEPROM_RTTY_SPEED, &rtty_ctrl_config.speed_idx, RTTY_SPEED_45, RTTY_SPEED_45, RTTY_SPEED_50},
     // the entry below MUST be the last entry, and only at the last position Stop is allowed
     {
         ConfigEntry_Stop
