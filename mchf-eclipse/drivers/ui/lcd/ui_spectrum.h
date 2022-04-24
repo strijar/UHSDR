@@ -259,6 +259,7 @@ typedef struct SpectrumDisplay
 
     uint32_t   boxes_colour;                // screen boxes colour
     uint32_t   txt_colour;                  // text colour
+    uint32_t   txt_colour_dark;
 
     uint16_t old_left_filter_border_pos;	//previous BW highlight left border
     uint16_t old_right_filter_border_pos;	//previous BW highlight right border

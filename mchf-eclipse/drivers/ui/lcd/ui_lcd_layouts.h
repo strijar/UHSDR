@@ -44,6 +44,17 @@ typedef struct {
     uint16_t h;
 } UiArea_t;
 
+typedef struct {
+    uint16_t x;
+    uint16_t y;
+    uint16_t w;
+    uint16_t h;
+
+    uint8_t padding;
+    uint8_t size;
+    uint8_t space;
+} UiMeter_t;
+
 typedef struct
 {
 	UiArea_t region;
@@ -78,8 +89,7 @@ typedef struct {
 
 	UiCoord_t TUNE_SFREQ;			// Second frequency display control
 
-	UiCoord_t BAND_MODE;			// Band selection control
-	UiArea_t BAND_MODE_MASK;
+	UiArea_t BAND_MODE;			    // Band selection control
 
 	UiArea_t DEMOD_MODE_MASK;		// Demodulator mode control
 
@@ -99,7 +109,7 @@ typedef struct {
 
 	UiArea_t PW_IND;				// Power level
 
-	UiArea_t SM_IND;				// S meter position
+	UiMeter_t SM_IND;				// Meter position
 	UiCoord_t PWR_IND;				// Supply Voltage indicator
 	UiCoord_t TEMP_IND;				// Temperature Indicator
 	UiCoord_t RTC_IND;				// RTC

@@ -287,37 +287,36 @@ const LcdLayout LcdLayouts[LcdLayoutsCount] = {
                 .INFO_BAR = {.x = 0, .y = 0, .h = 12, .w = 479 },
                 .TEMP_IND={ .x = 2, .y = 2 },          // width 40
                 .PWR_IND = { .x = 2 + 40 + 8, .y = 2 },
-                .RTC_IND = { .x = 170, .y = 2 },
+                .RTC_IND = { .x = 480 - 64, .y = 2 },
 
-                .DisplayDbm = { 126+160, 2 },              // width 75
-                .MEMORYLABEL= { 126+160 + 75 + 5, 2 },     // width 40
-                .TUNE_SFREQ = { 126+160 + 75 + 5 + 40, 2 },
+                .DisplayDbm = { 126, 2 },              // width 75
+                .MEMORYLABEL= { 126 + 75 + 5, 2 },     // width 40
+                .TUNE_SFREQ = { 126 + 75 + 5 + 40, 2 },
 
                 // 2 line
 
                 .ENCODER_IND = { 0, 14 },
                 .ENCODER_MODE = MODE_VERTICAL,
-                .SM_IND = { .x = 126+160, .y = 14, .h = 28, .w = 191 },
+                .SM_IND = { .x = 126, .y = 14, .h = 28, .w = 191 + 160, .size = 7, .space = 2, .padding = 10 },
 
                 // 3 line
 
                 .FILTER_IND = { .x = 0,  .y = 14 + 28 + 2, .w = 82, .h = 30 },
                 .PW_IND = { .x = 82 + 2, .y = 14 + 28 + 2, .w = 40, .h = 14 },
                 .DEMOD_MODE_MASK = { .x = 82 + 2, .y = 14 + 28 + 2 + 14 + 2, .w = 40, .h = 14 },
-                .TUNE_BOX = {.x = 126+160, .y = 14 + 28 + 2, .w = 191 + 2, .h = 30 + 14 + 2 },
-                .TUNE_FREQ = { 126+160 + 10, 14 + 28 + 2 + 5},
-                .TUNE_SPLIT_FREQ_X = 196+160 + 20,
-                .TUNE_SPLIT_FREQ_Y_TX = (14 + 28 + 2 + 5) + 12,
-                .TUNE_SPLIT_MARKER_X = 196+160,
+                .TUNE_BOX = {.x = 126, .y = 14 + 28 + 2, .w = 191 + 2 + 160, .h = 30 + 14 + 2 },
+                .TUNE_FREQ = { 126 + 1, 14 + 28 + 2 + 5},
 
                 // 4 line
 
                 .DSP_IND = { .x = 0, .y = 14 + (28 + 2) + (14 + 2) + (14 + 2), .w = 82, .h = 14 },
                 .AGC_MASK = { .x = 82 + 2, .y = 14 + (28 + 2) + (14 + 2) + (14 + 2), .w = 40, .h = 14 },
-                .TUNE_STEP={ .x = 126+160 + 26, .y = 14 + (28 + 2) + (14 + 2) + (14 + 2), .w = 40, .h = 14 },
-                .SNAP_CARRIER = { 126+160 + 96, 14 + (28 + 2) + (14 + 2) + (14 + 2) + 2 },
-                .BAND_MODE = { 480 - 55 + 1, 14 + (28 + 2) + (14 + 2) + (14 + 2) },
-                .BAND_MODE_MASK = { .x = 480 - 55, .y = 14 + (28 + 2) + (14 + 2) + (14 + 2) - 1, .h = 14, .w = 30 },
+                .TUNE_STEP={ .x = 126 + 8, .y = 14 + (28 + 2) + (14 + 2) + (14 + 2), .w = 40, .h = 14 },
+                .SNAP_CARRIER = { 126 + 82, 14 + (28 + 2) + (14 + 2) + (14 + 2) + 2 },
+                .BAND_MODE = { .x = 126 + 82 + 44, .y = 14 + (28 + 2) + (14 + 2) + (14 + 2), .h = 14, .w = 32 },
+                .TUNE_SPLIT_FREQ_X = 126 + 176,
+                .TUNE_SPLIT_FREQ_Y_TX = 14 + (28 + 2) + (14 + 2) + (14 + 2),
+                .TUNE_SPLIT_MARKER_X = 126 + 176,
 
                 // 5 line
 
@@ -366,7 +365,7 @@ const LcdLayout LcdLayouts[LcdLayoutsCount] = {
 
                 .ENCODER_IND = { 0, 14 },
                 .ENCODER_MODE = MODE_VERTICAL,
-                .SM_IND = { .x = 126, .y = 14, .h = 28, .w = 191 },
+                .SM_IND = { .x = 126, .y = 14, .h = 28, .w = 191, .size = 4, .space = 1, .padding = 0 },
 
 				// 3 line
 
@@ -385,8 +384,7 @@ const LcdLayout LcdLayouts[LcdLayoutsCount] = {
                 .AGC_MASK = { .x = 82 + 2, .y = 14 + (28 + 2) + (14 + 2) + (14 + 2), .w = 40, .h = 14 },
                 .TUNE_STEP={ .x = 126 + 26, .y = 14 + (28 + 2) + (14 + 2) + (14 + 2), .w = 40, .h = 14 },
                 .SNAP_CARRIER = { 126 + 96, 14 + (28 + 2) + (14 + 2) + (14 + 2) + 2 },
-                .BAND_MODE = { 320 - 55 + 1, 14 + (28 + 2) + (14 + 2) + (14 + 2) },
-                .BAND_MODE_MASK = { .x = 320 - 55, .y = 14 + (28 + 2) + (14 + 2) + (14 + 2) - 1, .h = 14, .w = 30 },
+                .BAND_MODE = { .x = 320 - 55 + 1, .y = 14 + (28 + 2) + (14 + 2) + (14 + 2), .h = 14, .w = 30 },
 
                 // 5 line
 
@@ -431,8 +429,7 @@ const LcdLayout LcdLayouts[LcdLayoutsCount] = {
                 .DisplayDbm = { R480320_DisplayDbm_X, R480320_DisplayDbm_Y},
                 .MEMORYLABEL = { R480320_MEMORYLABEL_X, R480320_MEMORYLABEL_Y},
 
-                .BAND_MODE = { R480320_BAND_MODE_X, R480320_BAND_MODE_Y},
-                .BAND_MODE_MASK = { .x = R480320_BAND_MODE_MASK_X, .y = R480320_BAND_MODE_MASK_Y, .h = R480320_BAND_MODE_MASK_H, .w= R480320_BAND_MODE_MASK_W},
+                .BAND_MODE = { .x = R480320_BAND_MODE_X, .y = R480320_BAND_MODE_Y, R480320_BAND_MODE_MASK_H, .w= R480320_BAND_MODE_MASK_W},
 
                 .DEMOD_MODE_MASK = { .x = R480320_DEMOD_MODE_MASK_X, .y = R480320_DEMOD_MODE_MASK_Y, .h = R480320_DEMOD_MODE_MASK_H,
                 .w = R480320_DEMOD_MODE_MASK_W},

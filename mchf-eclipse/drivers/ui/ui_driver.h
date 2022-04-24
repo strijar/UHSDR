@@ -22,11 +22,11 @@
 enum UpdateFrequencyMode_t
 {
     UFM_AUTOMATIC = 0,
-    UFM_LARGE,
+    UFM_LARGE_A,
+    UFM_LARGE_B,
     UFM_SMALL_RX,
     UFM_SMALL_TX,
     UFM_SECONDARY
-
 };
 
 
