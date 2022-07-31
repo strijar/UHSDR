@@ -2623,8 +2623,8 @@ static void RxProcessor_DemodAudioPostprocessing(float32_t (*a_buffer)[AUDIO_BLO
 
 }
 
-void AudioDriver_SetFade(float32_t speed) {
-    ads.audio_fade_speed = speed;
+void AudioDriver_SetFade(float32_t ms) {
+    ads.audio_fade_speed = 1000.0f / ms / 48000.0f;
     ads.audio_fade = 1.0f;
 }
 

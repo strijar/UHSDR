@@ -114,11 +114,11 @@ static void     UiDriver_DisplayPeak(uint8_t enc, uint8_t style);
 static void     UiDriver_DisplayInGain(uint8_t enc, uint8_t style);
 static void     UiDriver_DisplayIn(uint8_t enc, uint8_t style);
 static void     UiDriver_DisplayMeter(uint8_t enc, uint8_t style);
+static void     UiDriver_DisplayZoom(uint8_t enc, uint8_t style);
 
 #ifdef SDR_AMBER
 static void     UiDriver_DisplayPre(uint8_t enc, uint8_t style);
 #endif
-
 static void     UiDriver_DisplayDSPMode(void);
 static void 	UiDriver_DisplayPowerLevel(void);
 static void     UiDriver_DisplayTemperature(int temp);
@@ -195,6 +195,7 @@ typedef enum {
 #ifdef SDR_AMBER
     ENC_MODE_PRE,
 #endif
+    ENC_MODE_ZOOM,
     ENC_NUM_MODES
 } EncoderModes;
 
@@ -4624,6 +4625,16 @@ static void UiDriver_RotateNormalEncoder(int8_t pot_diff, uint8_t enc) {
             break;
 #endif
 
+        case ENC_MODE_ZOOM:
+            sd.magnify = change_and_limit_uint(
+                sd.magnify,
+                pot_diff_step,
+                MAGNIFY_MIN, MAGNIFY_MAX
+            );
+            UiDriver_DisplayZoom(enc, ENC_STATE_NORM);
+            UiDriver_SpectrumChangeLayoutParameters();
+            break;
+
         default:
             break;
     }
@@ -4810,6 +4821,10 @@ static void UiDriver_DisplayEncoderMode(uint8_t enc) {
             UiDriver_DisplayPre(enc, style);
             break;
 #endif
+
+        case ENC_MODE_ZOOM:
+            UiDriver_DisplayZoom(enc, style);
+            break;
 
 	    default:
 	        break;
@@ -5148,6 +5163,39 @@ static void UiDriver_DisplayPre(uint8_t enc, uint8_t style) {
     UiDriver_EncoderDisplay(0, enc, "PRE", style, txt, sd.txt_colour);
 }
 #endif
+
+static void UiDriver_DisplayZoom(uint8_t enc, uint8_t style) {
+    const char* txt;
+
+    switch(sd.magnify) {
+        case 1:
+            txt = " x2";
+            break;
+
+        case 2:
+            txt = " x4";
+            break;
+
+        case 3:
+            txt = " x8";
+            break;
+
+        case 4:
+            txt = "x16";
+            break;
+
+        case 5:
+            txt = "x32";
+            break;
+
+        case 0:
+        default:
+            txt = " x1";
+            break;
+    }
+
+    UiDriver_EncoderDisplay(0, enc, "ZOOM", style, txt, sd.txt_colour);
+}
 
 static void UiDriver_DisplayRfGain(uint8_t enc, uint8_t style) {
 	UiDriver_EncoderDisplaySimple(0, enc, "RFG", style, agc_wdsp_conf.thresh);
@@ -6780,7 +6828,7 @@ void UiDriver_StartUpScreenFinish() {
 	}
 
 	UiDriver_CreateDesktop();
-	AudioDriver_SetFade(1.0f / 10000.0f);
+	AudioDriver_SetFade(500.0f);
 }
 
 // UiAction_... are typically small functions to execute a specific ui function initiate by a key press or touch event

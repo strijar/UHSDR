@@ -681,6 +681,6 @@ void AudioDriver_SetBiquadCoeffs(float32_t* coeffsTo,const float32_t* coeffsFrom
 
 void AudioDriver_IQPhaseAdjust(uint16_t txrx_mode, float32_t* i_buffer, float32_t* q_buffer, const uint16_t blockSize);
 void AudioDriver_AgcWdsp_Set(void);
-void AudioDriver_SetFade(float32_t speed);
+void AudioDriver_SetFade(float32_t ms);
 
 #endif

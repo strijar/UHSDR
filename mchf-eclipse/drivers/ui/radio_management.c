@@ -1123,7 +1123,7 @@ void RadioManagement_MuteTemporarilyRxAudio()
         asm("NOP");
     }
 
-    AudioDriver_SetFade(1.0f / 2000.0f);
+    AudioDriver_SetFade(100.0f);
 }
 
 Oscillator_ResultCodes_t RadioManagement_ValidateFrequencyForTX(uint32_t dial_freq)
@@ -1369,7 +1369,7 @@ void RadioManagement_SwitchTxRx(uint8_t txrx_mode, bool tune_mode) {
             Board_RedLed(LED_STATE_OFF);
             Board_GreenLed(LED_STATE_ON);
             ts.audio_dac_muting_flag = false;   // unmute audio output
-            AudioDriver_SetFade(1.0f / 1000.0f);
+            AudioDriver_SetFade(100.0f);
         }
 
         if (ts.txrx_mode != txrx_mode_final) {
