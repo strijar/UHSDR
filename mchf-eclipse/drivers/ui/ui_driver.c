@@ -8620,7 +8620,7 @@ void UiDriver_BacklightDimHandler() {
 	static uchar lcd_dim = 0;
 	static const uint16_t dimming_pattern_map[1 + LCD_DIMMING_LEVEL_MAX - LCD_DIMMING_LEVEL_MIN] = {
 	        0b1111111111111111, // 100%
-	        0b0111011101111111, // 75%
+	        0b0111011101110111, // 75%
 	        0b0101010101010101, // 50%
 	        0b0001000100010001, // 25%
 	        0b0000000100000001, // 12%
