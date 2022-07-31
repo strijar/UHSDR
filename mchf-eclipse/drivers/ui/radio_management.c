@@ -1621,6 +1621,8 @@ bool RadioManagement_IsPowerFactorReduce(uint32_t freq)
  */
 void RadioManagement_SetDemodMode(uint8_t new_mode)
 {
+    Board_RedLed(LED_STATE_OFF);
+
     ts.dsp.inhibit++;
 //    ads.af_disabled++;
 
