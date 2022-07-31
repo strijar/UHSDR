@@ -2902,9 +2902,9 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
                                     1
                                     );
 
-        const uint8_t labels[1 + LCD_DIMMING_LEVEL_MAX - LCD_DIMMING_LEVEL_MIN] = { 100, 75, 50, 25, 12, 6 };
+        const char *labels[1 + LCD_DIMMING_LEVEL_MAX - LCD_DIMMING_LEVEL_MIN] = { "100%", " 75%", " 50%", " 25%", " 12%", "  6%", " OFF" };
 
-        snprintf(options, 32, "%3u%%", labels[ts.lcd_backlight_dimm_brightness]);
+        strcpy(options, labels[ts.lcd_backlight_dimm_brightness]);
     }
 //    case CONFIG_VOLTMETER_CALIBRATION:      // Voltmeter calibration
 	else if(select==CONFIG_VOLTMETER_CALIBRATION)

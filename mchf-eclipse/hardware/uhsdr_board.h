@@ -513,7 +513,7 @@ typedef struct TransceiverState
     dsp_params_t dsp;
 
     uint8_t	lcd_backlight_brightness;	// LCD backlight dimming, 0-LCD_DIMMING_LEVEL_MAX:  0 = full, LCD_DIMMING_LEVEL_MAX = dimmest
-#define LCD_DIMMING_LEVEL_MAX 5
+#define LCD_DIMMING_LEVEL_MAX 6
 #define LCD_DIMMING_LEVEL_MIN 0
 
 #define LCD_BLANKING_ENABLE 0x80

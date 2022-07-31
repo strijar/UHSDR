@@ -8625,6 +8625,7 @@ void UiDriver_BacklightDimHandler() {
 	        0b0001000100010001, // 25%
 	        0b0000000100000001, // 12%
 	        0b0000000000000001, // 6%
+            0b0000000000000000, // OFF
 	};
 
 	static uint16_t dim_pattern = 0xffff; // gives us the maximum brightness
