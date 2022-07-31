@@ -191,7 +191,7 @@ void    UiDriver_RefreshEncoderDisplay(void);
 void    UiDriver_DrawFButtonLabel(uint8_t button_num, const char* label, uint32_t label_color) ;
 void 	UiDriver_DisplayFreqStepSize(void);
 void 	UiDriver_DisplayDemodMode(void);
-void	UiDriver_LcdBlankingStartTimer(void);
+void	UiDriver_LcdDimmingStartTimer(void);
 void    UiDriver_SpectrumChangeLayoutParameters(void);
 
 void UiDriver_DebugInfo_DisplayEnable(bool enable);

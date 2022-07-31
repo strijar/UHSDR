@@ -185,7 +185,8 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
     { ConfigEntry_UInt8, EEPROM_CW_OFFSET_MODE,&ts.cw_offset_mode,CW_OFFSET_MODE_DEFAULT,0,CW_OFFSET_NUM-1},
     { ConfigEntry_Int32_16, EEPROM_FREQ_CONV_MODE,&ts.iq_freq_mode,FREQ_IQ_CONV_MODE_DEFAULT,0,FREQ_IQ_CONV_MODE_MAX}, // NO INT DEFAULT PROBLEM
     { ConfigEntry_UInt8, EEPROM_LSB_USB_AUTO_SELECT,&ts.lsb_usb_auto_select,AUTO_LSB_USB_DEFAULT,0,AUTO_LSB_USB_MAX},
-    { ConfigEntry_UInt8, EEPROM_LCD_BLANKING_CONFIG,&ts.lcd_backlight_blanking,0,0,255},
+    { ConfigEntry_UInt8, EEPROM_LCD_DIMMING_CONFIG,&ts.lcd_backlight_dimm_time,0,0,255},
+    { ConfigEntry_UInt8, EEPROM_LCD_DIMMING_BRIGHT,&ts.lcd_backlight_dimm_brightness, LCD_DIMMING_LEVEL_MAX, LCD_DIMMING_LEVEL_MIN + 1, LCD_DIMMING_LEVEL_MAX},
     { ConfigEntry_UInt32_16, EEPROM_VFO_MEM_MODE,&ts.vfo_mem_mode,0,0,255},
     { ConfigEntry_UInt8 | Calib_Val, EEPROM_DETECTOR_COUPLING_COEFF_2200M,&swrm.coupling_calc[COUPLING_2200M],SWR_COUPLING_DEFAULT,SWR_COUPLING_MIN,SWR_COUPLING_MAX},
     { ConfigEntry_UInt8 | Calib_Val, EEPROM_DETECTOR_COUPLING_COEFF_630M,&swrm.coupling_calc[COUPLING_630M],SWR_COUPLING_DEFAULT,SWR_COUPLING_MIN,SWR_COUPLING_MAX},

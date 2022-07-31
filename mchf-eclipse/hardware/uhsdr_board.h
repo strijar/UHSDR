@@ -518,9 +518,8 @@ typedef struct TransceiverState
 
 #define LCD_BLANKING_ENABLE 0x80
 #define LCD_BLANKING_TIMEMASK 0x0f
-    uint8_t	lcd_backlight_blanking;		// for controlling backlight auto-off control
-
-
+    uint8_t lcd_backlight_dimm_brightness;  // for controlling backlight auto-dimming control
+    uint8_t	lcd_backlight_dimm_time;		// for controlling backlight auto-dimming control
 
 #define LOW_POWER_ENABLE 0x80    // bit7 shows enable / no enable
 #define LOW_POWER_ENABLE_MASK 0x80
@@ -639,8 +638,8 @@ typedef struct TransceiverState
     int32_t	iq_freq_mode;				// used to set/configure the I/Q frequency/conversion mode
     uint8_t	lsb_usb_auto_select;			// holds setting of LSB/USB auto-select above/below 10 MHz
     uint32_t	last_tuning;				// this is a timer used to prevent too fast tuning per second
-    uint32_t	lcd_blanking_time;			// this holds the system time after which the LCD is blanked - if blanking is enabled
-    bool	lcd_blanking_flag;			// if TRUE, the LCD is blanked completely (e.g. backlight is off)
+    uint32_t	lcd_dimming_time;			// this holds the system time after which the LCD is blanked - if blanking is enabled
+    bool	lcd_dimming_flag;			// if TRUE, the LCD is dimmed (e.g. backlight is low)
     bool	xvtr_adjust_flag;			// set TRUE if transverter offset adjustment is in process
     bool	SpectrumResize_flag;		// set TRUE if waterfall/spectrum resize request from touchscreen action
     bool	VirtualKeysShown_flag;		// set TRUE if virtual keypad displayed instead of spectrum/waterfall

@@ -570,36 +570,27 @@ static void UiDriver_DisplayMessageStop(void)
 
 
 /**
- * @brief restarts lcd blanking timer, called in all functions which detect user interaction with the device
+ * @brief restarts lcd dimming timer, called in all functions which detect user interaction with the device
  */
-void UiDriver_LcdBlankingStartTimer()
-{
-	if(ts.lcd_backlight_blanking & LCD_BLANKING_ENABLE)     // is LCD blanking enabled?
-	{
-		uint32_t ltemp = (ulong)(ts.lcd_backlight_blanking & LCD_BLANKING_TIMEMASK);      // get setting of LCD blanking timing
+void UiDriver_LcdDimmingStartTimer() {
+	if (ts.lcd_backlight_dimm_time & LCD_BLANKING_ENABLE) {
+		uint32_t ltemp = (ulong)(ts.lcd_backlight_dimm_time & LCD_BLANKING_TIMEMASK);      // get setting of LCD blanking timing
 		ltemp *= 100;       // multiply to convert to deciseconds
-		ts.lcd_blanking_time = ltemp + ts.sysclock;     // calculate future time at which LCD is to be turned off
-		ts.lcd_blanking_flag = false;       // clear flag to make LCD turn on
+		ts.lcd_dimming_time = ltemp + ts.sysclock;
+		ts.lcd_dimming_flag = false;
 	}
 }
 
-static void   UiDriver_LcdBlankingProcessTimer(void)
-{
-	// Process LCD auto-blanking
-	if(ts.lcd_backlight_blanking & LCD_BLANKING_ENABLE)      // is LCD auto-blanking enabled?
-	{
-		if(ts.sysclock > ts.lcd_blanking_time)      // has the time expired and the LCD should be blanked?
-		{
-			ts.lcd_blanking_flag = true;             // yes - blank the LCD
+static void   UiDriver_LcdDimmingProcessTimer(void) {
+	// Process LCD auto-dimming
+	if (ts.lcd_backlight_dimm_time & LCD_BLANKING_ENABLE) {
+		if (ts.sysclock > ts.lcd_dimming_time) {
+			ts.lcd_dimming_flag = true;
+	    } else {
+			ts.lcd_dimming_flag = false;
 		}
-		else                                        // time not expired
-		{
-			ts.lcd_blanking_flag = false;             // un-blank the LCD
-		}
-	}
-	else                                  // auto-blanking NOT enabled
-	{
-		ts.lcd_blanking_flag = false;               // always un-blank the LCD in this case
+    } else {
+		ts.lcd_dimming_flag = false;
 	}
 }
 
@@ -691,15 +682,15 @@ void UiDriver_TextMsgPutSign(const char *s)
 
 static void UiDriver_LcdBlankingStealthSwitch(void)
 {
-	if(ts.lcd_backlight_blanking & LCD_BLANKING_ENABLE)
+	if(ts.lcd_backlight_dimm_time & LCD_BLANKING_ENABLE)
 	{         // Yes - is MSB set, indicating "stealth" (backlight timed-off) mode?
-		ts.lcd_backlight_blanking &= ~LCD_BLANKING_ENABLE;
+		ts.lcd_backlight_dimm_time &= ~LCD_BLANKING_ENABLE;
 	} // yes - clear that bit, turning off "stealth" mode
 	else
 	{
-		if(ts.lcd_backlight_blanking & LCD_BLANKING_TIMEMASK)    // bit NOT set AND the timing set to NON-zero?
+		if(ts.lcd_backlight_dimm_time & LCD_BLANKING_TIMEMASK)    // bit NOT set AND the timing set to NON-zero?
 		{
-			ts.lcd_backlight_blanking |= LCD_BLANKING_ENABLE;       // no - turn on MSB to activate "stealth" mode
+			ts.lcd_backlight_dimm_time |= LCD_BLANKING_ENABLE;       // no - turn on MSB to activate "stealth" mode
 		}
 	}
 }
@@ -1030,8 +1021,8 @@ void UiDriver_Init()
 	// Extra HW init
 	Board_PostInit();
 
-	UiDriver_LcdBlankingStartTimer();			// init timing for LCD blanking
-	ts.lcd_blanking_time = ts.sysclock + LCD_STARTUP_BLANKING_TIME;
+	UiDriver_LcdDimmingStartTimer();			// init timing for LCD blanking
+	ts.lcd_dimming_time = ts.sysclock + LCD_STARTUP_BLANKING_TIME;
 	ts.low_power_shutdown_time = ts.sysclock + LOW_POWER_SHUTDOWN_DELAY_TIME;
 	ts.cw_keyer_speed_bak = ts.cw_keyer_speed;
 }
@@ -4015,7 +4006,7 @@ static void UiDriver_TimeScheduler()
 	}
 
 	/*** ALWAYS ***/
-	UiDriver_LcdBlankingProcessTimer();
+	UiDriver_LcdDimmingProcessTimer();
 
 	// This delays the start-up of the DSP for several seconds to minimize the likelihood that the LMS function will get "jammed"
 	// and stop working.
@@ -4226,7 +4217,7 @@ static bool UiDriver_CheckFrequencyEncoder()
 		delta_t = ts.audio_int_counter;  // get ticker difference since last enc. change
 		ts.audio_int_counter = 0;		 //reset tick counter
 
-		UiDriver_LcdBlankingStartTimer();	// calculate/process LCD blanking timing
+		UiDriver_LcdDimmingStartTimer();	// calculate/process LCD blanking timing
 
 	}
 	if (pot_diff != 0 &&
@@ -4692,7 +4683,7 @@ static void UiDriver_RotateEncoderOne(void)
 	int32_t pot_diff = UiDriverEncoderRead(ENC1);
 
 	if (pot_diff) {
-		UiDriver_LcdBlankingStartTimer();
+		UiDriver_LcdDimmingStartTimer();
 		UiDriver_RotateEncoder(pot_diff, ENC1);
 	}
 }
@@ -4702,7 +4693,7 @@ static void UiDriver_RotateEncoderTwo(void)
 	int32_t pot_diff = UiDriverEncoderRead(ENC2);
 
 	if (pot_diff != 0) {
-		UiDriver_LcdBlankingStartTimer();
+		UiDriver_LcdDimmingStartTimer();
 
 		if (ts.menu_mode) {
 			UiMenu_RenderChangeItem(pot_diff);
@@ -4717,7 +4708,7 @@ static void UiDriver_RotateEncoderThree(void)
 	int32_t 	pot_diff = UiDriverEncoderRead(ENC3);
 
 	if (pot_diff != 0) {
-		UiDriver_LcdBlankingStartTimer();
+		UiDriver_LcdDimmingStartTimer();
 
 		if (ts.menu_mode) {
 			UiMenu_RenderChangeItemValue(pot_diff);
@@ -8036,7 +8027,7 @@ static void UiDriver_HandleKeyboard(void)
 {
 	if(ks.button_processed)
 	{
-		UiDriver_LcdBlankingStartTimer();	// calculate/process LCD blanking timing
+		UiDriver_LcdDimmingStartTimer();	// calculate/process LCD blanking timing
 		AudioManagement_KeyBeep();  // make keyboard beep, if enabled
 
 		bool keyIsProcessed = false;
@@ -8625,40 +8616,36 @@ void UiDriver_TaskHandler_MainTasks()
 
 #define LCD_DIMMING_PWM_COUNTS 16
 
-void UiDriver_BacklightDimHandler()
-{
+void UiDriver_BacklightDimHandler() {
 	static uchar lcd_dim = 0;
-	static const uint16_t dimming_pattern_map[1 + LCD_DIMMING_LEVEL_MAX - LCD_DIMMING_LEVEL_MIN] =
-	{
-	        0xffff, // 16/16
-	        0x3f3f, // 12/16
-	        0x0f0f, // 8/16
-	        0x0303, // 4/16
-	        0x0101, // 2/16
-	        0x0001, // 1/1
+	static const uint16_t dimming_pattern_map[1 + LCD_DIMMING_LEVEL_MAX - LCD_DIMMING_LEVEL_MIN] = {
+	        0b1111111111111111, // 100%
+	        0b0111011101111111, // 75%
+	        0b0101010101010101, // 50%
+	        0b0001000100010001, // 25%
+	        0b0000000100000001, // 12%
+	        0b0000000000000001, // 6%
 	};
-    // most of the patterns generate a 1500/8 =  187.5 Hz noise, lowest 1500/16 = 93.75 Hz.
 
 	static uint16_t dim_pattern = 0xffff; // gives us the maximum brightness
 
-	if(!ts.lcd_blanking_flag)       // is LCD *NOT* blanked?
-	{
-	    if (lcd_dim == 0 )
-	    {
-	        dim_pattern = dimming_pattern_map[ts.lcd_backlight_brightness - LCD_DIMMING_LEVEL_MIN];
-	    }
+    if (lcd_dim == 0) {
+        uint8_t index;
 
-	    // UiLcdHy28_BacklightEnable(lcd_dim >= dimming_map[ts.lcd_backlight_brightness - LCD_DIMMING_LEVEL_MIN]);   // LCD backlight off or on
-	    UiLcdHy28_BacklightEnable((dim_pattern & 0x001) == 1);   // LCD backlight off or on
+        if (!ts.menu_mode && ts.lcd_dimming_flag) {
+            index = ts.lcd_backlight_dimm_brightness;
+        } else {
+            index = ts.lcd_backlight_brightness;
+        }
 
-	    dim_pattern >>=1;
-	    lcd_dim++;
-	    lcd_dim %= LCD_DIMMING_PWM_COUNTS;   // limit brightness PWM count to 0-3
-	}
-	else if(!ts.menu_mode)
-	{ // LCD is to be blanked - if NOT in menu mode
-		UiLcdHy28_BacklightEnable(false);
-	}
+        dim_pattern = dimming_pattern_map[index - LCD_DIMMING_LEVEL_MIN];
+    }
+
+    UiLcdHy28_BacklightEnable((dim_pattern & 0x001) == 1);   // LCD backlight off or on
+
+    dim_pattern >>=1;
+    lcd_dim++;
+    lcd_dim %= LCD_DIMMING_PWM_COUNTS;   // limit brightness PWM count to 0-3
 }
 
 static void UiDriver_LoadXvtrData(uint8_t xvtr_cell)

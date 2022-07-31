@@ -1,0 +1,682 @@
+01:41:16 **** Build of configuration Build-mcHF for project mchf-eclipse ****
+make -f ../Makefile -j 5 ROOTLOC=.. all 
+  [CC] basesw/mcHF/Src/startup_stm32f407xx.o
+  [CC] basesw/mcHF/Src/system_stm32f4xx.o
+  [CC] basesw/mcHF/Src/adc.o
+  [CC] basesw/mcHF/Src/dac.o
+  [CC] basesw/mcHF/Src/dma.o
+  [CC] basesw/mcHF/Src/fatfs.o
+  [CC] basesw/mcHF/Src/fsmc.o
+  [CC] basesw/mcHF/Src/gpio.o
+  [CC] basesw/mcHF/Src/i2c.o
+  [CC] basesw/mcHF/Src/i2s.o
+  [CC] basesw/mcHF/Src/main.o
+  [CC] basesw/mcHF/Src/rtc.o
+  [CC] basesw/mcHF/Src/spi.o
+  [CC] basesw/mcHF/Src/stm32f4xx_hal_msp.o
+  [CC] basesw/mcHF/Src/stm32f4xx_it.o
+  [CC] basesw/mcHF/Src/tim.o
+  [CC] basesw/mcHF/Src/usb_host.o
+  [CC] basesw/mcHF/Src/usbd_conf.o
+  [CC] basesw/mcHF/Src/usbh_conf.o
+  [CC] basesw/mcHF/Src/user_diskio.o
+  [CC] basesw/mcHF/Middlewares/Third_Party/FatFs/src/option/syscall.o
+  [CC] basesw/mcHF/Middlewares/Third_Party/FatFs/src/option/unicode.o
+  [CC] basesw/mcHF/Middlewares/Third_Party/FatFs/src/drivers/usbh_diskio.o
+  [CC] basesw/mcHF/Middlewares/Third_Party/FatFs/src/diskio.o
+  [CC] basesw/mcHF/Middlewares/Third_Party/FatFs/src/ff.o
+  [CC] basesw/mcHF/Middlewares/Third_Party/FatFs/src/ff_gen_drv.o
+  [CC] basesw/mcHF/Middlewares/ST/STM32_USB_Host_Library/Core/Src/usbh_core.o
+  [CC] basesw/mcHF/Middlewares/ST/STM32_USB_Host_Library/Core/Src/usbh_ctlreq.o
+  [CC] basesw/mcHF/Middlewares/ST/STM32_USB_Host_Library/Core/Src/usbh_ioreq.o
+  [CC] basesw/mcHF/Middlewares/ST/STM32_USB_Host_Library/Core/Src/usbh_pipes.o
+  [CC] basesw/mcHF/Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Src/usbh_msc.o
+  [CC] basesw/mcHF/Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Src/usbh_msc_bot.o
+  [CC] basesw/mcHF/Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Src/usbh_msc_scsi.o
+  [CC] basesw/mcHF/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.o
+  [CC] basesw/mcHF/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.o
+  [CC] basesw/mcHF/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc_ex.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cec.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_can.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_crc.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cryp.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cryp_ex.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac_ex.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dcmi.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dcmi_ex.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dfsdm.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma2d.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dsi.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_eth.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ramfunc.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_fmpi2c.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_fmpi2c_ex.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_hash.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_hash_ex.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_hcd.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c_ex.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2s.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2s_ex.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_irda.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_iwdg.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_lptim.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_ltdc.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_ltdc_ex.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_nand.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_nor.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pccard.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd_ex.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_qspi.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rtc.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rtc_ex.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_sai.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_sai_ex.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_sd.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_sdram.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_smartcard.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spdifrx.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_sram.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_usart.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_wwdg.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_fmc.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_fsmc.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_sdmmc.o
+  [CC] basesw/mcHF/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usb.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_bitreversal.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_cfft_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_cfft_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_bitreversal2.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_cfft_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_cfft_radix2_init_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_cfft_radix2_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_cfft_radix2_init_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_cfft_radix2_init_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_cfft_radix2_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_cfft_radix2_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_cfft_radix4_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_cfft_radix4_init_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_cfft_radix4_init_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_cfft_radix4_init_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_cfft_radix4_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_cfft_radix4_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_cfft_radix8_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_dct4_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_dct4_init_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_dct4_init_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_dct4_init_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_dct4_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_rfft_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_dct4_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_rfft_fast_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_rfft_fast_init_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_rfft_init_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_rfft_init_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_rfft_init_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_rfft_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/TransformFunctions/arm_rfft_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/SupportFunctions/arm_copy_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/SupportFunctions/arm_copy_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/SupportFunctions/arm_copy_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/SupportFunctions/arm_copy_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/SupportFunctions/arm_fill_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/SupportFunctions/arm_fill_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/SupportFunctions/arm_fill_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/SupportFunctions/arm_fill_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/SupportFunctions/arm_float_to_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/SupportFunctions/arm_float_to_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/SupportFunctions/arm_float_to_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/SupportFunctions/arm_q15_to_float.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/SupportFunctions/arm_q15_to_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/SupportFunctions/arm_q15_to_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/SupportFunctions/arm_q31_to_float.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/SupportFunctions/arm_q31_to_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/SupportFunctions/arm_q31_to_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/SupportFunctions/arm_q7_to_float.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/SupportFunctions/arm_q7_to_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/SupportFunctions/arm_q7_to_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_max_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_max_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_max_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_max_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_mean_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_mean_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_mean_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_mean_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_min_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_min_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_min_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_min_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_power_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_power_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_power_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_power_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_rms_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_rms_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_rms_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_std_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_std_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_std_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_var_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_var_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_var_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_add_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_add_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_add_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_cmplx_mult_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_cmplx_mult_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_cmplx_mult_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_init_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_init_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_init_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_inverse_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_inverse_f64.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_mult_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_mult_fast_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_mult_fast_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_mult_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_mult_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_scale_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_scale_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_scale_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_sub_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_sub_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_sub_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_trans_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_trans_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/MatrixFunctions/arm_mat_trans_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_biquad_cascade_df1_32x64_init_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_biquad_cascade_df1_32x64_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_biquad_cascade_df1_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_biquad_cascade_df1_fast_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_biquad_cascade_df1_fast_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_biquad_cascade_df1_init_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_biquad_cascade_df1_init_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_biquad_cascade_df1_init_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_biquad_cascade_df1_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_biquad_cascade_df1_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_biquad_cascade_df2T_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_biquad_cascade_df2T_f64.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_biquad_cascade_df2T_init_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_biquad_cascade_df2T_init_f64.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_biquad_cascade_stereo_df2T_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_biquad_cascade_stereo_df2T_init_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_conv_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_conv_fast_opt_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_conv_fast_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_conv_fast_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_conv_opt_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_conv_opt_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_conv_partial_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_conv_partial_fast_opt_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_conv_partial_fast_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_conv_partial_fast_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_conv_partial_opt_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_conv_partial_opt_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_conv_partial_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_conv_partial_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_conv_partial_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_conv_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_conv_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_conv_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_correlate_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_correlate_fast_opt_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_correlate_fast_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_correlate_fast_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_correlate_opt_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_correlate_opt_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_correlate_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_correlate_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_correlate_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_decimate_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_decimate_fast_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_decimate_fast_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_decimate_init_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_decimate_init_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_decimate_init_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_decimate_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_decimate_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_fast_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_fast_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_init_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_init_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_init_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_init_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_interpolate_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_interpolate_init_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_interpolate_init_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_interpolate_init_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_interpolate_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_interpolate_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_lattice_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_lattice_init_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_lattice_init_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_lattice_init_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_lattice_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_lattice_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_sparse_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_sparse_init_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_sparse_init_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_sparse_init_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_sparse_init_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_sparse_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_sparse_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_fir_sparse_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_iir_lattice_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_iir_lattice_init_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_iir_lattice_init_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_iir_lattice_init_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_iir_lattice_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_iir_lattice_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_lms_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_lms_init_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_lms_init_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_lms_init_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_lms_norm_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_lms_norm_init_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_lms_norm_init_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_lms_norm_init_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_lms_norm_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_lms_norm_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_lms_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions/arm_lms_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FastMathFunctions/arm_cos_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FastMathFunctions/arm_cos_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FastMathFunctions/arm_cos_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FastMathFunctions/arm_sin_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FastMathFunctions/arm_sin_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FastMathFunctions/arm_sin_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FastMathFunctions/arm_sqrt_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/FastMathFunctions/arm_sqrt_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ControllerFunctions/arm_pid_init_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ControllerFunctions/arm_pid_init_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ControllerFunctions/arm_pid_init_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ControllerFunctions/arm_pid_reset_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ControllerFunctions/arm_pid_reset_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ControllerFunctions/arm_pid_reset_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ControllerFunctions/arm_sin_cos_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ControllerFunctions/arm_sin_cos_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ComplexMathFunctions/arm_cmplx_conj_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ComplexMathFunctions/arm_cmplx_conj_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ComplexMathFunctions/arm_cmplx_conj_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ComplexMathFunctions/arm_cmplx_dot_prod_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ComplexMathFunctions/arm_cmplx_dot_prod_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ComplexMathFunctions/arm_cmplx_dot_prod_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ComplexMathFunctions/arm_cmplx_mag_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ComplexMathFunctions/arm_cmplx_mag_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ComplexMathFunctions/arm_cmplx_mag_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ComplexMathFunctions/arm_cmplx_mag_squared_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ComplexMathFunctions/arm_cmplx_mag_squared_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ComplexMathFunctions/arm_cmplx_mag_squared_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ComplexMathFunctions/arm_cmplx_mult_cmplx_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ComplexMathFunctions/arm_cmplx_mult_cmplx_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ComplexMathFunctions/arm_cmplx_mult_cmplx_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ComplexMathFunctions/arm_cmplx_mult_real_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ComplexMathFunctions/arm_cmplx_mult_real_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/ComplexMathFunctions/arm_cmplx_mult_real_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/CommonTables/arm_common_tables.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/CommonTables/arm_const_structs.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_abs_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_abs_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_abs_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_abs_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_add_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_add_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_add_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_add_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_dot_prod_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_dot_prod_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_dot_prod_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_dot_prod_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_mult_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_mult_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_mult_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_mult_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_negate_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_negate_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_negate_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_negate_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_offset_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_offset_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_offset_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_offset_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_scale_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_scale_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_scale_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_scale_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_shift_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_shift_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_shift_q7.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_sub_f32.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_sub_q15.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_sub_q31.o
+  [CC] basesw/mcHF/Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_sub_q7.o
+  [CC] src/uhsdr_main.o
+  [CC] misc/v_eprom/uhsdr_flash.o
+  [CC] misc/config_storage.o
+  [CXX] misc/TestCPlusPlusBuild.o
+  [CC] misc/profiling.o
+  [CC] misc/serial_eeprom.o
+  [CC] misc/uhsdr_canary.o
+  [CC] misc/uhsdr_math.o
+  [CC] hardware/uhsdr_board.o
+  [CC] hardware/uhsdr_hw_i2c.o
+  [CC] hardware/uhsdr_hmc1023.o
+  [CC] hardware/uhsdr_keypad.o
+  [CC] hardware/uhsdr_rtc.o
+  [CC] drivers/usb/device/class/composite/usbd_composite.o
+  [CC] drivers/usb/device/class/composite/usbd_composite_desc.o
+  [CC] drivers/usb/device/class/CDC/Src/usbd_cdc.o
+  [CC] drivers/usb/device/class/AUDIO/Src/usbd_audio_cdc_comp.o
+  [CC] drivers/usb/host/class/HID/Src/usbh_hid.o
+  [CC] drivers/usb/host/class/HID/Src/usbh_hid_keybd.o
+  [CC] drivers/usb/host/class/HID/Src/usbh_hid_mouse.o
+  [CC] drivers/usb/host/class/HID/Src/usbh_hid_parser.o
+  [CC] drivers/usb/app/usb_device.o
+  [CC] drivers/usb/app/usbd_audio_if.o
+  [CC] drivers/usb/app/usbd_cdc_if.o
+  [CC] drivers/usb/app/usbd_desc.o
+  [CC] drivers/ui/oscillator/soft_tcxo.o
+  [CC] drivers/ui/oscillator/osc_si570.o
+  [CC] drivers/ui/oscillator/osc_si5351a.o
+  [CC] drivers/ui/oscillator/osc_interface.o
+  [CC] drivers/ui/menu/ui_menu.o
+  [CC] drivers/ui/menu/ui_menu_internal.o
+  [CC] drivers/ui/menu/ui_menu_structure.o
+../drivers/ui/menu/ui_menu.c: In function 'UiMenu_UpdateItem':
+../drivers/ui/menu/ui_menu.c:2407:61: warning: passing argument 3 of 'UiDriverMenuItemChangeUInt8' from incompatible pointer type [-Wincompatible-pointer-types]
+ 2407 |         var_change = UiDriverMenuItemChangeUInt8(var, mode, &ts.graticulePowerupYpos,
+      |                                                             ^~~~~~~~~~~~~~~~~~~~~~~~
+      |                                                             |
+      |                                                             volatile uint16_t * {aka volatile short unsigned int *}
+../drivers/ui/menu/ui_menu.c:113:115: note: expected 'volatile uint8_t *' {aka 'volatile unsigned char *'} but argument is of type 'volatile uint16_t *' {aka 'volatile short unsigned int *'}
+  113 | bool __attribute__ ((noinline)) UiDriverMenuItemChangeUInt8(int var, MenuProcessingMode_t mode, volatile uint8_t* val_ptr,uint8_t val_min,uint8_t val_max, uint8_t val_default, uint8_t increment)
+      |                                                                                                 ~~~~~~~~~~~~~~~~~~^~~~~~~
+  [CC] drivers/ui/lcd/ui_lcd_hy28.o
+  [CC] drivers/ui/lcd/ui_lcd_hy28_fonts.o
+  [CC] drivers/ui/lcd/ui_spectrum.o
+  [CC] drivers/ui/encoder/ui_rotary.o
+  [CC] drivers/ui/radio_management.o
+  [CC] drivers/ui/ui_configuration.o
+  [CC] drivers/ui/ui_driver.o
+  [CC] drivers/freedv/c2wideband.o
+  [CC] drivers/freedv/codebook.o
+  [CC] drivers/freedv/codebookd.o
+../drivers/freedv/c2wideband.c: In function 'correct_rate_K_vec':
+../drivers/freedv/c2wideband.c:260:27: warning: using integer absolute value function 'abs' when argument is of floating point type 'float' [-Wabsolute-value]
+  260 |                 float a = abs(rate_K_sample_freqs_kHz[k] - nasty_error_freq);
+      |                           ^~~
+../drivers/freedv/c2wideband.c:298:26: warning: using integer absolute value function 'abs' when argument is of floating point type 'float' [-Wabsolute-value]
+  298 |                 int pa = abs(Am_freqs_kHz[m] - rate_K_prev_sample_kHz);
+      |                          ^~~
+../drivers/freedv/c2wideband.c:299:30: warning: using integer absolute value function 'abs' when argument is of floating point type 'float' [-Wabsolute-value]
+  299 |                 int na = abs(abs(Am_freqs_kHz[m] - rate_K_next_sample_kHz));
+      |                              ^~~
+  [CC] drivers/freedv/codebookdt.o
+../drivers/ui/ui_driver.c: In function 'UiDriver_FButton_F6Illum':
+../drivers/ui/ui_driver.c:1874:22: warning: extra tokens at end of #ifdef directive
+ 1874 | #ifdef BOTTOM_BUTTON > 5
+      |                      ^
+../drivers/ui/ui_driver.c: In function 'UiDriver_EncoderDisplaySimple':
+../drivers/ui/ui_driver.c:1918:34: warning: format '%d' expects argument of type 'int', but argument 4 has type 'int32_t' {aka 'long int'} [-Wformat=]
+ 1918 |  snprintf(temp, sizeof(temp), "%4d", value);
+      |                                ~~^   ~~~~~
+      |                                  |   |
+      |                                  int int32_t {aka long int}
+      |                                %4ld
+../drivers/ui/ui_driver.c: At top level:
+../drivers/ui/ui_driver.c:4950:8: warning: return type defaults to 'int' [-Wimplicit-int]
+ 4950 | static UiDriver_DisplayStateAGC() {
+      |        ^~~~~~~~~~~~~~~~~~~~~~~~
+../drivers/ui/ui_driver.c: In function 'UiDriver_HandleSMeter':
+../drivers/ui/ui_driver.c:5389:24: warning: unused variable 'clip_indicate' [-Wunused-variable]
+ 5389 |    static bool         clip_indicate = 0;
+      |                        ^~~~~~~~~~~~~
+../drivers/ui/ui_driver.c: In function 'UiDriver_DisplayTemperature':
+../drivers/ui/ui_driver.c:5754:11: warning: unused variable 'clr' [-Wunused-variable]
+ 5754 |  uint32_t clr =  RadioManagement_TcxoGetMode() ==TCXO_ON ? Blue:Red;
+      |           ^~~
+  [CC] drivers/freedv/codebookge.o
+../drivers/ui/ui_driver.c: In function 'UiAction_ToggleNoiseblanker':
+../drivers/ui/ui_driver.c:7242:2: warning: implicit declaration of function 'UiDriver_DisplayEncoderTwoMode'; did you mean 'UiDriver_DisplayEncoderMode'? [-Wimplicit-function-declaration]
+ 7242 |  UiDriver_DisplayEncoderTwoMode();
+      |  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |  UiDriver_DisplayEncoderMode
+  [CC] drivers/freedv/codebookjnd.o
+../drivers/ui/ui_driver.c: In function 'UiDriver_HandleTouchScreen':
+../drivers/ui/ui_driver.c:7823:8: warning: variable 'TouchProcessed' set but not used [-Wunused-but-set-variable]
+ 7823 |   bool TouchProcessed = 0;
+      |        ^~~~~~~~~~~~~~
+  [CC] drivers/freedv/codebookjvm.o
+../drivers/ui/ui_driver.c: In function 'UiDriver_DisplayStateAGC':
+../drivers/ui/ui_driver.c:4973:1: warning: control reaches end of non-void function [-Wreturn-type]
+ 4973 | }
+      | ^
+At top level:
+../drivers/ui/ui_driver.c:5389:24: warning: 'clip_indicate' defined but not used [-Wunused-variable]
+ 5389 |    static bool         clip_indicate = 0;
+      |                        ^~~~~~~~~~~~~
+  [CC] drivers/freedv/codebooklspmelvq.o
+  [CC] drivers/freedv/codebookmel.o
+  [CC] drivers/freedv/codebooknewamp1.o
+  [CC] drivers/freedv/codebooknewamp1_energy.o
+  [CC] drivers/freedv/codebooknewamp2.o
+  [CC] drivers/freedv/codebooknewamp2_energy.o
+  [CC] drivers/freedv/codebookres.o
+  [CC] drivers/freedv/codebookvq.o
+  [CC] drivers/freedv/codebookvqanssi.o
+  [CC] drivers/freedv/codec2.o
+  [CC] drivers/freedv/codec2_fft.o
+  [CC] drivers/freedv/cohpsk.o
+  [CC] drivers/freedv/dct2.o
+  [CC] drivers/freedv/dump.o
+  [CC] drivers/freedv/fdmdv.o
+  [CC] drivers/freedv/filter.o
+  [CC] drivers/freedv/fm.o
+  [CC] drivers/freedv/fmfsk.o
+  [CC] drivers/freedv/freedv_api.o
+  [CC] drivers/freedv/freedv_data_channel.o
+  [CC] drivers/freedv/freedv_vhf_framing.o
+  [CC] drivers/freedv/fsk.o
+  [CC] drivers/freedv/golay23.o
+  [CC] drivers/freedv/gp_interleaver.o
+  [CC] drivers/freedv/HRA_112_112.o
+  [CC] drivers/freedv/HRAb_396_504.o
+  [CC] drivers/freedv/interp.o
+  [CC] drivers/freedv/interldpc.o
+  [CC] drivers/freedv/kiss_fft.o
+  [CC] drivers/freedv/kiss_fftr.o
+  [CC] drivers/freedv/linreg.o
+  [CC] drivers/freedv/lpc.o
+  [CC] drivers/freedv/lsp.o
+  [CC] drivers/freedv/mbest.o
+  [CC] drivers/freedv/modem_stats.o
+  [CC] drivers/freedv/mpdecode_core.o
+  [CC] drivers/freedv/newamp1.o
+  [CC] drivers/freedv/newamp2.o
+  [CC] drivers/freedv/nlp.o
+  [CC] drivers/freedv/ofdm.o
+  [CC] drivers/freedv/pack.o
+  [CC] drivers/freedv/phase.o
+  [CC] drivers/freedv/phi0.o
+  [CC] drivers/freedv/postfilter.o
+  [CC] drivers/freedv/quantise.o
+  [CC] drivers/freedv/sine.o
+  [CC] drivers/freedv/varicode.o
+  [CC] drivers/cat/cat_driver.o
+  [CC] drivers/audio/softdds/dds_table.o
+  [CC] drivers/audio/softdds/softdds.o
+  [CC] drivers/audio/filters/fir_rx_decimate_4.o
+  [CC] drivers/audio/filters/fir_rx_decimate_4_min_lpf.o
+  [CC] drivers/audio/filters/fir_rx_interpolate_16.o
+  [CC] drivers/audio/filters/fir_rx_interpolate_16_10kHz.o
+  [CC] drivers/audio/filters/iir_10k.o
+  [CC] drivers/audio/filters/iir_10k_neu.o
+  [CC] drivers/audio/filters/iir_15k_hpf_fm_squelch.o
+  [CC] drivers/audio/filters/iir_1_4k.o
+  [CC] drivers/audio/filters/iir_1_6k.o
+  [CC] drivers/audio/filters/iir_1_8k.o
+  [CC] drivers/audio/filters/iir_2_1k.o
+  [CC] drivers/audio/filters/iir_2_3k.o
+  [CC] drivers/audio/filters/iir_2_5k.o
+  [CC] drivers/audio/filters/iir_2_7k.o
+  [CC] drivers/audio/filters/iir_2_9k.o
+  [CC] drivers/audio/filters/iir_2k7_tx_bpf.o
+  [CC] drivers/audio/filters/iir_2k7_tx_bpf_fm.o
+  [CC] drivers/audio/filters/iir_100hz.o
+  [CC] drivers/audio/filters/iir_200hz.o
+  [CC] drivers/audio/filters/iir_300hz.o
+  [CC] drivers/audio/filters/iir_3_2k.o
+  [CC] drivers/audio/filters/iir_3_4k.o
+  [CC] drivers/audio/filters/iir_3_6k.o
+  [CC] drivers/audio/filters/iir_3_8k.o
+  [CC] drivers/audio/filters/iir_3k.o
+  [CC] drivers/audio/filters/iir_4_2k.o
+  [CC] drivers/audio/filters/iir_4_4k.o
+  [CC] drivers/audio/filters/iir_4_6k.o
+  [CC] drivers/audio/filters/iir_4_8k.o
+  [CC] drivers/audio/filters/iir_4k.o
+  [CC] drivers/audio/filters/iir_500hz.o
+  [CC] drivers/audio/filters/iir_5_5k.o
+  [CC] drivers/audio/filters/iir_5k.o
+  [CC] drivers/audio/filters/iir_6_5k.o
+  [CC] drivers/audio/filters/iir_6k.o
+  [CC] drivers/audio/filters/iir_7_5k.o
+  [CC] drivers/audio/filters/iir_7k.o
+  [CC] drivers/audio/filters/iir_8_5k.o
+  [CC] drivers/audio/filters/iir_8k.o
+  [CC] drivers/audio/filters/iir_8k5_hpf_fm_squelch.o
+  [CC] drivers/audio/filters/iir_9_5k.o
+  [CC] drivers/audio/filters/iir_9k.o
+  [CC] drivers/audio/filters/iir_antialias.o
+  [CC] drivers/audio/filters/iq_rx_filter.o
+  [CC] drivers/audio/filters/iq_rx_filter_am.o
+  [CC] drivers/audio/filters/iq_tx_filter.o
+  [CC] drivers/audio/cw/uhsdr_digi_buffer.o
+  [CC] drivers/audio/cw/cw_gen.o
+  [CC] drivers/audio/cw/cw_decoder.o
+  [CC] drivers/audio/codec/codec.o
+  [CC] drivers/audio/codec/uhsdr_hw_i2s.o
+  [CC] drivers/audio/audio_agc.o
+  [CC] drivers/audio/audio_driver.o
+  [CC] drivers/audio/audio_filter.o
+  [CC] drivers/audio/audio_convolution.o
+  [CC] drivers/audio/audio_nr.o
+  [CC] drivers/audio/audio_management.o
+  [CC] drivers/audio/audio_reverb.o
+  [CC] drivers/audio/freedv_uhsdr.o
+  [CC] drivers/audio/freedv_test_data.o
+  [CC] drivers/audio/freq_shift.o
+  [CC] drivers/audio/rtty.o
+  [CC] drivers/audio/psk.o
+  [CC] drivers/audio/rb.o
+  [CC] drivers/audio/tx_processor.o
+  [CC] drivers/ui/lcd/ui_lcd_layouts.o
+  [CC] drivers/ui/ui_vkeybrd.o
+../drivers/ui/lcd/ui_lcd_layouts.c:41:46: warning: initialized field overwritten [-Woverride-init]
+   41 | #define R480320_BAND_MODE_MASK_W             33
+      |                                              ^~
+../drivers/ui/lcd/ui_lcd_layouts.c:432:114: note: in expansion of macro 'R480320_BAND_MODE_MASK_W'
+  432 |                 .BAND_MODE = { .x = R480320_BAND_MODE_X, .y = R480320_BAND_MODE_Y, R480320_BAND_MODE_MASK_H, .w= R480320_BAND_MODE_MASK_W},
+      |                                                                                                                  ^~~~~~~~~~~~~~~~~~~~~~~~
+../drivers/ui/lcd/ui_lcd_layouts.c:41:46: note: (near initialization for 'LcdLayouts[2].BAND_MODE.w')
+   41 | #define R480320_BAND_MODE_MASK_W             33
+      |                                              ^~
+../drivers/ui/lcd/ui_lcd_layouts.c:432:114: note: in expansion of macro 'R480320_BAND_MODE_MASK_W'
+  432 |                 .BAND_MODE = { .x = R480320_BAND_MODE_X, .y = R480320_BAND_MODE_Y, R480320_BAND_MODE_MASK_H, .w= R480320_BAND_MODE_MASK_W},
+      |                                                                                                                  ^~~~~~~~~~~~~~~~~~~~~~~~
+../drivers/ui/lcd/ui_lcd_layouts.c:213:34: warning: 'R320240_touchactions_normal' defined but not used [-Wunused-const-variable=]
+  213 | static const touchaction_descr_t R320240_touchactions_normal[] = {
+      |                                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+  [LD] fw-mchf.elf
+../drivers/ui/ui_vkeybrd.c: In function 'UiVk_ModeVKeyInitTypeDraw':
+../drivers/ui/ui_vkeybrd.c:344:13: warning: 'mode_t' may be used uninitialized in this function [-Wmaybe-uninitialized]
+  344 |     uint8_t mode_t;
+      |             ^
+../drivers/ui/ui_driver.c: In function 'UiAction_ToggleBufferedTXMode':
+rm -f firmware_obj_list.lst
+../drivers/ui/ui_driver.c:1869:2: warning: 'cap' may be used uninitialized in this function [-Wmaybe-uninitialized]
+ 1869 |  UiDriver_DrawFButtonLabel(5, cap, color);
+      |  ^
+../drivers/ui/ui_driver.c:1818:14: note: 'cap' was declared here
+ 1818 |  const char* cap;
+      |              ^
+../drivers/ui/ui_driver.c: In function 'UiAction_ToggleTxDisable':
+../drivers/ui/ui_driver.c:1869:2: warning: 'cap' may be used uninitialized in this function [-Wmaybe-uninitialized]
+ 1869 |  UiDriver_DrawFButtonLabel(5, cap, color);
+      |  ^
+../drivers/ui/ui_driver.c: In function 'UiAction_ToggleTuneMode':
+../drivers/ui/ui_driver.c:1869:2: warning: 'cap' may be used uninitialized in this function [-Wmaybe-uninitialized]
+  [BIN] fw-mchf.hex
+ 1869 |  UiDriver_DrawFButtonLabel(5, cap, color);
+      |  ^
+../drivers/ui/ui_driver.c: In function 'UiAction_ToggleTxRx':
+../drivers/ui/ui_driver.c:1869:2: warning: 'cap' may be used uninitialized in this function [-Wmaybe-uninitialized]
+ 1869 |  UiDriver_DrawFButtonLabel(5, cap, color);
+      |  ^
+../drivers/ui/ui_driver.c: In function 'UiDriver_GetModeCode':
+../drivers/ui/ui_driver.c:1165:12: warning: 'mode' may be used uninitialized in this function [-Wmaybe-uninitialized]
+ 1165 |     return mode;
+      |            ^
+../drivers/ui/ui_driver.c:1138:13: note: 'mode' was declared here
+ 1138 |     uint8_t mode;
+      |             ^
+../drivers/ui/ui_driver.c: In function 'UiDriver_FButton_F3MemSplit':
+../drivers/ui/ui_driver.c:1869:2: warning: 'cap' may be used uninitialized in this function [-Wmaybe-uninitialized]
+ 1869 |  UiDriver_DrawFButtonLabel(5, cap, color);
+      |  ^
+../drivers/ui/ui_driver.c:1818:14: note: 'cap' was declared here
+ 1818 |  const char* cap;
+      |              ^
+  [OBJC] fw-mchf.bin
+../drivers/ui/ui_driver.c: In function 'UiDriver_CreateFunctionButtons':
+../drivers/ui/ui_driver.c:1869:2: warning: 'cap' may be used uninitialized in this function [-Wmaybe-uninitialized]
+ 1869 |  UiDriver_DrawFButtonLabel(5, cap, color);
+      |  ^
+   text	   data	    bss	    dec	    hex	filename
+ 314239	   2568	 110044	 426851	  68363	fw-mchf.elf
+   text	   data	    bss	    dec	    hex	filename
+ 314239	   2568	 110044	 426851	  68363	fw-mchf.elf
+copy from `fw-mchf.elf' [elf32-littlearm] to `fw-mchf.bin' [binary]
+copy from `fw-mchf.elf' [elf32-littlearm] to `fw-mchf.hex' [ihex]
+  [H2D] fw-mchf.dfu
+   text	   data	    bss	    dec	    hex	filename
+      0	 316807	      0	 316807	  4d587	fw-mchf.hex
+Loading fw-mchf.hex...
+  Start: 0x08010000
+  End  : 0x0805d587
+Saving fw-mchf.dfu...
+  Device ID: 0x0483:0xdf11
+  Target name: application
+# compile the firmware ARM-executables .bin / .elf and .dfu, generate .map 
+using \c
+arm-none-eabi-gcc (GNU Tools for STM32 9-2020-q2-update.20201001-1621) 9.3.1 20200408 (release)
+# compile the firmware ARM-executables .bin / .elf and .dfu, generate .map 
+rm fw-mchf.hex
+
+01:41:38 Build Finished. 0 errors, 23 warnings. (took 22s.576ms)
+

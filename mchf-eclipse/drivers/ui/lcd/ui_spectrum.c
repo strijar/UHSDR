@@ -1730,7 +1730,6 @@ void UiSpectrum_Redraw()
     if (
             (ts.txrx_mode == TRX_MODE_RX)
             && (ts.powering_down == false)
-            && (ts.lcd_blanking_flag == false)
     )
     {
         if(ts.waterfall.scheduler == 0 && is_waterfallmode())   // is waterfall mode enabled?

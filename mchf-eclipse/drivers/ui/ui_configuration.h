@@ -373,7 +373,7 @@ void		UiConfiguration_UpdateMacroCap(void);
 #define EEPROM_FREQ_CONV_MODE				174     // Frequency Conversion Mode (e.g. I/Q frequency conversion done in receive/transmit to offset from zero)
 #define EEPROM_LSB_USB_AUTO_SELECT			175     // Auto selection of LSB/USB above/below 10 MHz (including 60 meters)
 #define EEPROM_VERSION_MAJOR				176     // Storage of current version build number - used to detect change of firmware
-#define EEPROM_LCD_BLANKING_CONFIG			177     // Configuration of automatic LCD blanking mode settings
+#define EEPROM_LCD_DIMMING_CONFIG			177     // Configuration of automatic LCD blanking mode settings
 #define EEPROM_VOLTMETER_CALIBRATE			178     // Holder for calibration of the on-screen voltmeter
 #define EEPROM_WATERFALL_COLOR_SCHEME		179     // Color scheme for waterfall display
 #define EEPROM_WATERFALL_VERTICAL_STEP_SIZE 180 // Number of vertical steps of waterfall per iteration
@@ -712,8 +712,9 @@ void		UiConfiguration_UpdateMacroCap(void);
 #define EEPROM_RTTY_SHIFT                            517
 #define EEPROM_RTTY_SPEED                            518
 #define EEPROM_AMBER_INPUT                           519
+#define EEPROM_LCD_DIMMING_BRIGHT                    520
 
-#define EEPROM_FIRST_UNUSED                          520  // change this if new value ids are introduced, must be correct at any time
+#define EEPROM_FIRST_UNUSED                          521  // change this if new value ids are introduced, must be correct at any time
 
 #define MAX_VAR_ADDR (EEPROM_FIRST_UNUSED - 1) // Max 511
 

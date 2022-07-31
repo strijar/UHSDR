@@ -2864,9 +2864,9 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
 //        break;
 	}
 //    case CONFIG_LCD_AUTO_OFF_MODE:  // LCD auto-off mode control
-	else if(select==CONFIG_LCD_AUTO_OFF_MODE)
+	else if(select==CONFIG_LCD_AUTO_DIMM_TIME)
 	{
-        temp_var_u8 = ts.lcd_backlight_blanking;        // get control variable
+        temp_var_u8 = ts.lcd_backlight_dimm_time;        // get control variable
         temp_var_u8 &= LCD_BLANKING_TIMEMASK;                           // mask off upper nybble
         var_change = UiDriverMenuItemChangeUInt8(var, mode, &temp_var_u8,
                                               0,
@@ -2878,22 +2878,34 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
         {
             if(temp_var_u8)                 // is the time non-zero?
             {
-                ts.lcd_backlight_blanking = temp_var_u8;    // yes, copy current value into variable
-                ts.lcd_backlight_blanking |= LCD_BLANKING_ENABLE;       // set MSB to enable auto-blanking
+                ts.lcd_backlight_dimm_time = temp_var_u8;    // yes, copy current value into variable
+                ts.lcd_backlight_dimm_time |= LCD_BLANKING_ENABLE;       // set MSB to enable auto-blanking
             }
             else
             {
-                ts.lcd_backlight_blanking = 0;          // zero out variable
+                ts.lcd_backlight_dimm_time = 0;          // zero out variable
             }
-            UiDriver_LcdBlankingStartTimer();       // update the LCD timing parameters
+            UiDriver_LcdDimmingStartTimer();       // update the LCD timing parameters
         }
         //
-        if(ts.lcd_backlight_blanking & LCD_BLANKING_ENABLE)         // timed auto-blanking enabled?
-            snprintf(options,32,"%02d sec",ts.lcd_backlight_blanking & LCD_BLANKING_TIMEMASK);  // yes - Update screen indicator with number of seconds
+        if(ts.lcd_backlight_dimm_time & LCD_BLANKING_ENABLE)         // timed auto-blanking enabled?
+            snprintf(options,32,"%02d sec",ts.lcd_backlight_dimm_time & LCD_BLANKING_TIMEMASK);  // yes - Update screen indicator with number of seconds
         else
             snprintf(options,32,"   OFF");                      // Or if turned off
 //        break;
 	}
+    else if (select==CONFIG_LCD_AUTO_DIMM_BRIGHT) {
+        var_change = UiDriverMenuItemChangeUInt8(var, mode, &ts.lcd_backlight_dimm_brightness,
+                                    LCD_DIMMING_LEVEL_MIN + 1,
+                                    LCD_DIMMING_LEVEL_MAX,
+                                    LCD_DIMMING_LEVEL_MAX,
+                                    1
+                                    );
+
+        const uint8_t labels[1 + LCD_DIMMING_LEVEL_MAX - LCD_DIMMING_LEVEL_MIN] = { 100, 75, 50, 25, 12, 6 };
+
+        snprintf(options, 32, "%3u%%", labels[ts.lcd_backlight_dimm_brightness]);
+    }
 //    case CONFIG_VOLTMETER_CALIBRATION:      // Voltmeter calibration
 	else if(select==CONFIG_VOLTMETER_CALIBRATION)
 	{

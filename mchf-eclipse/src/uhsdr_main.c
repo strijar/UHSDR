@@ -212,7 +212,7 @@ void TransceiverStateInit(void)
     ts.freq_step_config		= 0;				// disabled both marker line under frequency and swapping of STEP buttons
 
     ts.lcd_backlight_brightness = 0;			// = 0 full brightness
-    ts.lcd_backlight_blanking = 0;				// MSB = 1 for auto-off of backlight, lower nybble holds time for auto-off in seconds
+    ts.lcd_backlight_dimm_brightness = 1;
     //CONFIG LOADED:ts.low_power_config = LOW_POWER_THRESHOLD_DEFAULT; // add LOW_POWER_THRESHOLD_OFFSET for voltage value
 
     ts.tune_step		= 0;					// Used for press-and-hold step size changing mode
@@ -231,8 +231,8 @@ void TransceiverStateInit(void)
     //CONFIG LOADED:ts.iq_freq_mode		= FREQ_IQ_CONV_MODE_DEFAULT;					// used to set/configure the I/Q frequency/conversion mode
     //CONFIG LOADED:ts.lsb_usb_auto_select	= 0;				// holds setting of LSB/USB auto-select above/below 10 MHz
     ts.last_tuning		= 0;					// this is a timer used to hold off updates of the spectrum scope when an SPI LCD display interface is used
-    ts.lcd_blanking_time = 0;					// this holds the system time after which the LCD is blanked - if blanking is enabled
-    ts.lcd_blanking_flag = 0;					// if TRUE, the LCD is blanked completely (e.g. backlight is off)
+    ts.lcd_dimming_time = 0;					// this holds the system time after which the LCD is blanked - if blanking is enabled
+    ts.lcd_dimming_flag = 0;					// if TRUE, the LCD is blanked completely (e.g. backlight is off)
     ts.xvtr_adjust_flag = 0;					// set TRUE if transverter offset adjustment is in process
     //CONFIG LOADED:ts.vfo_mem_mode = 0;						// this is used to record the VFO/memory mode (0 = VFO "A" = backwards compatibility)
     //CONFIG LOADED:ts.voltmeter_calibrate	= POWER_VOLTMETER_CALIBRATE_DEFAULT;	// Voltmeter calibration constant

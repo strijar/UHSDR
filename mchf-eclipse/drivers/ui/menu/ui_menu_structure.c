@@ -199,7 +199,8 @@ const MenuDescriptor confGroup[] =
 
 const MenuDescriptor displayGroup[] =
 {
-	{ MENU_DISPLAY, MENU_ITEM, CONFIG_LCD_AUTO_OFF_MODE, NULL, "LCD Auto Blank", UiMenuDesc("After x seconds LCD turns dark and LCD data sections stop. So power consumption is decreased and RX hum is decreased, too. LCD operation starts when using any button or the touchscreen.") },
+	{ MENU_DISPLAY, MENU_ITEM, CONFIG_LCD_AUTO_DIMM_TIME, NULL, "LCD Auto dimming", UiMenuDesc("After x seconds LCD dimming. So power consumption is decreased and RX hum is decreased, too. LCD operation starts when using any button or the touchscreen.") },
+    { MENU_DISPLAY, MENU_ITEM, CONFIG_LCD_AUTO_DIMM_BRIGHT, NULL, "LCD dimming", UiMenuDesc("") },
     { MENU_DISPLAY, MENU_ITEM, MENU_CW_DECODER_SNAP_ENABLE, NULL,"Show Tune Helper", UiMenuDesc("graphical tune helper: adjust frequency until yellow vertical line is in centre of green box --> right on CW carrier frequency") },
 	{ MENU_DISPLAY, MENU_ITEM, CONFIG_FREQ_STEP_MARKER_LINE, NULL, "Step Size Marker", UiMenuDesc("If enabled, you'll see a line under the digit which is currently representing the selected tuning step size") },
     { MENU_DISPLAY, MENU_ITEM, MENU_NO_SHOW_BNDMEM, NULL, "Don't Show BndMem", UiMenuDesc("Don't show BndMemory.") },
