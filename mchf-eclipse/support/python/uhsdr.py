@@ -107,12 +107,11 @@ class catCommands:
 
         return res == bytearray("UHSDR", 'utf-8')
    
-    def readPttState(self):
+       def readPttState(self):
         cmd = bytearray([ 0x00, 0x00 , 0x00, 0x00, CatCmd.PTT_STATE])
         ok,res = self.execute(cmd,5)
 
         return res
-
 
     def writeEEPROM(self, addr, value16bit):
         cmd = bytearray([ (addr & 0xff00)>>8,addr & 0xff, (value16bit & 0xff) >> 0, (value16bit & 0xff00) >> 8, CatCmd.WRITE_EEPROM])
@@ -121,7 +120,6 @@ class catCommands:
     
     def readUHSDRConfig(self, index):
         return self.readEEPROM(index + 0x8000);
-
 
     def writeUHSDRConfig(self, index, value):
         return self.writeEEPROM(index + 0x8000, value);

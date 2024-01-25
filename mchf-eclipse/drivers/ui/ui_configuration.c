@@ -219,6 +219,8 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
 	{ ConfigEntry_Int32_16, EEPROM_BASS_GAIN,&ts.dsp.bass_gain,2,-20,20}, // INT DEFAULT PROBLEM,see above
     { ConfigEntry_Int32_16, EEPROM_TREBLE_GAIN,&ts.dsp.treble_gain,0,-20,20},  // MINOR INT DEFAULT PROBLEM,see above
     { ConfigEntry_UInt8, EEPROM_TX_FILTER,&ts.tx_filter,0,0,TX_FILTER_ESSB_6k},
+//	{ ConfigEntry_Int32_16, EEPROM_TX_BASS_GAIN,&ts.dsp.tx_bass_gain,4,-20,6}, // INT DEFAULT PROBLEM,see above
+//	{ ConfigEntry_Int32_16, EEPROM_TX_TREBLE_GAIN,&ts.dsp.tx_treble_gain,4,-20,6}, // INT DEFAULT PROBLEM,see above
 
 	{ ConfigEntry_Int32_16, EEPROM_TX_EQ0_GAIN,&ts.dsp.tx_eq_gain[0],4, MIN_TX_EQ, MAX_TX_EQ}, // INT DEFAULT PROBLEM,see above
     { ConfigEntry_Int32_16, EEPROM_TX_EQ1_GAIN,&ts.dsp.tx_eq_gain[1],4, MIN_TX_EQ, MAX_TX_EQ}, // INT DEFAULT PROBLEM,see above
@@ -339,7 +341,15 @@ const ConfigEntryDescriptor ConfigEntryInfo[] =
     { ConfigEntry_UInt8, EEPROM_TX_REVERB_GAIN, &ts.reverb_gain, 0, 0, 100},
     { ConfigEntry_UInt8, EEPROM_TX_REVERB_DELAY, &ts.reverb_delay, 25, 25, 100},
     { ConfigEntry_Int32_16, EEPROM_IQ_FREQ_DELTA, &ts.iq_freq_delta, 1000, -18000, 18000},
-    // the entry below MUST be the last entry, and only at the last position Stop is allowed
+    { ConfigEntry_UInt16, EEPROM_EXPFLAGS3,&ts.expflags3,EXPFLAGS3_CONFIG_DEFAULT,0,0xffff},
+    { ConfigEntry_UInt8, EEPROM_INPUT_STATE,&ts.amber_input_state,0,0,3},
+	{ ConfigEntry_UInt16, EEPROM_AMBER_2_0_W,&ts.amber_tx_2_0_w,438,0,4096},
+	{ ConfigEntry_UInt16, EEPROM_AMBER_1_0_W,&ts.amber_tx_1_0_w,298,0,4096},
+	{ ConfigEntry_UInt16, EEPROM_AMBER_0_5_W,&ts.amber_tx_0_5_w,208,0,4096},
+	{ ConfigEntry_UInt16, EEPROM_AMBER_DCDC_FREQ1,&ts.amber_dcdc_freq1,1600,300,4000},
+	{ ConfigEntry_UInt16, EEPROM_AMBER_DCDC_FREQ2,&ts.amber_dcdc_freq2,1800,300,4000},
+	{ ConfigEntry_UInt16, EEPROM_FREEDV_TX_LEVEL,&ts.freedv_tx_level,100,50,200},
+	// the entry below MUST be the last entry, and only at the last position Stop is allowed
     {
         ConfigEntry_Stop
     }

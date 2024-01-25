@@ -15,7 +15,7 @@
 #include "profiling.h"
 
 #include "audio_driver.h"
-#include "audio_reverb.h"
+//#include "audio_reverb.h"
 #include "radio_management.h"
 #include "audio_management.h" // only for AudioManagement_CalcALCDecay
 #include "rtty.h"
@@ -40,17 +40,23 @@ static float32_t       iir_tx_state[IIR_TX_STATE_ARRAY_SIZE];
 static arm_iir_lattice_instance_f32    IIR_TXFilter;
 
 
+//// variables for TX bass & treble adjustment IIR biquad filter
 // variables for TX EQ adjustment IIR biquad filter
 static arm_biquad_casd_df1_inst_f32 IIR_TX_biquad =
 {
+//        .numStages = 3,
         .numStages = 5,
         .pCoeffs = (float32_t *)(float32_t [])
         {
+//            1,0,0,0,0,  1,0,0,0,0,  1,0,0,0,0
+//        }, // 3 x 5 = 15 coefficients
             1,0,0,0,0,  1,0,0,0,0,  1,0,0,0,0, 1,0,0,0,0, 1,0,0,0,0
         }, // 5 x 5 = 25 coefficients
 
         .pState = (float32_t *)(float32_t [])
         {
+//            0,0,0,0,   0,0,0,0,   0,0,0,0
+//        } // 3 x 4 = 12 state variables
             0,0,0,0,   0,0,0,0,   0,0,0,0,   0,0,0,0,   0,0,0,0
         } // 5 x 4 = 20 state variables
 };
@@ -76,20 +82,32 @@ void TxProcessor_Set(uint8_t dmod_mode)
     ads.tx_filter_adjusting++;        // disable TX filtering during adjustment
     float32_t coeffs[5];
 
+//    // coefficient calculation for TX bass & treble adjustment
+//    // the TX treble filter is in IIR_TX_biquad and works at 48000ksps
+//    AudioDriver_CalcHighShelf(coeffs, 1700, 0.9, ts.dsp.tx_treble_gain, AUDIO_SAMPLE_RATE);
+//    AudioDriver_SetBiquadCoeffs(&IIR_TX_biquad.pCoeffs[0],coeffs);
     // coefficient calculation for TX EQ adjustment
 
+    // the TX bass filter is in IIR_TX_biquad and works at 48000 sample rate
+//    AudioDriver_CalcLowShelf(coeffs, 300, 0.7, ts.dsp.tx_bass_gain, AUDIO_SAMPLE_RATE);
+//    AudioDriver_SetBiquadCoeffs(&IIR_TX_biquad.pCoeffs[5],coeffs);
+//    AudioDriver_CalcPeakEQ(coeffs, 160, 1.0, ts.dsp.tx_eq_gain[0], AUDIO_SAMPLE_RATE);
     AudioDriver_CalcPeakEQ(coeffs, 175, 0.7071, ts.dsp.tx_eq_gain[0], AUDIO_SAMPLE_RATE);
     AudioDriver_SetBiquadCoeffs(&IIR_TX_biquad.pCoeffs[0*5],coeffs);
 
+//    AudioDriver_CalcPeakEQ(coeffs, 325, 1.0, ts.dsp.tx_eq_gain[1], AUDIO_SAMPLE_RATE);
     AudioDriver_CalcPeakEQ(coeffs, 350, 0.7071, ts.dsp.tx_eq_gain[1], AUDIO_SAMPLE_RATE);
     AudioDriver_SetBiquadCoeffs(&IIR_TX_biquad.pCoeffs[1*5],coeffs);
 
+//    AudioDriver_CalcPeakEQ(coeffs, 750, 1.0, ts.dsp.tx_eq_gain[2], AUDIO_SAMPLE_RATE);
     AudioDriver_CalcPeakEQ(coeffs, 700, 0.7071, ts.dsp.tx_eq_gain[2], AUDIO_SAMPLE_RATE);
     AudioDriver_SetBiquadCoeffs(&IIR_TX_biquad.pCoeffs[2*5],coeffs);
 
+//    AudioDriver_CalcPeakEQ(coeffs, 1500, 1.0, ts.dsp.tx_eq_gain[3], AUDIO_SAMPLE_RATE);
     AudioDriver_CalcPeakEQ(coeffs, 1400, 0.7071, ts.dsp.tx_eq_gain[3], AUDIO_SAMPLE_RATE);
     AudioDriver_SetBiquadCoeffs(&IIR_TX_biquad.pCoeffs[3*5],coeffs);
 
+//    AudioDriver_CalcPeakEQ(coeffs, 3000.0, 1.0, ts.dsp.tx_eq_gain[4], AUDIO_SAMPLE_RATE);
     AudioDriver_CalcPeakEQ(coeffs, 2800.0, 0.7071, ts.dsp.tx_eq_gain[4], AUDIO_SAMPLE_RATE);
     AudioDriver_SetBiquadCoeffs(&IIR_TX_biquad.pCoeffs[4*5],coeffs);
 
@@ -159,7 +177,9 @@ void TxProcessor_Init()
     CwGen_Init(); // TX
 
     TxProcessor_FM_Init(&ads.fm_conf);
+#ifdef USE_REVERB_TX
     AudioReverb_Init();
+#endif
  }
 
 
@@ -469,14 +489,29 @@ static void TxProcessor_PrepareVoice(audio_block_t a_buffer, AudioSample_t* src,
 //  if (!ts.tune)
     if (!ts.tune)
     {
-        if (ts.reverb_gain > 0)
+//        TxProcessor_FilterAudio(runFilter, ts.tx_audio_source != TX_AUDIO_DIG, a_buffer, a_buffer, blockSize);
+        TxProcessor_FilterAudio(runFilter, ts.tx_audio_source == TX_AUDIO_MIC, a_buffer, a_buffer, blockSize);
+
+//
+//        for (int i = 0; i < blockSize; i++)
+//        {
+//            a_buffer[i] = AudioReverb_Calc(a_buffer[i]);
+//        }
+//    }
+#ifdef  USE_REVERB_TX
+    	if ((ts.reverb_gain > 0) && (ts.tx_audio_source == TX_AUDIO_MIC))
+    	{
             for (int i = 0; i < blockSize; i++)
+            {
                 a_buffer[i] = AudioReverb_Calc(a_buffer[i]);
-
-        TxProcessor_FilterAudio(runFilter, ts.tx_audio_source != TX_AUDIO_DIG, a_buffer, a_buffer, blockSize);
+            }
+    	}
+#endif
+    	if (ts.tx_audio_source == TX_AUDIO_MIC)
+    	{
+    	    TxProcessor_VoiceCompressor(a_buffer, blockSize, gain);  // Do the TX ALC and speech compression/processing
+    	}
     }
-
-    TxProcessor_VoiceCompressor(a_buffer, blockSize, gain);  // Do the TX ALC and speech compression/processing
 }
 
 /**
@@ -1007,7 +1042,7 @@ void TxProcessor_Run(AudioSample_t * const srcCodec, IqSample_t * const dst, Aud
         case DigitalMode_FreeDV:
             TxProcessor_PrepareVoice(adb.a_buffer[0], src, blockSize, SSB_ALC_GAIN_CORRECTION, true);
             signal_active = TxProcessor_FreeDV(adb.a_buffer[0], &adb.iq_buf, blockSize);
-            iq_gain_comp = FREEDV_GAIN_COMP;
+            iq_gain_comp = FREEDV_GAIN_COMP * ts.freedv_tx_level / 100;
             break;
 #endif
         case DigitalMode_RTTY:
@@ -1025,6 +1060,7 @@ void TxProcessor_Run(AudioSample_t * const srcCodec, IqSample_t * const dst, Aud
     else if(dmod_mode == DEMOD_CW || ts.cw_text_entry)
     {
         signal_active = TxProcessor_CW(adb.a_buffer[0], &adb.iq_buf, blockSize);
+        iq_gain_comp = ts.power==0 ? 1.3 : 1.6;
     }
     else if(is_ssb(dmod_mode))
     {

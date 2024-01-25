@@ -40,10 +40,11 @@
 
 #include "audio_nr.h"
 #include "audio_agc.h"
-#include "audio_reverb.h"
 
 #include "fm_subaudible_tone_table.h"
 #include "tx_processor.h"
+//#include "audio_reverb.h"
+#include "audio_driver.h"
 
 #define CLR_OR_SET_BITMASK(cond,value,mask) ((value) = (((cond))? ((value) | (mask)): ((value) & ~(mask))))
 
@@ -569,6 +570,12 @@ const char* UiMenu_GetSystemInfo(uint32_t* m_clr_ptr, int info_item)
             break;
         default:
             outs = "mcHF RF Board";
+#ifdef SDR_AMBER
+            if(ts.amber_io8_present)
+            {
+            	outs = "Amber RF Board";
+            }
+#endif
             break;
         }
         break;
@@ -814,6 +821,10 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
     bool var_change = false;
     uint8_t temp_var_u8; // used to temporarily represent some configuration values as uint8_t value
     bool temp_var_bool;
+
+#ifdef HELP_MENU
+    ts.menu_selected_item = select;
+#endif
 
     if(mode == MENU_PROCESS_VALUE_CHANGE)
     {
@@ -1692,25 +1703,29 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
                                                   1
                                                  );
 
-        }
+//        }
 
         if(var_change)          // update on-screen info and codec if there was a change
         {
-            if(ts.dmod_mode != DEMOD_CW)
-            {
+//            if(ts.dmod_mode != DEMOD_CW)
+//            {
                 UiDriver_RefreshEncoderDisplay(); // maybe shown on encoder boxes
-                if(ts.txrx_mode == TRX_MODE_TX)     // in transmit mode?
+                if(ts.txrx_mode == TRX_MODE_TX)
                 {
                     // TODO: Think about this, this is a hack
-                    Codec_LineInGainAdj(ts.tx_gain[TX_AUDIO_LINEIN_L]);     // change codec gain
+//                    Codec_LineInGainAdj(ts.tx_gain[TX_AUDIO_LINEIN_L]);     // change codec gain
+                	Codec_LineInGainAdj(ts.tx_gain[ts.tx_audio_source]);
                 }
-            }
+//            }
         }
 
-        if(ts.tx_audio_source == TX_AUDIO_MIC)  // Orange if in MIC mode
+        }
+
+        if((ts.tx_audio_source != TX_AUDIO_LINEIN_L) && (ts.tx_audio_source != TX_AUDIO_LINEIN_R))
         {
             clr = Orange;
-            snprintf(options,32, "  %u", ts.tx_gain[TX_AUDIO_LINEIN_L]);
+//            snprintf(options,32, "  %u", ts.tx_gain[TX_AUDIO_LINEIN_L]);
+            txt_ptr = "N/A";
         }
         else
         {
@@ -2472,11 +2487,14 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
         case WFALL_HOT_COLD:
             txt_ptr = "HotCold";
             break;
-        case WFALL_INFERNO:
-            txt_ptr = "Inferno";
+        case WFALL_FLAME:
+            txt_ptr = "  Flame";
             break;
         case WFALL_SUNSET:
             txt_ptr = " Sunset";
+            break;
+        case WFALL_MATRIX:
+            txt_ptr = " Matrix";
             break;
         case WFALL_RAINBOW:
             txt_ptr = "Rainbow";
@@ -4032,72 +4050,6 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
         }
 //        break;
 	}
-    else if(select==CONFIG_TX_REVERB_GAIN)
-    {
-       var_change = UiDriverMenuItemChangeUInt8(var, mode, &ts.reverb_gain,
-                                           0,
-                                           100,
-                                           0,
-                                           1
-                                          );
-       if(var_change)
-       {
-           AudioReverb_SetWet();
-       }
-       if (ts.reverb_gain) {
-           snprintf(options, 32, "  %u%%", ts.reverb_gain);
-       } else {
-           txt_ptr = " OFF";
-       }
-    }
-    else if(select==CONFIG_TX_REVERB_DELAY)
-    {
-       var_change = UiDriverMenuItemChangeUInt8(var, mode, &ts.reverb_delay,
-                                           25,
-                                           100,
-                                           25,
-                                           1
-                                          );
-       if(var_change)
-       {
-           AudioReverb_SetDelay();
-       }
-       snprintf(options, 32, "  %u%%", ts.reverb_delay);
-    }
-    else if(select==CONFIG_TX_EQ0 || select==CONFIG_TX_EQ1 || select==CONFIG_TX_EQ2 || select==CONFIG_TX_EQ3 || select==CONFIG_TX_EQ4)
-    {
-       uint8_t n = 0;
-
-       switch (select) {
-       case CONFIG_TX_EQ0:
-           n = 0;
-           break;
-       case CONFIG_TX_EQ1:
-           n = 1;
-           break;
-       case CONFIG_TX_EQ2:
-           n = 2;
-           break;
-       case CONFIG_TX_EQ3:
-           n = 3;
-           break;
-       case CONFIG_TX_EQ4:
-           n = 4;
-           break;
-       };
-
-       var_change = UiDriverMenuItemChangeInt(var, mode, &ts.dsp.tx_eq_gain[n],
-                                           MIN_TX_EQ,
-                                           MAX_TX_EQ,
-                                           0,
-                                           1
-                                          );
-       if(var_change)
-       {
-           AudioDriver_SetProcessingChain(ts.dmod_mode, false);
-       }
-       snprintf(options, 32, "  %ddb", ts.dsp.tx_eq_gain[n]);
-    }
 //        case CONFIG_TUNE_TONE_MODE: // set power for antenne tuning
 	else if(select==CONFIG_TUNE_TONE_MODE)
 	{
@@ -5847,6 +5799,19 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
 				if(var_change)
 				{
 					ALT_RWP_CTRL_DAC_WriteReg(ts.amber_dac_pwr_tx_state); // Set the DAC voltage
+
+					if(ts.power_level == PA_LEVEL_MEDIUM)
+					{
+						ts.amber_tx_2_0_w = ts.amber_dac_pwr_tx_state;
+					}
+					else if(ts.power_level == PA_LEVEL_LOW)
+					{
+						ts.amber_tx_1_0_w = ts.amber_dac_pwr_tx_state;
+					}
+					else if(ts.power_level == PA_LEVEL_MINIMAL)
+					{
+						ts.amber_tx_0_5_w = ts.amber_dac_pwr_tx_state;
+					}
 				}
             }
 	}
@@ -5932,6 +5897,273 @@ void UiMenu_UpdateItem(uint16_t select, MenuProcessingMode_t mode, int pos, int 
 			UiDriver_CreateFunctionButtons(false);
 		}
 	}
+#ifdef 	USE_REVERB_TX
+    else if(select==CONFIG_TX_REVERB_GAIN)
+    {
+       var_change = UiDriverMenuItemChangeUInt8(var, mode, &ts.reverb_gain,
+                                           0,
+                                           100,
+                                           0,
+                                           1
+                                          );
+       if(var_change)
+       {
+           AudioReverb_SetWet();
+       }
+       snprintf(options, 32, "  %u%%", ts.reverb_gain);
+       if(ts.reverb_gain == 0)
+       {
+    	   txt_ptr = " OFF";
+       }
+    }
+    else if(select==CONFIG_TX_REVERB_DELAY)
+    {
+       var_change = UiDriverMenuItemChangeUInt8(var, mode, &ts.reverb_delay,
+                                           25,
+                                           100,
+                                           25,
+                                           1
+                                          );
+       if(var_change)
+       {
+           AudioReverb_SetDelay();
+       }
+       snprintf(options, 32, "  %u%%", ts.reverb_delay);
+    }
+#endif
+    else if(select==CONFIG_TX_EQ0 || select==CONFIG_TX_EQ1 || select==CONFIG_TX_EQ2 || select==CONFIG_TX_EQ3 || select==CONFIG_TX_EQ4)
+    {
+       uint8_t n = 0;
+
+       switch (select) {
+       case CONFIG_TX_EQ0:
+           n = 0;
+           break;
+       case CONFIG_TX_EQ1:
+           n = 1;
+           break;
+       case CONFIG_TX_EQ2:
+           n = 2;
+           break;
+       case CONFIG_TX_EQ3:
+           n = 3;
+           break;
+       case CONFIG_TX_EQ4:
+           n = 4;
+           break;
+       };
+
+       var_change = UiDriverMenuItemChangeInt(var, mode, &ts.dsp.tx_eq_gain[n],
+                                           MIN_TX_EQ,
+                                           MAX_TX_EQ,
+                                           0,
+                                           1
+                                          );
+       if(var_change)
+       {
+           AudioDriver_SetProcessingChain(ts.dmod_mode, false);
+       }
+       snprintf(options, 32, "  %ddb", ts.dsp.tx_eq_gain[n]);
+    }
+	else if(select==MENU_DEBUG_BEEP_GEN)
+	{
+		var_change = UiDriverMenuItemChangeEnableOnOffFlag(var, mode, &ts.expflags2,0,options,&clr, EXPFLAGS2_BEEP_GEN);
+
+		clr = White;
+
+		if(ts.expflags2 & EXPFLAGS2_BEEP_GEN)
+		{
+			txt_ptr = " ON";
+		}
+		else
+		{
+			txt_ptr = "OFF";
+		}
+	}
+	else if(select==MENU_DEBUG_BAND_OFF_160M)
+	{
+		var_change = UiDriverMenuItemChangeEnableOnOffFlag(var, mode, &ts.expflags3,0,options,&clr, EXPFLAGS3_BAND_OFF_160M);
+		clr = White;
+		if(ts.expflags3 & EXPFLAGS3_BAND_OFF_160M)
+		{ txt_ptr = "YES"; }
+		else
+		{ txt_ptr = " NO"; }
+	}
+	else if(select==MENU_DEBUG_BAND_OFF_80M)
+	{
+		var_change = UiDriverMenuItemChangeEnableOnOffFlag(var, mode, &ts.expflags3,0,options,&clr, EXPFLAGS3_BAND_OFF_80M);
+		clr = White;
+		if(ts.expflags3 & EXPFLAGS3_BAND_OFF_80M)
+		{ txt_ptr = "YES"; }
+		else
+		{ txt_ptr = " NO"; }
+	}
+	else if(select==MENU_DEBUG_BAND_OFF_60M)
+	{
+		var_change = UiDriverMenuItemChangeEnableOnOffFlag(var, mode, &ts.expflags3,0,options,&clr, EXPFLAGS3_BAND_OFF_60M);
+		clr = White;
+		if(ts.expflags3 & EXPFLAGS3_BAND_OFF_60M)
+		{ txt_ptr = "YES"; }
+		else
+		{ txt_ptr = " NO"; }
+	}
+	else if(select==MENU_DEBUG_BAND_OFF_40M)
+	{
+		var_change = UiDriverMenuItemChangeEnableOnOffFlag(var, mode, &ts.expflags3,0,options,&clr, EXPFLAGS3_BAND_OFF_40M);
+		clr = White;
+		if(ts.expflags3 & EXPFLAGS3_BAND_OFF_40M)
+		{ txt_ptr = "YES"; }
+		else
+		{ txt_ptr = " NO"; }
+	}
+	else if(select==MENU_DEBUG_BAND_OFF_30M)
+	{
+		var_change = UiDriverMenuItemChangeEnableOnOffFlag(var, mode, &ts.expflags3,0,options,&clr, EXPFLAGS3_BAND_OFF_30M);
+		clr = White;
+		if(ts.expflags3 & EXPFLAGS3_BAND_OFF_30M)
+		{ txt_ptr = "YES"; }
+		else
+		{ txt_ptr = " NO"; }
+	}
+	else if(select==MENU_DEBUG_BAND_OFF_20M)
+	{
+		var_change = UiDriverMenuItemChangeEnableOnOffFlag(var, mode, &ts.expflags3,0,options,&clr, EXPFLAGS3_BAND_OFF_20M);
+		clr = White;
+		if(ts.expflags3 & EXPFLAGS3_BAND_OFF_20M)
+		{ txt_ptr = "YES"; }
+		else
+		{ txt_ptr = " NO"; }
+	}
+	else if(select==MENU_DEBUG_BAND_OFF_17M)
+	{
+		var_change = UiDriverMenuItemChangeEnableOnOffFlag(var, mode, &ts.expflags3,0,options,&clr, EXPFLAGS3_BAND_OFF_17M);
+		clr = White;
+		if(ts.expflags3 & EXPFLAGS3_BAND_OFF_17M)
+		{ txt_ptr = "YES"; }
+		else
+		{ txt_ptr = " NO"; }
+	}
+	else if(select==MENU_DEBUG_BAND_OFF_15M)
+	{
+		var_change = UiDriverMenuItemChangeEnableOnOffFlag(var, mode, &ts.expflags3,0,options,&clr, EXPFLAGS3_BAND_OFF_15M);
+		clr = White;
+		if(ts.expflags3 & EXPFLAGS3_BAND_OFF_15M)
+		{ txt_ptr = "YES"; }
+		else
+		{ txt_ptr = " NO"; }
+	}
+	else if(select==MENU_DEBUG_BAND_OFF_12M)
+	{
+		var_change = UiDriverMenuItemChangeEnableOnOffFlag(var, mode, &ts.expflags3,0,options,&clr, EXPFLAGS3_BAND_OFF_12M);
+		clr = White;
+		if(ts.expflags3 & EXPFLAGS3_BAND_OFF_12M)
+		{ txt_ptr = "YES"; }
+		else
+		{ txt_ptr = " NO"; }
+	}
+	else if(select==MENU_DEBUG_BAND_OFF_10M)
+	{
+		var_change = UiDriverMenuItemChangeEnableOnOffFlag(var, mode, &ts.expflags3,0,options,&clr, EXPFLAGS3_BAND_OFF_10M);
+		clr = White;
+		if(ts.expflags3 & EXPFLAGS3_BAND_OFF_10M)
+		{ txt_ptr = "YES"; }
+		else
+		{ txt_ptr = " NO"; }
+	}
+	else if(select==MENU_DEBUG_BAND_OFF_6M)
+	{
+		var_change = UiDriverMenuItemChangeEnableOnOffFlag(var, mode, &ts.expflags3,0,options,&clr, EXPFLAGS3_BAND_OFF_6M);
+		clr = White;
+		if(ts.expflags3 & EXPFLAGS3_BAND_OFF_6M)
+		{ txt_ptr = "YES"; }
+		else
+		{ txt_ptr = " NO"; }
+	}
+	else if(select==MENU_DEBUG_REDUCE_POWER_ON_LOW_BANDS_MORE)
+	{
+        var_change = UiDriverMenuItemChangeEnableOnOffFlag(var, mode, &ts.expflags3,0,options,&clr, EXPFLAGS3_LOW_BAND_BIAS_REDUCE_MORE);
+	}
+	else if(select==MENU_DEBUG_SHOW_SWR_ONLY_TUNE)
+	{
+        var_change = UiDriverMenuItemChangeEnableOnOffFlag(var, mode, &ts.expflags2,0,options,&clr, EXPFLAGS2_SHOW_SWR_ONLY_TUNE);
+	}
+	else if(select==MENU_DEBUG_CONTEST)
+	{
+        var_change = UiDriverMenuItemChangeEnableOnOffFlag(var, mode, &ts.expflags2,0,options,&clr, EXPFLAGS2_CONTEST_MODE_F3_ON);
+	}
+//    else if(select==MENU_DEBUG_CONTEST_COLOUR)
+//    {
+//    	var_change = UiDriverMenuItemChangeUInt8(var, mode, &ts.cq_colour,
+//                                                  0,
+//                                                  SPEC_MAX_COLOUR,
+//                                                  SPEC_BLUE3,
+//                                                  1
+//                                                  );
+//    	UiMenu_MapColors(ts.cq_colour,options,&clr);
+//	}
+#if defined(UI_BRD_OVI40) && defined(SDR_AMBER)
+	else if(select==MENU_DEBUG_DCDC_FREQSW)
+	{
+		var_change = UiDriverMenuItemChangeEnableOnOffFlag(var, mode, &ts.expflags2,0,options,&clr, EXPFLAGS2_AMBER_DCDC_FREQSW_ON);
+	}
+
+    else if(select==MENU_DEBUG_DCDC_FREQ)
+    {
+       var_change = UiDriverMenuItemChangeUInt8(var, mode, &ts.amber_dcdc_freq,
+                                           0,
+                                           1,
+                                           0,
+                                           1
+                                          );
+       if(var_change)
+       {
+           if(ts.amber_dcdc_freq == 1)
+           {
+        	   Board_DCDC_FREQ_SHIFT(DCDC_STATE_ON);
+           }
+           else
+           {
+        	   Board_DCDC_FREQ_SHIFT(DCDC_STATE_OFF);
+           }
+       }
+       if(ts.amber_dcdc_freq == 1)
+          { txt_ptr = " 1"; }
+          else
+          { txt_ptr = " 0"; }
+    }
+
+    else if(select==MENU_DEBUG_DCDC_FREQ1)
+    {
+        var_change = UiDriverMenuItemChangeInt16(var, mode, &ts.amber_dcdc_freq1,
+            300,
+            4000,
+            1600,
+            5);
+        snprintf(options,32, "%4d", ts.amber_dcdc_freq1);
+    }
+
+    else if(select==MENU_DEBUG_DCDC_FREQ2)
+    {
+        var_change = UiDriverMenuItemChangeInt16(var, mode, &ts.amber_dcdc_freq2,
+            300,
+            4000,
+            1800,
+            5);
+        snprintf(options,32, "%4d", ts.amber_dcdc_freq2);
+    }
+#endif
+#if defined(USE_FREEDV)
+	else if(select==MENU_DEBUG_FREEDV_TXLEVEL)
+	{
+        var_change = UiDriverMenuItemChangeUInt8(var, mode, &ts.freedv_tx_level,
+                                              50,
+                                              200,
+                                              100,
+                                              1
+                                              );
+        snprintf(options, 32, "  %u%%", ts.freedv_tx_level);
+	}
+#endif
 //    default:                        // Move to this location if we get to the bottom of the table!
 	else
 	{

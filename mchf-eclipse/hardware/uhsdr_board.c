@@ -38,10 +38,7 @@
 
 // Transceiver state public structure
 __IO __MCHF_SPECIALMEM TransceiverState ts;
-
-uint32_t mem_data[4][2][20];
-uint32_t xvtr_data[4][3];
-uint16_t bw_data[10][20];
+//TransceiverState ts;
 
 static void Board_Led_Init(void)
 {
@@ -905,6 +902,7 @@ void Board_RedLed(ledstate_t state)
 }
 
 #ifdef UI_BRD_OVI40
+#ifndef SDR_AMBER
 void Board_BlueLed(ledstate_t state)
 {
     switch(state)
@@ -920,6 +918,23 @@ void Board_BlueLed(ledstate_t state)
         break;
     }
 }
+#else
+void Board_DCDC_FREQ_SHIFT(dcdc_state_t state)
+{
+    switch(state)
+    {
+    case DCDC_STATE_ON:
+        GPIO_SetBits(BLUE_LED_PIO, BLUE_LED);
+        break;
+    case DCDC_STATE_OFF:
+        GPIO_ResetBits(BLUE_LED_PIO, BLUE_LED);
+        break;
+    default:
+        GPIO_ToggleBits(BLUE_LED_PIO, BLUE_LED);
+        break;
+    }
+}
+#endif
 #endif
 
 #ifdef SDR_AMBER

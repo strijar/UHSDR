@@ -700,3 +700,28 @@ bool Codec_ReadyForIrqCall(void)
 {
     return (CODEC_ANA_I2C->Lock == HAL_UNLOCKED) && (CODEC_IQ_I2C->Lock == HAL_UNLOCKED);
 }
+
+uint32_t Codec_Mute(bool mute_on)
+{
+    uint32_t retval;
+#ifdef UI_BRD_MCHF
+    if(mute_on)
+    {
+    	retval = Codec_WriteRegister(CODEC_I2C, 0x04, 0);
+    }
+    else
+    {
+    	retval = Codec_WriteRegister(CODEC_I2C, 0x04, 0x10);
+    }
+#else
+    if(mute_on)
+    {
+    	retval = Codec_WriteRegister(CODEC_IQ_I2C, 0x04, 0);
+    }
+    else
+    {
+    	retval = Codec_WriteRegister(CODEC_IQ_I2C, 0x04, 0x10);
+    }
+#endif
+    return retval;
+}

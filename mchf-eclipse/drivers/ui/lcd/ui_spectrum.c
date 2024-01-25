@@ -250,6 +250,7 @@ static void UiSpectrum_UpdateSpectrumPixelParameters(void)
     static uint16_t old_cw_sidetone_freq = 0;
     static uint16_t old_rtty_shift = 0;
     static uint8_t old_digital_mode = 0xFF;
+//    static int32_t old_iq_freq_delta = 0;
     static int32_t old_iq_freq_delta = -20000;
 
     static bool force_update = true;
@@ -261,8 +262,11 @@ static void UiSpectrum_UpdateSpectrumPixelParameters(void)
         force_update = true;
     }
 
+//    if (ts.iq_freq_mode != old_iq_freq_mode  || force_update)
+//    if (ts.iq_freq_mode != old_iq_freq_mode  || force_update || (ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE && ts.iq_freq_delta != old_iq_freq_delta))
     if ((ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE && ts.iq_freq_delta != old_iq_freq_delta) || force_update)
     {
+//        old_iq_freq_mode = ts.iq_freq_mode;
         old_iq_freq_delta = ts.iq_freq_delta;
         force_update = true;
     }
@@ -271,13 +275,13 @@ static void UiSpectrum_UpdateSpectrumPixelParameters(void)
     {
         old_iq_freq_mode = ts.iq_freq_mode;
         force_update = true;
-
         if(!sd.magnify)     // is magnify mode on?
         {
             sd.rx_carrier_pos = slayout.scope.w/2 - 0.5 - (AudioDriver_GetTranslateFreq()/sd.hz_per_pixel);
         }
         else        // magnify mode is on
         {
+//            sd.rx_carrier_pos = slayout.scope.w/2 -0.5;                                // line is always in center in "magnify" mode
             if (ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE) {
                 sd.rx_carrier_pos = slayout.scope.w/2 - 0.5 - (AudioDriver_GetTranslateFreq()/sd.hz_per_pixel);
             } else {
@@ -1062,11 +1066,14 @@ static void UiSpectrum_InitSpectrumDisplayData(void)
     case WFALL_HOT_COLD:
         wfall_scheme = &waterfall_cold_hot[0];
         break;
-    case WFALL_INFERNO:
-        wfall_scheme = &waterfall_inferno[0];
+    case WFALL_FLAME:
+        wfall_scheme = &waterfall_flame[0];
         break;
     case WFALL_SUNSET:
         wfall_scheme = &waterfall_sunset[0];
+        break;
+    case WFALL_MATRIX:
+        wfall_scheme = &waterfall_matrix[0];
         break;
     case WFALL_RAINBOW:
         wfall_scheme = &waterfall_rainbow[0];
@@ -1753,6 +1760,7 @@ static void UiSpectrum_DrawFrequencyBar()
 
         float32_t freq_calc = RadioManagement_GetRXDialFrequency() + (ts.dmod_mode == DEMOD_CW ? RadioManagement_GetCWDialOffset() : 0 );      // get current tune frequency in Hz
 
+//        if (sd.magnify == 0)
         if (sd.magnify == 0 || ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE)
         {
             freq_calc += AudioDriver_GetTranslateFreq();
@@ -2154,9 +2162,10 @@ static void UiSpectrum_CalculateDBm()
         // frequency translation off, IF = 0 Hz OR
         // in all magnify cases (2x up to 32x) the posbin is in the centre of the spectrum display
 
+//        const int32_t bin_offset = sd.magnify != 0 ? 0 : (- (buff_len_int * AudioDriver_GetTranslateFreq( )) / (2 * IQ_SAMPLE_RATE));
+//        const int32_t posbin = buff_len_int / 4 + bin_offset;  // right in the middle!        const int32_t bin_offset = (sd.magnify != 0 && ts.iq_freq_mode != FREQ_IQ_CONV_SLIDE) ? 0 : (- (buff_len_int * AudioDriver_GetTranslateFreq( )) / (2 * IQ_SAMPLE_RATE));
         const int32_t bin_offset = (sd.magnify != 0 && ts.iq_freq_mode != FREQ_IQ_CONV_SLIDE) ? 0 : (- (buff_len_int * AudioDriver_GetTranslateFreq( )) / (2 * IQ_SAMPLE_RATE));
         const int32_t posbin = buff_len_int / 4 + bin_offset * (1 << sd.magnify);  // right in the middle!
-
 
         // calculate upper and lower limit for determination of signal strength
         // = filter passband is between the lower bin Lbin and the upper bin Ubin

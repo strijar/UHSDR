@@ -374,8 +374,13 @@
 #define BUTTON_S19              GPIO_PIN_11
 #define BUTTON_S19_PIO          GPIOF
 // pin 12
+//#ifndef SDR_AMBER
 #define BLUE_LED                GPIO_PIN_12
 #define BLUE_LED_PIO            GPIOF
+//#else
+//    #define DCDC_FREQ_SHIFT         GPIO_PIN_12
+//    #define DCDC_FREQ_SHIFT_PIO     GPIOF
+//#endif
 // pin 13
 #define BUTTON_E1               GPIO_PIN_13
 #define BUTTON_E1_PIO           GPIOF

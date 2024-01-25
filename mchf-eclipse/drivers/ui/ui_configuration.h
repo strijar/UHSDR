@@ -543,6 +543,8 @@ void		UiConfiguration_UpdateMacroCap(void);
 #define EEPROM_TREBLE_GAIN					361		// treble gain highShelf filter
 //#define	EEPROM_S_METER						362		// S-Meter configuration
 #define EEPROM_TX_FILTER					363		// TX_Filter configuration
+//#define EEPROM_TX_BASS_GAIN				364		// TX bass gain lowShelf filter
+//#define EEPROM_TX_TREBLE_GAIN				365		// TX treble gain highShelf filter
 #define EEPROM_TX_EQ0_GAIN					364		// TX bass EQ filter
 #define EEPROM_TX_EQ4_GAIN				    365		// TX treble EQ filter
 #define EEPROM_SAM_PLL_LOCKING_RANGE        366     //
@@ -685,16 +687,21 @@ void		UiConfiguration_UpdateMacroCap(void);
 #define EEPROM_TX_IQ_17M_PHASE_BALANCE_TRANS_OFF	 496
 #define EEPROM_TX_IQ_12M_GAIN_BALANCE_TRANS_OFF		 497
 #define EEPROM_TX_IQ_12M_PHASE_BALANCE_TRANS_OFF	 498
-
 #define EEPROM_TX_REVERB_GAIN                        499
 #define EEPROM_TX_REVERB_DELAY                       500
 #define EEPROM_TX_EQ1_GAIN                           501
 #define EEPROM_TX_EQ2_GAIN                           502
 #define EEPROM_TX_EQ3_GAIN                           503
-
 #define EEPROM_IQ_FREQ_DELTA                         504
-
-#define EEPROM_FIRST_UNUSED                          505  // change this if new value ids are introduced, must be correct at any time
+#define EEPROM_EXPFLAGS3                             505  // Flags for options in the system menu - see variable "expflags3"
+#define EEPROM_INPUT_STATE                           506  // State of input group - TRX Amber etc.
+#define EEPROM_AMBER_2_0_W							 507
+#define EEPROM_AMBER_1_0_W							 508
+#define EEPROM_AMBER_0_5_W							 509
+#define EEPROM_AMBER_DCDC_FREQ1                      510
+#define EEPROM_AMBER_DCDC_FREQ2                      511
+#define EEPROM_FREEDV_TX_LEVEL                       512
+#define EEPROM_FIRST_UNUSED                          512 //513  // change this if new value ids are introduced, must be correct at any time
 
 #define MAX_VAR_ADDR (EEPROM_FIRST_UNUSED - 1) // Max 511
 

@@ -114,19 +114,21 @@
  * This parameter disables certain features / capabilites in order to achieve a minimum build size for
  * the 192k ram / 512k flash STM32F4 machines. Unless you have such a machine, leave this disabled.
  */
-//#define IS_SMALL_BUILD		// ********************************** Small build (512k) Var. 1
-//#define R928_PLUS				// ********************************** For R928 ets with Si5351a alone synthesizer
+//#define IS_SMALL_BUILD		// ********************************** Small build (512k) Var. 1 (not good, don't use)
+#define R928_PLUS				// ********************************** For R928 ets with Si5351a alone synthesizer, ON in all mod-FW
 //#define OPEN_TX_OUTBAND		//  Open TX out of band (by Menu option) - not in use now
 //#define GREY_STYLE            // ********************************** Monochrome display style
-//#define SEPIA_STYLE           // ********************************** Monochrome display style
-//#define SDR_AMBER			    // ********************************** Russian clone from UB8JDC (SDR)
-//#define SDR_AMBER_480_320	    // ********************************** Display 480x320
-//#define SDR_AMBER_4INCH		// ********************************** Display 480x320 4 inches
-//#define SDR_AMBER_PTT_ALT		// ********************************** Option of PTT_Alt (work CW with pedal) is ON
-//#define DDC_AXIS				// ********************************** Russian clone from UB8JDC (DDC/DUC)
+//#define SEPIA_STYLE			// ********************************** Monochrome display style
+//#define SDR_AMBER			    // ********************************** Russian replica from UB8JDC (SDR)
+//#define SDR_AMBER_480_320	    // ********************************** Display 480x320 (3.5")
+//#define SDR_AMBER_480_320_SPAN// ********************************** Display 480x320, shorter panoram
+//#define SDR_AMBER_4INCH		// ********************************** Display 480x320 (4.0")
+//#define SDR_AMBER_PTT_ALT		// ********************************** Work CW with pedal is ON - Amber only for F7 and H7!!!
+//#define DDC_AXIS				// ********************************** Russian replica from UB8JDC (DDC/DUC)
 //#define OVI40_DISP_320_240    // ********************************** UHSDR don't love displays 320*240 now. Why?
 //#define OVI40_MOD_480_320		// ********************************** Interface like Amber 480x320
 #define FAST_FREQ_ENC           // ********************************** The freq encoder is polled more often than 10ms.
+//#define USE_REVERB_TX			// ********************************** Use the audio reverberator for TX SSB (mice).
 
 #if !defined(IS_SMALL_BUILD)
     #define USE_8bit_FONT
@@ -134,15 +136,6 @@
     // OPTION with IS_SMALL_BUILD we are not automatically including USE_FREEDV as it uses lot of memory, both RAM and flash
 	#define USE_FREEDV			// ********************************** Small build (512k) Var. 2
 #endif // IS_SMALL_BUILD
-
-#ifdef SDR_AMBER_4INCH
-    #define SDR_AMBER_480_320
-#endif
-
-#ifdef SDR_AMBER_480_320
-    #define SDR_AMBER
-    #define USE_DISP_480_320
-#endif
 
 #ifdef SDR_AMBER
 	#define DAC_5MW   0
@@ -169,7 +162,7 @@
     #define USE_GFX_ILI932x
     #define USE_GFX_ILI9486
 	#define USE_GFX_ST7796
-	#define USE_GFX_ILI9341
+//	#define USE_GFX_ILI9341
     // SSD1289 support is not yet working, also requires USE_GFX_ILI932x to be enabled for now.
     // #define USE_GFX_SSD1289
     #define USE_DISP_480_320

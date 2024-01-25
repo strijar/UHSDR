@@ -218,6 +218,8 @@ typedef struct
 
     int     bass_gain;              // gain of the low shelf EQ filter
     int     treble_gain;            // gain of the high shelf EQ filter
+//    int     tx_bass_gain;           // gain of the TX low shelf EQ filter
+//    int     tx_treble_gain;         // gain of the TX high shelf EQ filter
     int     tx_eq_gain[5];          // gain of the TX 5-bands EQ filter
 
 } dsp_params_t;
@@ -264,6 +266,9 @@ typedef struct AudioDriverState
     /* IQ Balance */
     float32_t               iq_phase_balance_rx;
     float32_t               iq_phase_balance_tx[IQ_TRANS_NUM];
+
+    float32_t               audio_fade;
+    float32_t               audio_fade_speed;
 
     ulong snap_carrier_freq; // used for passing the estimated carrier freq in SNAP mode to the print routine in UI_Driver
     bool CW_signal; // if CW decoder is enabled and carrier snap is wanted, this indicates whenever a pulse is received
@@ -317,6 +322,10 @@ typedef struct SMeter
 #define MIN_BASS 			-20
 #define MAX_TREBLE 			20
 #define MIN_TREBLE			-20
+//#define MAX_TX_BASS		 	5
+//#define MIN_TX_BASS			-20
+//#define MAX_TX_TREBLE 		5
+//#define MIN_TX_TREBLE		-20
 #define MAX_TX_EQ		 	20
 #define MIN_TX_EQ			-20
 
@@ -529,7 +538,7 @@ typedef enum
 // This is divided by the decimation rate so that the time delay is constant.
 
 
-#define	FREQ_IQ_CONV_MODE_OFF		0	// No frequency conversion
+#define	FREQ_IQ_CONV_MODE_OFF	0	// No frequency conversion
 #define FREQ_IQ_CONV_P6KHZ		1	// LO is 6KHz above receive frequency in RX mode
 #define	FREQ_IQ_CONV_M6KHZ		2	// LO is 6KHz below receive frequency in RX mode
 #define FREQ_IQ_CONV_P12KHZ		3	// LO is 12KHz above receive frequency in RX mode
@@ -537,7 +546,7 @@ typedef enum
 #define	FREQ_IQ_CONV_SLIDE		5	// LO slide frequency in RX mode
 //
 #define	FREQ_IQ_CONV_MODE_DEFAULT	FREQ_IQ_CONV_M12KHZ		//FREQ_IQ_CONV_MODE_OFF
-#define	FREQ_IQ_CONV_MODE_MAX		5
+#define	FREQ_IQ_CONV_MODE_MAX	5
 
 // Public Audio
 extern AudioDriverState	ads;
@@ -663,15 +672,23 @@ int32_t AudioDriver_GetTranslateFreq(void);
 void AudioDriver_SetSamPllParameters (void);
 
 void AudioDriver_I2SCallback(AudioSample_t *audio, IqSample_t *iq, AudioSample_t *audioDst, int16_t size);
-
+void AudioDriver_CalcPeakEQ(float32_t coeffs[5], float32_t f0, float32_t q, float32_t gain, float32_t FS);
 
 void AudioDriver_CalcLowShelf(float32_t coeffs[5], float32_t f0, float32_t S, float32_t gain, float32_t FS);
 void AudioDriver_CalcHighShelf(float32_t coeffs[5], float32_t f0, float32_t S, float32_t gain, float32_t FS);
-void AudioDriver_CalcPeakEQ(float32_t coeffs[5], float32_t f0, float32_t q, float32_t gain, float32_t FS);
 void AudioDriver_CalcBandpass(float32_t coeffs[5], float32_t f0, float32_t FS);
 void AudioDriver_SetBiquadCoeffs(float32_t* coeffsTo,const float32_t* coeffsFrom);
 
 void AudioDriver_IQPhaseAdjust(uint16_t txrx_mode, float32_t* i_buffer, float32_t* q_buffer, const uint16_t blockSize);
 void AudioDriver_AgcWdsp_Set(void);
+
+void AudioDriver_SetFade(float32_t speed);
+
+#ifdef 	USE_REVERB_TX
+extern void AudioReverb_Init(void);
+extern void AudioReverb_SetDelay();
+extern void AudioReverb_SetWet();
+float32_t AudioReverb_Calc(float32_t in);
+#endif
 
 #endif

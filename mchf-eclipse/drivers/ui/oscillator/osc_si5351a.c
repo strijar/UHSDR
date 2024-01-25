@@ -22,9 +22,9 @@
 
 #ifdef USE_OSC_SI5351A
 // Will be removed and made a dynamic config element
-#ifdef UI_BRD_OVI40
-    #define TEST_QUADRATURE
-#endif
+//#ifdef UI_BRD_OVI40
+//    #define TEST_QUADRATURE
+//#endif
 
 // reference oscillator xtal frequency
 #define SI5351_XTAL_FREQ		27000000			// Crystal frequency
@@ -389,8 +389,8 @@ static Oscillator_ResultCodes_t Si5351a_PrepareNextFrequency(uint32_t freq, int 
 }
 #else // R928+ etc
 {
-si5351a_state.next.phasedOutput = freq > SI5351_MIN_FREQ_PHASE90;
 freq *= 4;
+si5351a_state.next.phasedOutput = freq > SI5351_MIN_FREQ_PHASE90;
 return Si5351a_CalculateConfig(freq, &si5351a_state.next, &si5351a_state.current) == true?OSC_OK:OSC_TUNE_IMPOSSIBLE;
 }
 #endif
@@ -436,7 +436,8 @@ static uint32_t Si5351a_getMaxFrequency(void)
     // this is an experimental value
     // outside the spec sheet but still
     // most if not all Si5351a can do it.
-    return 290000000 / 4;
+//    return 290000000 / 4;
+    return 260000000 / 4;
 }
 
 const OscillatorInterface_t osc_si5351a =

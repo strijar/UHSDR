@@ -51,6 +51,8 @@
 
 #include "audio_nr.h"
 
+#include "uhsdr_board.h"
+
 #define SWR_SAMPLES_SKP             1   //5000
 #define SWR_SAMPLES_CNT             5//10
 #define SWR_ADC_FULL_SCALE          4095    // full scale of A/D converter (4095 = 10 bits)
@@ -391,9 +393,9 @@ float32_t RadioManagement_CalculatePowerFactorScale(float32_t powerMw)
         uint16_t vol = DAC_5W;
         if(powerMw == 0)        { vol = DAC_5W;  } // FULL
         else if(powerMw < 500)  { vol = DAC_5MW; }
-        else if(powerMw < 1000) { vol = DAC_05W; }
-        else if(powerMw < 2000) { vol = DAC_1W;  }
-        else if(powerMw < 4000) { vol = DAC_2W;  }
+        else if(powerMw < 1000) { vol = ts.amber_tx_0_5_w; } //{ vol = DAC_05W; }
+        else if(powerMw < 2000) { vol = ts.amber_tx_1_0_w; } //{ vol = DAC_1W;  }
+        else if(powerMw < 4000) { vol = ts.amber_tx_2_0_w; } //{ vol = DAC_2W;  }
         else if(powerMw < 5000) { vol = DAC_4W;  }
         else                    { vol = DAC_5W;  }
 
@@ -424,13 +426,16 @@ static bool RadioManagement_SetBandPowerFactor(const BandInfo* band, int32_t pow
         uint32_t freq_min = 3600000;
 //        float32_t adj_min = ts.pwr_adj[ADJ_REF_PWR][BAND_MODE_80] / (RadioManagement_IsPowerFactorReduce(freq_min)? 400: 100);
         float32_t adj_min = ts.pwr_adj[ADJ_REF_PWR][BAND_MODE_80];
-        adj_min /= RadioManagement_IsPowerFactorReduce(df.tune_old)? 400.0: 100.0;
+//        adj_min /= RadioManagement_IsPowerFactorReduce(df.tune_old)? 400.0: 100.0;
+        adj_min /= RadioManagement_IsPowerFactorReduce(df.tune_old)? (((ts.expflags3 & EXPFLAGS3_LOW_BAND_BIAS_REDUCE_MORE) && (df.tune_old < 8000000))? 2000.0 : 400.0): 100.0;
 
 //        uint32_t freq_max = RadioManagement_GetBandInfo(BAND_MODE_10)->tune;
         uint32_t freq_max = 28600000;
 //        float32_t adj_max = ts.pwr_adj[ADJ_REF_PWR][BAND_MODE_10] / (RadioManagement_IsPowerFactorReduce(freq_max)? 400: 100);
         float32_t adj_max = ts.pwr_adj[ADJ_REF_PWR][BAND_MODE_10];
-        adj_max /= RadioManagement_IsPowerFactorReduce(df.tune_old)? 400.0: 100.0;
+//        adj_max /= RadioManagement_IsPowerFactorReduce(df.tune_old)? 400.0: 100.0;
+        adj_max /= RadioManagement_IsPowerFactorReduce(df.tune_old)? (((ts.expflags3 & EXPFLAGS3_LOW_BAND_BIAS_REDUCE_MORE) && (df.tune_old < 8000000))? 2000.0 : 400.0): 100.0;
+
 
         uint32_t t_freq = df.tune_old;
         t_freq = t_freq <= 3600000 ? 3600000 : t_freq;
@@ -448,7 +453,8 @@ static bool RadioManagement_SetBandPowerFactor(const BandInfo* band, int32_t pow
     else
     {
         pf_bandvalue = ts.pwr_adj[power == 0?ADJ_FULL_POWER:ADJ_REF_PWR][band->band_mode];
-        pf_bandvalue /= RadioManagement_IsPowerFactorReduce(df.tune_old)? 400: 100;
+//        pf_bandvalue /= RadioManagement_IsPowerFactorReduce(df.tune_old)? 400: 100;
+        pf_bandvalue /= RadioManagement_IsPowerFactorReduce(df.tune_old)? (((ts.expflags3 & EXPFLAGS3_LOW_BAND_BIAS_REDUCE_MORE) && (df.tune_old < 8000000))? 2000.0 : 400.0): 100.0;
     }
 
     float32_t power_factor_scale = 1.0 ;
@@ -500,6 +506,27 @@ bool RadioManagement_SetPowerLevel(const BandInfo* band, power_level_t power_lev
 
     int32_t power = power_level < mchf_power_levelsInfo.count ? mchf_power_levelsInfo.levels[power_level].mW : -1;
     ts.band_index = band->band_mode;
+
+    // Cross beep
+    if(ts.expflags2 & EXPFLAGS2_BEEP_GEN)
+    {
+        if (RadioManagement_IsGenericBand(band))
+        {
+           if(ts.it_is_band)
+           {
+               AudioManagement_KeyBeep();
+               ts.it_is_band = false;
+           }
+        }
+        else
+        {
+            if(!ts.it_is_band)
+            {
+                AudioManagement_KeyBeep();
+                ts.it_is_band = true;
+            }
+        }
+    }
 
     if (power != -1 && band != NULL)
     {
@@ -809,7 +836,12 @@ void RadioManagement_SetPaBias()
     }
 #endif
 
-    Board_SetPaBiasValue(calc_var);
+//    Board_SetPaBiasValue(calc_var);
+    for (uint8_t i = 1; i <= 10; i++)//10; i++)
+    {
+        Board_SetPaBiasValue((calc_var * i) / 10);//10);
+        HAL_Delay(1);
+    }
 }
 
 
@@ -883,7 +915,12 @@ bool RadioManagement_ChangeFrequency(bool force_update, uint32_t dial_freq,uint8
             RadioManagement_SetCouplingForFrequency(tune_freq_real);    // adjust wattmeter coupling factor
             RadioManagement_SetHWFiltersForFrequency(tune_freq_real);  // check the filter status with the new frequency update
             AudioManagement_CalcIqPhaseGainAdjust(tune_freq_real);
-
+#if defined(UI_BRD_OVI40) && defined(SDR_AMBER)
+            if(ts.expflags2 & EXPFLAGS2_AMBER_DCDC_FREQSW_ON)
+            {
+            	RadioManagement_TestDCDC_Freq(tune_freq_real);
+            }
+#endif
             // Inform Spectrum Display code that a frequency change has happened
             ts.dial_moved = 1;
         }
@@ -1094,6 +1131,7 @@ void RadioManagement_SwitchTxRx(uint8_t txrx_mode, bool tune_mode)
 
     if(txrx_mode == TRX_MODE_TX)
     {
+
         // FIXME: Not very robust code, make sure Validate always returns TUNE_IMPOSSIBLE in case of issues
         tx_ok = RadioManagement_ValidateFrequencyForTX(tune_new) != OSC_TUNE_IMPOSSIBLE;
 
@@ -1133,6 +1171,7 @@ void RadioManagement_SwitchTxRx(uint8_t txrx_mode, bool tune_mode)
             ts.audio_dac_muting_buffer_count = 2; // wait at least 2 buffer cycles
             ts.audio_dac_muting_flag = true; // let the audio being muted initially as long as we need it
             RadioManagement_DisablePaBias(); // kill bias to mute the HF output quickly
+
         }
 
         if(txrx_mode_final == TRX_MODE_TX)
@@ -1212,12 +1251,18 @@ void RadioManagement_SwitchTxRx(uint8_t txrx_mode, bool tune_mode)
                         dac_mute_time_mode = 0* 15; // Minimum time is 0ms
                         break;
                     case TX_AUDIO_LINEIN_L:
+//                        dac_mute_time_mode = 4 * 15; // Minimum time is 40ms
+                        dac_mute_time_mode = 3 * 15; // Minimum time is 30ms
+                        input_mute_time_mode = dac_mute_time_mode;
+                        break;
                     case TX_AUDIO_LINEIN_R:
-                        dac_mute_time_mode = 4 * 15; // Minimum time is 40ms
+//                        dac_mute_time_mode = 4 * 15; // Minimum time is 40ms
+                        dac_mute_time_mode = 3 * 15; // Minimum time is 30ms
                         input_mute_time_mode = dac_mute_time_mode;
                         break;
                     case TX_AUDIO_MIC:
-                        dac_mute_time_mode = 4* 15; // Minimum time is 40ms
+//                        dac_mute_time_mode = 4* 15; // Minimum time is 40ms
+                        dac_mute_time_mode = 3* 15; // Minimum time is 30ms
                         input_mute_time_mode = dac_mute_time_mode;
                         break;
                     }
@@ -1228,6 +1273,7 @@ void RadioManagement_SwitchTxRx(uint8_t txrx_mode, bool tune_mode)
 
                 ts.audio_processor_input_mute_counter = input_mute_time;
                 ts.audio_dac_muting_buffer_count =   dac_mute_time; // 15 == 10ms
+                ts.mute_iq_codec_count = dac_mute_time? dac_mute_time + 15 : 0; // Hardware muting of the IQ codec to prevent flash at the beginning of TX
 
                 ts.audio_dac_muting_flag = false; // unmute audio output unless timed muting is active
             }
@@ -1284,7 +1330,8 @@ static const BandFilterDescriptor mchf_rf_bandFilters[] =
     { 16000000,  2 },
     { 32000000,  3 },
 #else // Amber
-    {  1800000,  4 },
+//    {  1800000,  4 },
+    {  1790000,  4 },
     {  2000000,  5 },
     {  4000000,  0 },
     {  8000000,  1 },
@@ -1451,6 +1498,7 @@ bool RadioManagement_IsPowerFactorReduce(uint32_t freq)
  */
 void RadioManagement_SetDemodMode(uint8_t new_mode)
 {
+	Board_RedLed(LED_STATE_OFF);      // TX led off
     ts.dsp.inhibit++;
 //    ads.af_disabled++;
 
@@ -2150,7 +2198,8 @@ void RadioManagement_ToggleVfoAB()
         vfo_new = VFO_B;
         vfo_active = VFO_A;
     }
-    vfo[vfo_active].band[ts.band->band_mode].dial_value = df.tune_new; //band_dial_value[ts.band];     // save "VFO B" settings
+//    vfo[vfo_active].band[ts.band->band_mode].dial_value = df.tune_old; //band_dial_value[ts.band];     // save "VFO B" settings
+    vfo[vfo_active].band[ts.band->band_mode].dial_value = df.tune_new;
     vfo[vfo_active].band[ts.band->band_mode].decod_mode = ts.dmod_mode;    //band_decod_mode[ts.band];
     vfo[vfo_active].band[ts.band->band_mode].digital_mode = ts.digital_mode;
     vfo[vfo_active].band[ts.band->band_mode].dial_delta = ts.iq_freq_delta;
@@ -2211,3 +2260,26 @@ uint64_t RadioManagement_Transverter_GetFreq(const uint32_t dial_freq, const uin
 
     return dial_freq * ts.xverter_mode + offset_offset * offset_multiplier;
 }
+
+#if defined(UI_BRD_OVI40) && defined(SDR_AMBER)
+void RadioManagement_TestDCDC_Freq(uint32_t freq)
+{
+	uint32_t DCDC_freq = ts.amber_dcdc_freq==0 ? ts.amber_dcdc_freq1 : ts.amber_dcdc_freq2; // in kHz
+	uint32_t testfreq = freq/1000; // in kHz
+
+	if((DCDC_freq > (testfreq - 50)) && (DCDC_freq < (testfreq + 50)))
+	{
+		// Switch the freq of DC-DC Converter +5V
+		if(ts.amber_dcdc_freq==0)
+		{
+			ts.amber_dcdc_freq = 1;
+			Board_DCDC_FREQ_SHIFT(DCDC_STATE_ON);
+		}
+		else
+		{
+			ts.amber_dcdc_freq = 0;
+			Board_DCDC_FREQ_SHIFT(DCDC_STATE_OFF);
+		}
+	}
+}
+#endif

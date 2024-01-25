@@ -266,6 +266,7 @@ void UiDriver_CreateMainFreqDisplay(bool all_digits);
 void UiDriver_StoreBwData(void);
 void UiDriver_CreateFunctionButtons(bool full_repaint);
 void UiDriver_RefreshPowerLevel(const BandInfo* band, uint8_t power_level);
+bool UiDriver_NotLockedBand(uint32_t idx);
 
 // Items that are timed using ts.sysclock (operates at 100 Hz)
 //

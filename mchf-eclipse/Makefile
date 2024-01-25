@@ -215,7 +215,7 @@ CC      = $(VPRE)$(PREFIX)arm-none-eabi-gcc
 CXX     = $(VPRE)$(PREFIX)arm-none-eabi-g++
 OC      = $(VPRE)$(PREFIX)arm-none-eabi-objcopy
 SZ      = $(VPRE)$(PREFIX)arm-none-eabi-size
-HEX2DFU = $(VPRE)python3 $(ROOTLOC)/support/hex2dfu/hex2dfu.py
+HEX2DFU = $(VPRE)python $(ROOTLOC)/support/hex2dfu/hex2dfu.py
 
 POSTCOMPILE = @mv -f $*.Td $*.d && touch $@
 DEPFLAGS = -MT $@ -MMD -MP -MF $*.Td
@@ -252,24 +252,28 @@ basesw/%stm32f4xx_ll_usb.o: CFLAGS += -Wno-attributes
 basesw/%stm32f7xx_ll_usb.o: CFLAGS += -Wno-attributes
 basesw/%stm32h7xx_ll_usb.o: CFLAGS += -Wno-attributes
 
+#.S.o: %.d
 .S.o:
 	$(ECHO) "  [CC] $@"
 	@mkdir -p $(subst $(ROOTLOC)/,,$(shell dirname $<))
 	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(DEPFLAGS) -std=gnu11 -c ${INC_DIRS} $< -o $@
 	$(POSTCOMPILE)
 
+#.c.o: %.d
 .c.o:
 	$(ECHO) "  [CC] $@"
 	@mkdir -p $(subst $(ROOTLOC)/,,$(shell dirname $<))
 	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(DEPFLAGS) -std=gnu11 -c ${INC_DIRS} $< -o $@
 	$(POSTCOMPILE)
 
+#.cxx.o: %.d
 .cxx.o:
 	$(ECHO) "  [CXX] $@"
 	@mkdir -p $(subst $(ROOTLOC)/,,$(shell dirname $<))
 	$(CXX) $(CFLAGS) $(CXXFLAGS) $(DEPFLAGS) -std=gnu++11 -c ${INC_DIRS} $< -o $@
 	$(POSTCOMPILE)
 
+#.cpp.o: %.d
 .cpp.o:
 	$(ECHO) "  [CXX] $@"
 	@mkdir -p $(subst $(ROOTLOC)/,,$(shell dirname $<))

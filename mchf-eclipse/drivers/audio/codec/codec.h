@@ -56,3 +56,5 @@ bool     Codec_ReadyForIrqCall(void);
 #ifdef SDR_AMBER
 uint32_t Codec_Reset_CS4270_Codec(void);
 #endif
+
+uint32_t Codec_Mute(bool mute_on);

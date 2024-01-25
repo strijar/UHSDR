@@ -63,6 +63,9 @@
 
 #include "audio_convolution.h"
 #include "audio_agc.h"
+#include "ui_menu_internal.h"
+
+#include "uhsdr_board.h"
 
 #define SPLIT_ACTIVE_COLOUR         		Yellow      // colour of "SPLIT" indicator when active
 #define SPLIT_INACTIVE_COLOUR           	Grey        // colour of "SPLIT" indicator when NOT active
@@ -479,6 +482,142 @@ typedef struct
 	int32_t size;
 } keyaction_list_descr_t;
 
+// Contest mode - F4IYT
+static void UiDriver_RstCq(void)
+{
+	ts.pos_id_contest = 0;
+	ts.pos_id_contesttry = 0;
+	for (int idpos = 0; idpos <= ts.maxi_pos_contest; idpos++)
+	{
+		ts.matrix_contest[idpos] = 0;
+	}
+	for (int idpos = 0; idpos <= ts.maxi_pos_contesttry; idpos++)
+	{
+		ts.matrix_contesttry[idpos] = 0;
+	}
+    uint32_t  cq_color;
+    UiMenu_MapColors(0,NULL, &cq_color);
+	UiDriver_UpdateLcdFreq(RadioManagement_GetRXDialFrequency() ,cq_color, UFM_SECONDARY);
+}
+//
+static void UiDriver_MemCq(void)
+{
+	int CqVal = 0;
+    uint32_t freq_calc = RadioManagement_GetRXDialFrequency() + (ts.dmod_mode == DEMOD_CW ? RadioManagement_GetCWDialOffset() : 0 );      // get current tune frequency in Hz
+	for (int idpos = 0; idpos <= ts.pos_id_contest; idpos++)
+	{
+		if (ts.matrix_contest[idpos] == freq_calc)
+		{
+			CqVal++;
+			break;
+    	}
+    }
+    if (!CqVal)
+    {
+		ts.matrix_contest[ts.pos_id_contest] = freq_calc;
+
+		if (ts.pos_id_contest < ts.maxi_pos_contest)
+		{
+			ts.pos_id_contest ++;
+		}
+		for (int idpos = 0; idpos <= ts.pos_id_contesttry; idpos++)
+		{
+			if ((ts.matrix_contesttry[idpos] <= (freq_calc + 50)) && (ts.matrix_contesttry[idpos] >= (freq_calc - 50)))
+			{
+				ts.matrix_contesttry[idpos] = 0;
+				break;
+	    	}
+	    }
+	}
+//    uint32_t  cq_color;
+//    UiMenu_MapColors(ts.cq_colour,NULL, &cq_color);
+//	UiDriver_UpdateLcdFreq(RadioManagement_GetRXDialFrequency() ,cq_color, UFM_SECONDARY);
+    UiDriver_UpdateLcdFreq(RadioManagement_GetRXDialFrequency() ,Red, UFM_SECONDARY);
+}
+//
+static void UiDriver_TryCq(void)
+{
+	int CqVal = 0;
+    uint32_t freq_calc = RadioManagement_GetRXDialFrequency() + (ts.dmod_mode == DEMOD_CW ? RadioManagement_GetCWDialOffset() : 0 );      // get current tune frequency in Hz
+	for (int idpos = 0; idpos <= ts.pos_id_contesttry; idpos++)
+	{
+		if (ts.matrix_contesttry[idpos] == freq_calc)
+		{
+			CqVal++;
+			break;
+    	}
+    }
+    if (!CqVal)
+    {
+		ts.matrix_contesttry[ts.pos_id_contesttry] = freq_calc;
+		if (ts.pos_id_contesttry < ts.maxi_pos_contesttry)
+		{
+			ts.pos_id_contesttry ++;
+		}
+	}
+
+	UiDriver_UpdateLcdFreq(RadioManagement_GetRXDialFrequency() ,Green, UFM_SECONDARY);
+}
+//
+static void UiAction_ShowCq()
+{
+	uint8_t x_interval = 0;
+	uint8_t y_start = 137; //146;
+	uint8_t y_interval = 11;
+	if (ts.swtcqtry==0)
+	{
+		char txt_cell[24];
+		int idcpt = 7;
+		int icpt = 0;
+		for (int idpos = 0; idpos <= ts.pos_id_contest; idpos++)
+		{
+			if((idpos == 8) || (idpos == 9))
+			{
+				snprintf(txt_cell,20,"M%1u =%8lu ",idpos,ts.matrix_contest[idpos]);
+			}
+			else
+			{
+				snprintf(txt_cell,20,"M%1u=%8lu ",idpos,ts.matrix_contest[idpos]);
+			}
+			UiLcdHy28_PrintText(10+(x_interval),y_start+(icpt*y_interval), txt_cell,Red,Black,0);
+			icpt++;
+			if ( idpos >= idcpt )
+			{
+				icpt = 0;
+				idcpt = idcpt + 8;
+				x_interval = x_interval + 93 + (idpos >= 15 ? 7 : 0);
+			}
+		}
+		ts.swtcqtry++;
+	}
+	else
+	{
+		char txt_cell2[24];
+		int idcpt = 7;
+		int icpt = 0;
+		for (int idpos = 0; idpos <= ts.pos_id_contesttry; idpos++)
+		{
+			if((idpos == 8) || (idpos == 9))
+			{
+				snprintf(txt_cell2,20,"M%1u =%8lu ",idpos,ts.matrix_contesttry[idpos]);
+			}
+			else
+			{
+				snprintf(txt_cell2,20,"M%1u=%8lu ",idpos,ts.matrix_contesttry[idpos]);
+			}
+			UiLcdHy28_PrintText(10+(x_interval),y_start+(icpt*y_interval), txt_cell2,Green,Black,0);
+			icpt++;
+			if ( idpos >= idcpt )
+			{
+				icpt = 0;
+				idcpt = idcpt + 8;
+				x_interval = x_interval + 93 + (idpos >= 15 ? 7 : 0);
+			}
+		}
+		ts.swtcqtry = 0;
+	}
+ }
+// Contest mode - end
 
 /*
  * @brief find the matching region in a list of region and associated function
@@ -852,8 +991,7 @@ void UiDriver_SpectrumChangeLayoutParameters()
 {
 	UiSpectrum_WaterfallClearData();
 	AudioDriver_SetProcessingChain(ts.dmod_mode, false);
-
-    ts.iq_freq_delta = 0;
+	ts.iq_freq_delta = 0;
 
 	if (ts.menu_mode == false)
 	{
@@ -1007,7 +1145,8 @@ void UiDriver_Init()
 	}
 	if (ts.special_functions_enabled != 1)
 	{
-	  UiDriver_StartupScreen_LogIfProblem(ts.iq_freq_mode == FREQ_IQ_CONV_MODE_OFF,
+//	  UiDriver_StartupScreen_LogIfProblem(AudioDriver_GetTranslateFreq() == 0,
+		UiDriver_StartupScreen_LogIfProblem(ts.iq_freq_mode == FREQ_IQ_CONV_MODE_OFF,
 			"WARNING:  Freq. Translation is OFF!!!\nTranslation is STRONGLY recommended!!");
 	}
 
@@ -1248,22 +1387,50 @@ static void UiDriver_StoreMemData(uint8_t mem_cell)
 
 static void UiDriver_StoreMemData1(void)
 {
-    UiDriver_StoreMemData(1);
+//    UiDriver_StoreMemData(1);
+	if(ts.expflags2 & EXPFLAGS2_CONTEST_MODE_F3_ON)
+	{
+		UiDriver_MemCq();
+	}
+	else
+	{
+	     UiDriver_StoreMemData(1);
+	}
 }
 
 static void UiDriver_StoreMemData2(void)
 {
-    UiDriver_StoreMemData(2);
+//    UiDriver_StoreMemData(2);
+	if(ts.expflags2 & EXPFLAGS2_CONTEST_MODE_F3_ON)
+	{
+		UiDriver_TryCq();
+	}
+	else
+	{
+		UiDriver_StoreMemData(2);
+	}
 }
 
 static void UiDriver_StoreMemData3(void)
 {
-    UiDriver_StoreMemData(3);
+//    UiDriver_StoreMemData(3);
+	if(ts.expflags2 & EXPFLAGS2_CONTEST_MODE_F3_ON)
+	{
+		UiDriver_RstCq();
+	}
+	else
+	{
+		UiDriver_StoreMemData(3);
+	}
 }
 
 static void UiDriver_StoreMemData4(void)
 {
-    UiDriver_StoreMemData(4);
+//    UiDriver_StoreMemData(4);
+	if(!(ts.expflags2 & EXPFLAGS2_CONTEST_MODE_F3_ON))
+	{
+		UiDriver_StoreMemData(4);
+	}
 }
 
 static void UiDriver_LoadMemData(uint8_t mem_cell)
@@ -1379,22 +1546,50 @@ static void UiDriver_LoadMemData(uint8_t mem_cell)
 
 static void UiDriver_LoadMemData1(void)
 {
-    UiDriver_LoadMemData(1);
+//    UiDriver_LoadMemData(1);
+	if(ts.expflags2 & EXPFLAGS2_CONTEST_MODE_F3_ON)
+	{
+		UiDriver_MemCq();
+	}
+	else
+	{
+		UiDriver_LoadMemData(1);
+	}
 }
 
 static void UiDriver_LoadMemData2(void)
 {
-    UiDriver_LoadMemData(2);
+//    UiDriver_LoadMemData(2);
+	if(ts.expflags2 & EXPFLAGS2_CONTEST_MODE_F3_ON)
+	{
+		UiDriver_TryCq();
+	}
+	else
+	{
+		UiDriver_LoadMemData(2);
+	}
 }
 
 static void UiDriver_LoadMemData3(void)
 {
-    UiDriver_LoadMemData(3);
+//    UiDriver_LoadMemData(3);
+	if(ts.expflags2 & EXPFLAGS2_CONTEST_MODE_F3_ON)
+	{
+		UiDriver_RstCq();
+	}
+	else
+	{
+		UiDriver_LoadMemData(3);
+	}
 }
 
 static void UiDriver_LoadMemData4(void)
 {
-    UiDriver_LoadMemData(4);
+//    UiDriver_LoadMemData(4);
+	if(!(ts.expflags2 & EXPFLAGS2_CONTEST_MODE_F3_ON))
+	{
+		UiDriver_LoadMemData(4);
+	}
 }
 
 static void UiAction_ShowMems()
@@ -1730,13 +1925,31 @@ static void UiDriver_FButton_F3MemSplit(void)
 	{
 		if (ts.vfo_mem_flag)            // is it in VFO MEM mode now?
 		{
-			cap = "MEM";
-//			color = White;    // yes - indicate with color
-			color = Yellow;
-			UiDriver_DrawFButtonLabel(1, "M1", White);
-			UiDriver_DrawFButtonLabel(2, "M2", White);
-			UiDriver_DrawFButtonLabel(4, "M3", White);
-			UiDriver_DrawFButtonLabel(5, "M4", White);
+//			cap = "MEM";
+////			color = White;    // yes - indicate with color
+//			color = Yellow;
+//			UiDriver_DrawFButtonLabel(1, "M1", White);
+//			UiDriver_DrawFButtonLabel(2, "M2", White);
+//			UiDriver_DrawFButtonLabel(4, "M3", White);
+//			UiDriver_DrawFButtonLabel(5, "M4", White);
+			if(ts.expflags2 & EXPFLAGS2_CONTEST_MODE_F3_ON)
+			{
+				cap = "LIST";
+				color = Yellow;
+				UiDriver_DrawFButtonLabel(1, "MEM", Red);
+				UiDriver_DrawFButtonLabel(2, "TRY", Green);
+				UiDriver_DrawFButtonLabel(4, "RST", White);
+				UiDriver_DrawFButtonLabel(5, "-", White);
+			}
+			else
+			{
+				cap = "MEM";
+				color = Yellow;
+				UiDriver_DrawFButtonLabel(1, "M1", White);
+				UiDriver_DrawFButtonLabel(2, "M2", White);
+				UiDriver_DrawFButtonLabel(4, "M3", White);
+				UiDriver_DrawFButtonLabel(5, "M4", White);
+			}
 		}
 		else
 		{
@@ -1783,8 +1996,16 @@ static inline void UiDriver_FButton_F4ActiveVFO()
 	}
     else if(ts.vfo_mem_flag)
     {
-		cap = "M3";
+//		cap = "M3";
 		color = White;
+		if(ts.expflags2 & EXPFLAGS2_CONTEST_MODE_F3_ON)
+		{
+			cap = "RST";
+		}
+		else
+		{
+			cap = "M3";
+		}
     }
     else if(ts.XvtrFMenuActive)
     {
@@ -1849,8 +2070,16 @@ static inline void UiDriver_FButton_F5Tune()
 	}
     else if(ts.vfo_mem_flag)
     {
-		cap = "M4";
+//		cap = "M4";
 		color = White;
+		if(ts.expflags2 & EXPFLAGS2_CONTEST_MODE_F3_ON)
+		{
+			cap = "-";
+		}
+		else
+		{
+			cap = "M4";
+		}
     }
     else if(ts.XvtrFMenuActive)
     {
@@ -1978,7 +2207,6 @@ void UiAction_CopyVfoAB()
 	vfo_store->dial_value = df.tune_new;
 	vfo_store->decod_mode = ts.dmod_mode;                   // copy active VFO settings into other VFO
 	vfo_store->digital_mode = ts.digital_mode;
-	vfo_store->dial_delta = ts.iq_freq_delta;
 
 	UiDriver_FrequencyUpdateLOandDisplay(true);
 
@@ -2873,6 +3101,15 @@ static void UiDriver_CreateDesktop(void)
         ts.disabled_tp = true;
     }
 
+#if defined(UI_BRD_OVI40) && defined(SDR_AMBER)
+    ts.amber_dcdc_freq = 0;
+    Board_DCDC_FREQ_SHIFT(DCDC_STATE_OFF);
+    if(ts.expflags2 & EXPFLAGS2_AMBER_DCDC_FREQSW_ON)
+    {
+        RadioManagement_TestDCDC_Freq(ts.tune_freq);
+    }
+#endif
+
 #ifndef UI_BRD_MCHF
     MIC_bias_set();
 #endif
@@ -3623,7 +3860,8 @@ void UiDriver_UpdateFrequency(bool force_update, enum UpdateFrequencyMode_t mode
 				UiDriver_DisplayBandForFreq(dial_freq, false);
 				// check which band in which we are currently tuning and update the display
 
-				UiDriver_UpdateLcdFreq(RadioManagement_GetRXDialFrequency() ,White, UFM_SECONDARY);
+//				UiDriver_UpdateLcdFreq(RadioManagement_GetRXDialFrequency() ,White, UFM_SECONDARY);
+				UiDriver_UpdateLcdFreq(RadioManagement_GetRXDialFrequency() ,ts.cmem_colour, UFM_SECONDARY);
 				// set mode parameter to UFM_SECONDARY to update secondary display (it shows real RX frequency if RIT is being used)
 				// color argument is not being used by secondary display
 			}
@@ -3655,6 +3893,51 @@ void UiDriver_UpdateFrequency(bool force_update, enum UpdateFrequencyMode_t mode
 		// Update frequency display
 		UiDriver_UpdateLcdFreq(dial_freq, clr, mode);
 	}
+
+	// Contest mode - F4IYT
+	bool change_cmem_colour = false;
+    if ((ts.expflags2 & EXPFLAGS2_CONTEST_MODE_F3_ON) && ts.vfo_mem_flag)
+    {
+		uint32_t freq_calc = RadioManagement_GetRXDialFrequency() + (ts.dmod_mode == DEMOD_CW ? RadioManagement_GetCWDialOffset() : 0 );
+		if(ts.pos_id_contest)
+		{
+			for(int idpos = 0; idpos <= ts.pos_id_contest; idpos++)
+			{
+				if ((freq_calc >= (ts.matrix_contest[idpos] - 100)) && (freq_calc <= (ts.matrix_contest[idpos] + 100)))
+				{
+//					UiDriver_UpdateLcdFreq(RadioManagement_GetRXDialFrequency() ,Red, UFM_SECONDARY);
+					ts.cmem_colour = Red;
+					change_cmem_colour = true;
+					break;
+				}
+			}
+		}
+		if (ts.pos_id_contesttry)
+		{
+			for(int idpos = 0; idpos <= ts.pos_id_contesttry; idpos++)
+			{
+				if ((freq_calc >= (ts.matrix_contesttry[idpos] - 100)) && (freq_calc <= (ts.matrix_contesttry[idpos] + 100)))
+				{
+//					UiDriver_UpdateLcdFreq(RadioManagement_GetRXDialFrequency() ,Green, UFM_SECONDARY);
+					if(ts.matrix_contesttry[idpos])
+					{
+					ts.cmem_colour = Green;
+					change_cmem_colour = true;
+					break;
+					}
+				}
+			}
+		}
+		if(!change_cmem_colour)
+		{
+			ts.cmem_colour = White;
+		}
+    }
+    else
+    {
+    	ts.cmem_colour = White;
+    }
+    //
 }
 
 
@@ -4493,6 +4776,29 @@ void UiDriver_SelectBandMemory(uint16_t vfo_sel, uint8_t new_band_index)
 }
 
 /**
+ * @brief checking band change.
+ * @param idx is idx of band.
+ */
+bool UiDriver_NotLockedBand(uint32_t idx)
+{
+    if(((ts.expflags3 & EXPFLAGS3_BAND_OFF_160M) && (idx == BAND_MODE_160)) ||
+        ((ts.expflags3 & EXPFLAGS3_BAND_OFF_80M) && (idx == BAND_MODE_80)) ||
+        ((ts.expflags3 & EXPFLAGS3_BAND_OFF_60M) && (idx == BAND_MODE_60)) ||
+        ((ts.expflags3 & EXPFLAGS3_BAND_OFF_40M) && (idx == BAND_MODE_40)) ||
+        ((ts.expflags3 & EXPFLAGS3_BAND_OFF_30M) && (idx == BAND_MODE_30)) ||
+        ((ts.expflags3 & EXPFLAGS3_BAND_OFF_20M) && (idx == BAND_MODE_20)) ||
+        ((ts.expflags3 & EXPFLAGS3_BAND_OFF_17M) && (idx == BAND_MODE_17)) ||
+        ((ts.expflags3 & EXPFLAGS3_BAND_OFF_15M) && (idx == BAND_MODE_15)) ||
+        ((ts.expflags3 & EXPFLAGS3_BAND_OFF_12M) && (idx == BAND_MODE_12)) ||
+        ((ts.expflags3 & EXPFLAGS3_BAND_OFF_10M) && (idx == BAND_MODE_10)) ||
+        ((ts.expflags3 & EXPFLAGS3_BAND_OFF_6M) && (idx == BAND_MODE_6)))
+    {
+        return false;
+    }
+    return true;
+}
+
+/**
  * @brief initiate band change.
  * @param is_up select the next higher band, otherwise go to the next lower band
  */
@@ -4516,10 +4822,10 @@ static void UiDriver_ChangeBand(bool is_up)
 		if(curr_band_index < (MAX_BANDS) && ts.cat_band_index == 255)
 		{
 			// Save dial, but only if we are not in "CAT mode"
+//			vfo[vfo_sel].band[curr_band_index].dial_value = df.tune_old;
 			vfo[vfo_sel].band[curr_band_index].dial_value = df.tune_new;
 			vfo[vfo_sel].band[curr_band_index].decod_mode = ts.dmod_mode;
 			vfo[vfo_sel].band[curr_band_index].digital_mode = ts.digital_mode;
-			vfo[vfo_sel].band[curr_band_index].dial_delta = ts.iq_freq_delta;
 		}
 		else
 		{
@@ -4535,7 +4841,8 @@ static void UiDriver_ChangeBand(bool is_up)
 		{
 		    uint32_t test_idx = (curr_band_index + ((is_up == true) ? idx : (MAX_BANDS-idx)))% MAX_BANDS;
 #ifndef USE_MEMORY_MODE
-		    if (band_enabled[test_idx])
+//		    if (band_enabled[test_idx])
+		    if (band_enabled[test_idx] && UiDriver_NotLockedBand(test_idx))
 #endif
 		    {
 		        new_band_index = test_idx;
@@ -4664,28 +4971,56 @@ static bool UiDriver_CheckFrequencyEncoder()
 
 		// Finally convert to frequency incr/decr
 
-		if (ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE) {
-		    int32_t    freq_delta = ts.iq_freq_delta;
-		    int32_t    max = 18000 / (1 << sd.magnify);
+//		if(pot_diff>0)
+//		{
+//			df.tune_new += (df.tuning_step * enc_multiplier);
+//			//itoa(enc_speed,num,6);
+//			//UiSpectrumClearDisplay();			// clear display under spectrum scope
+//			//UiLcdHy28_PrintText(110,156,num,Cyan,Black,0);
+//		}
+//		else
+//		{
+//			df.tune_new -= (df.tuning_step * enc_multiplier);
+//		}
+//
+//
+//		if (enc_multiplier != 1)
+//		{
+//			df.tune_new = enc_multiplier*df.tuning_step * div((df.tune_new),enc_multiplier*df.tuning_step).quot;    // keep last digit to zero
+//		}
 
-		    if (pot_diff>0) {
+		if (ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE)
+		{
+//		    int32_t freq_delta = ts.iq_freq_delta;
+		    int32_t    freq_delta = ts.iq_freq_delta;
+//		    int32_t    max = 12000 / (1 << sd.magnify);
+		    int32_t    max = 18000 / (1 << sd.magnify);
+		    if (pot_diff>0)
+		    {
                 freq_delta -= (df.tuning_step * enc_multiplier);
 
-                if (freq_delta < -max) {
+                if (freq_delta < -max)
+                {
                     freq_delta = -max;
                 }
                 df.tune_new += df.tuning_step * enc_multiplier;
-		    } else {
+		    }
+		    else
+		    {
                 freq_delta += (df.tuning_step * enc_multiplier);
 
-                if (freq_delta > max) {
+                if (freq_delta > max)
+                {
                     freq_delta = max;
                 }
                 df.tune_new -= df.tuning_step * enc_multiplier;
 		    }
 
 		    ts.iq_freq_delta = freq_delta;
-		} else {
+//	        UiSpectrum_DisplayFilterBW();
+		}
+		else
+		{
             if(pot_diff>0)
             {
                 df.tune_new += (df.tuning_step * enc_multiplier);
@@ -4703,7 +5038,6 @@ static bool UiDriver_CheckFrequencyEncoder()
                 df.tune_new = enc_multiplier*df.tuning_step * div((df.tune_new),enc_multiplier*df.tuning_step).quot;    // keep last digit to zero
             }
 		}
-
 		retval = true;
 	}
 	return retval;
@@ -4991,6 +5325,7 @@ static void UiDriver_CheckEncoderTwo(void)
 					break;
 				case ENC_TWO_MODE_BASS_GAIN:
 					ts.dsp.bass_gain = change_and_limit_int(ts.dsp.bass_gain,pot_diff_step,MIN_BASS,MAX_BASS);
+//					ts.dsp.tx_eq_gain[0] = change_and_limit_int(ts.dsp.tx_eq_gain[0],pot_diff_step,MIN_TX_EQ,MAX_TX_EQ);
 					// set filter instance
 					AudioDriver_SetProcessingChain(ts.dmod_mode, false);
 					// display bass gain
@@ -4998,6 +5333,7 @@ static void UiDriver_CheckEncoderTwo(void)
 					break;
 				case ENC_TWO_MODE_TREBLE_GAIN:
 					ts.dsp.treble_gain = change_and_limit_int(ts.dsp.treble_gain,pot_diff_step,MIN_TREBLE,MAX_TREBLE);
+//					ts.dsp.tx_eq_gain[4] = change_and_limit_int(ts.dsp.tx_eq_gain[4],pot_diff_step,MIN_TX_EQ,MAX_TX_EQ);
 					// set filter instance
 					AudioDriver_SetProcessingChain(ts.dmod_mode, false);
 					// display treble gain
@@ -5039,14 +5375,16 @@ static void UiDriver_CheckEncoderTwo(void)
 				switch(ts.enc_two_mode)
 				{
 				case ENC_TWO_MODE_BASS_GAIN:
-					ts.dsp.tx_eq_gain[0] = change_and_limit_int(ts.dsp.tx_eq_gain[0],pot_diff_step,MIN_TX_EQ,MAX_TX_EQ);
+//					ts.dsp.tx_bass_gain = change_and_limit_int(ts.dsp.tx_bass_gain,pot_diff_step,MIN_TX_BASS,MAX_TX_BASS);
+                    ts.dsp.tx_eq_gain[0] = change_and_limit_int(ts.dsp.tx_eq_gain[0],pot_diff_step,MIN_TX_EQ,MAX_TX_EQ);
 					// set filter instance
 					AudioDriver_SetProcessingChain(ts.dmod_mode, false);
 					// display bass gain
 					UiDriver_DisplayTone(true);
 					break;
 				case ENC_TWO_MODE_TREBLE_GAIN:
-					ts.dsp.tx_eq_gain[4] = change_and_limit_int(ts.dsp.tx_eq_gain[4],pot_diff_step,MIN_TX_EQ,MAX_TX_EQ);
+//					ts.dsp.tx_treble_gain = change_and_limit_int(ts.dsp.tx_treble_gain,pot_diff_step,MIN_TX_TREBLE,MAX_TX_TREBLE);
+                    ts.dsp.tx_eq_gain[4] = change_and_limit_int(ts.dsp.tx_eq_gain[4],pot_diff_step,MIN_TX_EQ,MAX_TX_EQ);
 					// set filter instance
 					AudioDriver_SetProcessingChain(ts.dmod_mode, false);
 					// display treble gain
@@ -5717,8 +6055,11 @@ static void UiDriver_DisplayTone(bool encoder_active)
 	char temp[5];
 	int bas,tre;
 
+//	if(ts.txrx_mode == TRX_MODE_TX) // if in TX_mode, display TX bass gain instead of RX_bass gain!
 	if(ts.txrx_mode == TRX_MODE_TX) // if in TX_mode, display TX EQ gain instead of RX_bass gain!
 	{
+//		bas = ts.dsp.tx_bass_gain;
+//		tre = ts.dsp.tx_treble_gain;
 		bas = ts.dsp.tx_eq_gain[0];
 		tre = ts.dsp.tx_eq_gain[4];
 	}
@@ -6180,6 +6521,12 @@ static void UiDriver_HandleTXMeters(void)
 					swrm.vswr_dampened = swrm.vswr_dampened * (1 - VSWR_DAMPENING_FACTOR) + swrm.vswr * VSWR_DAMPENING_FACTOR;
 				}
 				btm_mtr_val = swrm.vswr_dampened * 4;		// yes - four dots per unit of VSWR
+
+				if((ts.expflags2 & EXPFLAGS2_SHOW_SWR_ONLY_TUNE) && (ts.txrx_mode == TRX_MODE_TX) && (!ts.tune))
+				{
+					btm_mtr_val = 0;
+				}
+
 			}
 		}
 		else if(ts.tx_meter_mode == METER_ALC)
@@ -7425,7 +7772,7 @@ void UiDriver_StartUpScreenInit()
 	nextY = UiLcdHy28_PrintTextCentered(posX, nextY, 320, "UB8JDC Korenev Yuri, ub8jdc@mail.ru", White,Black, 0);
 #endif
 
-	snprintf(tx,100,"%s%s","UHSDR Vers. ",UiMenu_GetSystemInfo(&clr,INFO_FW_VERSION));
+	snprintf(tx,100,"%s%s","Version ",UiMenu_GetSystemInfo(&clr,INFO_FW_VERSION));
 //	nextY = UiLcdHy28_PrintTextCentered(ts.Layout->StartUpScreen_START.x, nextY + 8, 320, tx, Yellow, Black, 1);
 	nextY = UiLcdHy28_PrintTextCentered(posX, nextY + 8, 320, tx, Yellow, Black, 0);
 	nextY = UiLcdHy28_PrintTextCentered(posX, nextY + 3, 320, "Firmware License: " UHSDR_LICENCE "\n" UHSDR_REPO, White, Black, 0);
@@ -7522,6 +7869,11 @@ void UiDriver_StartUpScreenFinish()
 	}
 
 	UiDriver_CreateDesktop();
+	AudioDriver_SetFade(1.0f / 10000.0f);
+
+#ifdef SDR_AMBER
+	Board_Amber_InputStateSet(ts.amber_input_state);
+#endif
 }
 
 // UiAction_... are typically small functions to execute a specific ui function initiate by a key press or touch event
@@ -7820,6 +8172,22 @@ static void UiAction_SaveConfigurationToMemory(void)
             UiDriver_SaveConfiguration();
             HAL_Delay(3000);
             UiDriver_DisplayMessageStop();
+
+            if((ts.menu_mode))              // update menu when we are (or WERE) in MENU mode
+            {
+                UiSpectrum_Clear();
+        #ifndef SDR_AMBER_480_320
+            #ifndef OVI40_MOD_480_320
+                if(ts.show_wide_spectrum) { UiLcdHy28_PrintTextCentered(0, 175, 79," SETUP  ",Blue,Black,0); }
+            #else
+                UiLcdHy28_PrintTextCentered(0, 205, 130," SETUP  ",Blue,Black,0);
+            #endif
+        #else
+                UiLcdHy28_PrintTextCentered(0, 205, 130," SETUP  ",Blue,Black,0);
+        #endif
+                UiMenu_RenderMenu(MENU_RENDER_ONLY);
+            }
+
 			if(!ts.show_wide_spectrum)
 			{
 #ifndef SDR_AMBER_480_320
@@ -7835,6 +8203,7 @@ static void UiAction_SaveConfigurationToMemory(void)
 			else if(ts.menu_mode)
 			{
 				UiLcdHy28_PrintTextCentered(0, 175, 79," SETUP  ",Blue,Black,0);
+                UiMenu_RenderMenu(MENU_RENDER_ONLY);
 			}
             ts.menu_var_changed = 0;                    // clear "EEPROM SAVE IS NECESSARY" indicators
             UiDriver_DisplayFButton_F1MenuExit();
@@ -7976,6 +8345,7 @@ void UiAction_ChangeRXInputStateDown()
 		ts.amber_input_state ++;
 		if(ts.amber_io8_present)
 		{
+			RadioManagement_MuteTemporarilyRxAudio();
 		    Board_Amber_InputStateSet(ts.amber_input_state);
 		}
 	}
@@ -7990,6 +8360,7 @@ void UiAction_ChangeRXInputStateUp()
 		ts.amber_input_state --;
         if(ts.amber_io8_present)
         {
+        	RadioManagement_MuteTemporarilyRxAudio();
             Board_Amber_InputStateSet(ts.amber_input_state);
         }
 	}
@@ -8368,7 +8739,15 @@ static void UiAction_ToggleSplitModeOrToggleMemMode(void)
 		}
 		else
 		{
-		    UiAction_ShowMems();
+//		    UiAction_ShowMems();
+			if(ts.expflags2 & EXPFLAGS2_CONTEST_MODE_F3_ON)
+			{
+				UiAction_ShowCq();
+			}
+			else
+			{
+				UiAction_ShowMems();
+			}
 		}
 	}
 }
@@ -8583,6 +8962,11 @@ static void UiAction_StepMinusHold(void)
 	if(UiDriver_IsButtonPressed(BUTTON_STEPP_PRESSED))	 	// was keyPin STEP+ pressed at the same time?
 	{
 		ts.frequency_lock = !ts.frequency_lock;
+
+        if(ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE)
+        {
+            ts.iq_freq_delta = 0;
+        }
 		// update frequency display
 		UiDriver_FrequencyUpdateLOandDisplay(true);
 	}
@@ -8619,6 +9003,11 @@ static void UiAction_StepPlusHold(void)
 	if(UiDriver_IsButtonPressed(BUTTON_STEPM_PRESSED))	 	// was keyPin STEP- pressed at the same time?
 	{
 		ts.frequency_lock = !ts.frequency_lock;
+
+		if(ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE)
+		{
+		    ts.iq_freq_delta = 0;
+		}
 		// update frequency display
 		UiDriver_FrequencyUpdateLOandDisplay(true);
 	}
@@ -8793,9 +9182,9 @@ static const keyaction_descr_t keyactions_normal[] =
 
 static const keyaction_descr_t keyactions_menu[] =
 {
-		{ BUTTON_F2_PRESSED, 	UiAction_MenuRenderPrevScreen, 		UiMenu_RenderFirstScreen },
-		{ BUTTON_F3_PRESSED, 	UiAction_MenuRenderNextScreen, 		UiMenu_RenderLastScreen },
-		{ BUTTON_F4_PRESSED, 	UiAction_MenuSetDefaultValue,				KEYACTION_NOP },
+		{ BUTTON_F2_PRESSED, 	UiAction_MenuRenderPrevScreen,              UiMenu_RenderFirstScreen },
+		{ BUTTON_F3_PRESSED, 	UiAction_MenuRenderNextScreen,              UiMenu_RenderLastScreen },
+		{ BUTTON_F4_PRESSED, 	UiAction_MenuSetDefaultValue,               KEYACTION_NOP },
 };
 
 static const keyaction_descr_t keyactions_keyer[] =

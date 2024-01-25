@@ -105,7 +105,11 @@ const uhsdr_display_info_t* UiLcdHy28_DisplayInfoGet(mchf_display_types_t displa
 // Saved fonts
 extern sFONT GL_Font8x8;
 extern sFONT GL_Font8x12;
+
+#ifndef SDR_AMBER
 extern sFONT GL_Font8x12_bold;
+#endif
+
 extern sFONT GL_Font12x12;
 extern sFONT GL_Font16x24;
 #ifdef USE_8bit_FONT

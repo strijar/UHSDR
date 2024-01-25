@@ -89,7 +89,7 @@ const MenuDescriptor baseGroup[] =
     { MENU_BASE, MENU_ITEM, MENU_AGC_WDSP_MODE, NULL, "AGC WDSP Mode", UiMenuDesc("Choose a bundle of preset AGC parameters for the WDSP AGC: FAST / MED / SLOW / LONG / very LONG or switch OFF the AGC.") },
     { MENU_BASE, MENU_ITEM, MENU_AGC_WDSP_SLOPE, NULL, "AGC WDSP Slope", UiMenuDesc("Slope of the AGC is the difference between the loudest signal and the quietest signal after the AGC action has taken place. Given in dB.") },
     { MENU_BASE, MENU_ITEM, MENU_AGC_WDSP_TAU_DECAY, NULL, "AGC WDSP Decay", UiMenuDesc("Time constant for the AGC decay (speed of recovery of the AGC gain) in milliseconds.") },
-    { MENU_BASE, MENU_ITEM, MENU_AGC_WDSP_THRESH, NULL, "AGC WDSP Threshold", UiMenuDesc("´Threshold´ = ´Knee´ of the AGC: input signal level from which on the AGC action takes place. AGC threshold should be placed/adjusted just above the band noise for every particular RX situation to allow for optimal AGC action. The blue AGC box indicates when AGC action takes place and helps in adjusting this threshold.") },
+    { MENU_BASE, MENU_ITEM, MENU_AGC_WDSP_THRESH, NULL, "AGC WDSP Threshold", UiMenuDesc("Threshold = Knee of the AGC: input signal level from which on the AGC action takes place. AGC threshold should be placed/adjusted just above the band noise for every particular RX situation to allow for optimal AGC action. The blue AGC box indicates when AGC action takes place and helps in adjusting this threshold.") },
     { MENU_BASE, MENU_ITEM, MENU_AGC_WDSP_HANG_ENABLE, NULL, "AGC WDSP Hang enable", UiMenuDesc("Enable/Disable Hang AGC function: If enabled: after the signal has decreased, the gain of the AGC is held constant for a certain time period (the hang time) in order to allow for speech pauses without disturbing noise because of fast acting AGC.") },
     { MENU_BASE, MENU_ITEM, MENU_AGC_WDSP_HANG_TIME, NULL, "AGC WDSP Hang time", UiMenuDesc("Hang AGC: hang time is the time period over which the AGC gain is held constant when in AGC Hang mode. After this period the gain is increased fast.") },
     { MENU_BASE, MENU_ITEM, MENU_AGC_WDSP_HANG_THRESH, NULL, "AGC WDSP Hang threshold", UiMenuDesc("´Threshold´ for the Hang AGC: Hang AGC is useful for medium to strong signals. The Hang threshold determines the signal strength a signal has to exceed for Hang AGC to take place.") },
@@ -371,16 +371,15 @@ const MenuDescriptor filterGroup[] =
     { MENU_FILTER, MENU_ITEM, CONFIG_AM_TX_FILTER_DISABLE, NULL,"AM  TX Audio Filter", UiMenuDesc("Select if AM-TX signal is filtered (strongly recommended to agree to regulations)") },
 //    { MENU_FILTER, MENU_ITEM, CONFIG_SSB_TX_FILTER_DISABLE, NULL,"SSB TX Audio Filter", UiMenuDesc(":soon:") },
     { MENU_FILTER, MENU_ITEM, CONFIG_SSB_TX_FILTER, NULL,"SSB TX Audio Filter2", UiMenuDesc("Select if SSB-TX signal is filtered (strongly recommended to agree to regulations)") },
-
-    { MENU_FILTER, MENU_ITEM, CONFIG_TX_REVERB_GAIN, NULL,"TX Reverb gain", UiMenuDesc("") },
-    { MENU_FILTER, MENU_ITEM, CONFIG_TX_REVERB_DELAY, NULL,"TX Reverb delay", UiMenuDesc("") },
-
-    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ0, NULL,"TX EQ 175 Hz", UiMenuDesc("") },
-    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ1, NULL,"TX EQ 350 Hz", UiMenuDesc("") },
-    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ2, NULL,"TX EQ 700 Hz", UiMenuDesc("") },
-    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ3, NULL,"TX EQ 1.4 kHz", UiMenuDesc("") },
-    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ4, NULL,"TX EQ 2.8 kHz", UiMenuDesc("") },
-
+#ifdef 	USE_REVERB_TX
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_REVERB_GAIN, NULL,"TX Reverb gain", UiMenuDesc("TX reverberation gain, OFF - disabled") },
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_REVERB_DELAY, NULL,"TX Reverb delay", UiMenuDesc("TX reverberation delay") },
+#endif
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ0, NULL,"TX EQ 175 Hz", UiMenuDesc("Equalizer band level adjustment -20 ... + 20 dB, 0 - no adjustment.") },
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ1, NULL,"TX EQ 350 Hz", UiMenuDesc("Equalizer band level adjustment -20 ... + 20 dB, 0 - no adjustment.") },
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ2, NULL,"TX EQ 700 Hz", UiMenuDesc("Equalizer band level adjustment -20 ... + 20 dB, 0 - no adjustment.") },
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ3, NULL,"TX EQ 1.4 kHz", UiMenuDesc("Equalizer band level adjustment -20 ... + 20 dB, 0 - no adjustment.") },
+    { MENU_FILTER, MENU_ITEM, CONFIG_TX_EQ4, NULL,"TX EQ 2.8 kHz", UiMenuDesc("Equalizer band level adjustment -20 ... + 20 dB, 0 - no adjustment.") },
     { MENU_FILTER, MENU_STOP, 0, NULL, NULL, UiMenuDesc("") }
 };
 
@@ -633,16 +632,41 @@ const MenuDescriptor debugGroup[] =
 	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_BPF_OPTION, NULL, "RF - Amber BPF Option", UiMenuDesc("3 extra BPF instead of 2 on Amber-RF board.") },
 	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_XVTR_OFF_PA, NULL, "XVTR - OFF PA", UiMenuDesc("Transverter mode - blocking PA on TX. The optional 'XVTR TX' SMA connector must be soldered and connected with coaxial cable to the output of the amplifier before PA driver ('XVTR_TX' contacts).") },
 	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_BANDCODE, NULL, "Ext. PA Bandcode", UiMenuDesc("PA bandcode variant, if not OFF.") },
-    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_ALT_PWR_CTRL, NULL, "TX_PREAMP_DUC Option", UiMenuDesc("Alternative POWER lewel control ON/OFF") },
-    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_ALT_PWR_CTRL_VOL, NULL, "TX_PREAMP_DUC Vol.", UiMenuDesc("Alternative POWER lewel control - DAC volume in points, 0-4096 (0-5V).") },
+    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_ALT_PWR_CTRL, NULL, "TX_PREAMP_DAC Option", UiMenuDesc("Alternative POWER lewel control ON/OFF") },
+    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_ALT_PWR_CTRL_VOL, NULL, "TX_PREAMP_DAC Vol.", UiMenuDesc("Alternative POWER lewel control - DAC volume in points, 0-4096 (0-5V).") },
 #endif
 	//    { MENU_DEBUG, MENU_ITEM, MENU_DEBUG_WIDE_SPEC_DEF, NULL, "Wide Spectrum Default", UiMenuDesc("Wide mode of spectrum on screen 320x240 is default.") },
 	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_DISABLE_TP, NULL, "Disable touchscreen", UiMenuDesc("Disable touchscreen actions.") },
 	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_FMENUS_SEL, NULL, "Choice of F-menu", UiMenuDesc("Type of F-menus selection.") },
 	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_IMPROV_IQ_ADJ, NULL, "Improved I/Q Adj.", UiMenuDesc("Improved I/Q adjusting. Added 160, 40, 30, 17, 12m.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_BEEP_GEN, NULL, "Beep GEN", UiMenuDesc("Activate beep (as button beep set) when the band border is crossed.") },
 #ifdef SDR_AMBER_4INCH
 	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_F6_IND_SEL, NULL, "F6 Ind.", UiMenuDesc("Amber 4'' - Indication of F6 button.") },
 	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_F7_IND_SEL, NULL, "F7 Ind.", UiMenuDesc("Amber 4'' - Indication of F7 button.") },
+#endif
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_BAND_OFF_160M, NULL, "Band OFF -160m", UiMenuDesc("Remove this band from switching queue.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_BAND_OFF_80M, NULL, "Band OFF - 80m", UiMenuDesc("Remove this band from switching queue.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_BAND_OFF_60M, NULL, "Band OFF - 60m", UiMenuDesc("Remove this band from switching queue.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_BAND_OFF_40M, NULL, "Band OFF - 40m", UiMenuDesc("Remove this band from switching queue.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_BAND_OFF_30M, NULL, "Band OFF - 30m", UiMenuDesc("Remove this band from switching queue.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_BAND_OFF_20M, NULL, "Band OFF - 20m", UiMenuDesc("Remove this band from switching queue.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_BAND_OFF_17M, NULL, "Band OFF - 17m", UiMenuDesc("Remove this band from switching queue.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_BAND_OFF_15M, NULL, "Band OFF - 15m", UiMenuDesc("Remove this band from switching queue.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_BAND_OFF_12M, NULL, "Band OFF - 12m", UiMenuDesc("Remove this band from switching queue.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_BAND_OFF_10M, NULL, "Band OFF - 10m", UiMenuDesc("Remove this band from switching queue.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_BAND_OFF_6M, NULL, "Band OFF -  6m", UiMenuDesc("Remove this band from switching queue.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_REDUCE_POWER_ON_LOW_BANDS_MORE, NULL, "ReducePWR_MoreOnLowBands", UiMenuDesc("Reduce power x20 (instead of x4) for F < 8 MHz.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_SHOW_SWR_ONLY_TUNE, NULL, "Show SWR only in TUNE", UiMenuDesc("Show SWR only in TUNE mode.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_CONTEST, NULL, "Contest mode (MEMS)", UiMenuDesc("Contest mode long F3 activation is ON.") },
+//	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_CONTEST_COLOUR, NULL, "Contest mode COLOUR", UiMenuDesc("Contest mode mems colour.") },
+#if defined(UI_BRD_OVI40) && defined(SDR_AMBER)
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_DCDC_FREQSW, NULL, "DC-DC Freq Switching", UiMenuDesc("Amber - ON/OFF DC-DC Converter +5V Freq Switching.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_DCDC_FREQ, NULL, "DC-DC Freq", UiMenuDesc("Amber - DC-DC Converter +5V Freq 0/1.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_DCDC_FREQ1, NULL, "DC-DC Freq0, kHz", UiMenuDesc("Amber - DC-DC Converter +5V Freq0 in kHz.") },
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_DCDC_FREQ2, NULL, "DC-DC Freq1, kHz", UiMenuDesc("Amber - DC-DC Converter +5V Freq1 in kHz.") },
+#endif
+#if defined(USE_FREEDV)
+	{ MENU_DEBUG, MENU_ITEM, MENU_DEBUG_FREEDV_TXLEVEL, NULL, "FreeDV TX Level, %", UiMenuDesc("TX level in FreeDV mode from SSB, %.") },
 #endif
 	{ MENU_DEBUG, MENU_STOP, 0, NULL, NULL, UiMenuDesc("") }
 };

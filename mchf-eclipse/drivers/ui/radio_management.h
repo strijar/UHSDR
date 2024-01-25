@@ -409,3 +409,7 @@ inline bool RadioManagement_TxRxSwitching_IsEnabled(void)
 }
 
 #endif /* DRIVERS_UI_RADIO_MANAGEMENT_H_ */
+
+#if defined(UI_BRD_OVI40) && defined(SDR_AMBER)
+void RadioManagement_TestDCDC_Freq(uint32_t freq);
+#endif

@@ -31,7 +31,6 @@
 #include "audio_nr.h"
 #include "audio_agc.h"
 #include "audio_management.h"
-#include "audio_reverb.h"
 #include "radio_management.h"
 #include "usbd_audio_if.h"
 #include "ui_spectrum.h"
@@ -50,6 +49,7 @@
 #include "fm_subaudible_tone_table.h" // hm.
 #include "uhsdr_math.h"
 #include "tx_processor.h"
+//#include "audio_reverb.h"
 
 // SSB filters - now handled in ui_driver to allow I/Q phase adjustment
 
@@ -462,6 +462,7 @@ int32_t AudioDriver_GetTranslateFreq()
         break;
     case FREQ_IQ_CONV_SLIDE:
         fdelta = ts.iq_freq_delta;
+        break;
     }
     return fdelta;
 }
@@ -664,6 +665,7 @@ static void RxProcessor_Init(void)
 
     AudioDriver_FreeDV_Rx_Init();  // RX
     AudioDriver_FM_Rx_Init(&ads.fm_conf); // RX
+//    AudioReverb_Init();  //TX
     //    ads.fade_leveler = 0;
 }
 
@@ -1923,10 +1925,14 @@ static void AudioDriver_SpectrumZoomProcessSamples(iq_buffer_t* iq_buf_p,  const
             // collect samples for spectrum display 256-point-FFT
 
             AudioDriver_SpectrumCopyIqBuffers(&decim_iq_buf, blockSize/ (1<<sd.magnify));
+//            sd.FFT_frequency = ts.tune_freq + AudioDriver_GetTranslateFreq(); // spectrum shows center at translate frequency, LO + Translate Freq  is center frequency;
 
-            if (ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE) {
+            if (ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE)
+            {
                 sd.FFT_frequency = ts.tune_freq;
-            } else {
+            }
+            else
+            {
                 sd.FFT_frequency = ts.tune_freq + AudioDriver_GetTranslateFreq();
             }
 
@@ -2734,20 +2740,30 @@ static void AudioDriver_RxProcessor(IqSample_t * const srcCodec, AudioSample_t *
 
         if(iq_freq_mode)            // is receive frequency conversion to be done?
         {
-            if (ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE) {
+//            FreqShift(adb.iq_buf.i_buffer, adb.iq_buf.q_buffer, blockSize, AudioDriver_GetTranslateFreq());
+            if (ts.iq_freq_mode == FREQ_IQ_CONV_SLIDE)
+            {
                 AudioDriver_SpectrumZoomProcessSamples(&adb.iq_buf, blockSize);
                 FreqShift(adb.iq_buf.i_buffer, adb.iq_buf.q_buffer, blockSize, AudioDriver_GetTranslateFreq());
-            } else {
+            }
+            else
+            {
                 FreqShift(adb.iq_buf.i_buffer, adb.iq_buf.q_buffer, blockSize, AudioDriver_GetTranslateFreq());
                 AudioDriver_SpectrumZoomProcessSamples(&adb.iq_buf, blockSize);
             }
-        } else {
+        }
+        else
+        {
             AudioDriver_SpectrumZoomProcessSamples(&adb.iq_buf, blockSize);
         }
 
         // at this point we have phase corrected IQ @ IQ_SAMPLE_RATE, with our RX frequency in the center (i.e. at 0 Hertz Shift)
         // in adb.iq_buf.i_buffer, adb.iq_buf.q_buffer
 
+
+        // Spectrum display sample collect for magnify != 0
+
+//        AudioDriver_SpectrumZoomProcessSamples(&adb.iq_buf, blockSize);
 #ifdef USE_FREEDV
         if (ts.dvmode == true && ts.digital_mode == DigitalMode_FreeDV)
         {
@@ -2898,6 +2914,19 @@ static void AudioDriver_RxProcessor(IqSample_t * const srcCodec, AudioSample_t *
     }
     else
     {
+
+        if (ads.audio_fade > 0.0f)
+        {
+            ads.audio_fade -= ads.audio_fade_speed;
+
+            if (ads.audio_fade < 0.01f)
+            {
+                ads.audio_fade = 0.0f;
+            }
+
+            arm_scale_f32(adb.a_buffer[1], 1.0f - ads.audio_fade, adb.a_buffer[1], blockSize);
+        }
+
 #ifdef USE_TWO_CHANNEL_AUDIO
         // BOTH CHANNELS "FIXED" GAIN as input for audio amp and headphones/lineout
         // each output path has its own gain control.
@@ -3088,6 +3117,24 @@ void AudioDriver_I2SCallback(AudioSample_t *audio, IqSample_t *iq, AudioSample_t
             ts.audio_dac_muting_buffer_count--;
         }
 
+        // Hardware muting of the IQ codec to prevent flash at the beginning of TX - UB8JDC
+        if(ts.mute_iq_codec_count)
+        {
+            if(!ts.muted_iq_codec)
+            {
+                uint32_t retval_1;
+                retval_1 = Codec_Mute(true);
+            }
+            ts.muted_iq_codec = true;
+            ts.mute_iq_codec_count--;
+            if(!ts.mute_iq_codec_count)
+            {
+                uint32_t retval_2;
+                retval_2 = Codec_Mute(false);
+                ts.muted_iq_codec = false;
+            }
+        }
+
         to_rx = true;		// Set flag to indicate that we WERE transmitting when we eventually go back to receive mode
     }
 
@@ -3104,4 +3151,126 @@ void AudioDriver_I2SCallback(AudioSample_t *audio, IqSample_t *iq, AudioSample_t
 #endif
 }
 
+void AudioDriver_SetFade(float32_t speed)
+{
+    ads.audio_fade_speed = speed;
+    ads.audio_fade = 1.0f;
+}
 
+#ifdef  USE_REVERB_TX
+#define DECIM   5
+#define CF0 (3460 / DECIM)
+#define CF1 (2988 / DECIM)
+#define CF2 (3882 / DECIM)
+#define CF3 (4312 / DECIM)
+#define AP0 (480 / DECIM)
+#define AP1 (161 / DECIM)
+#define AP2 (46 / DECIM)
+
+static float32_t    cfbuf0[CF0];
+static float32_t    cfbuf1[CF1];
+static float32_t    cfbuf2[CF2];
+static float32_t    cfbuf3[CF3];
+
+static float32_t    apbuf0[AP0];
+static float32_t    apbuf1[AP1];
+static float32_t    apbuf2[AP2];
+
+typedef struct {
+    float32_t   *buf;
+    uint16_t    index;
+    uint16_t    delay;
+    float32_t   gain;
+} item_t;
+
+static float32_t    wet0 = 1.0f;
+static float32_t    wet1 = 0.0f;
+static float32_t    result = 0.0f;
+static uint8_t      decim_count = 0;
+
+static item_t       cf0, cf1, cf2, cf3;
+static item_t       ap0, ap1, ap2;
+
+static float32_t CalcComb(float32_t in, item_t *comb) {
+    float32_t   readback = comb->buf[comb->index];
+    float32_t   new = readback * comb->gain + in;
+
+    comb->buf[comb->index] = new;
+    comb->index++;
+
+    if (comb->index > comb->delay)
+        comb->index = 0;
+
+    return readback;
+}
+
+static float32_t CalcAllPass(float32_t in, item_t *allpass) {
+    float32_t   reedback = allpass->buf[allpass->index] - allpass->gain*in;
+    float32_t   new = reedback*allpass->gain + in;
+
+    allpass->buf[allpass->index] = new;
+    allpass->index++;
+
+    if (allpass->index > allpass->delay)
+        allpass->index = 0;
+
+    return reedback;
+}
+
+void AudioReverb_Init(void) {
+    cf0.buf = (float32_t*) &cfbuf0;  cf0.gain = 0.805f;
+    cf1.buf = (float32_t*) &cfbuf1;  cf1.gain = 0.827f;
+    cf2.buf = (float32_t*) &cfbuf2;  cf2.gain = 0.783f;
+    cf3.buf = (float32_t*) &cfbuf3;  cf3.gain = 0.764f;
+
+    ap0.buf = (float32_t*) &apbuf0;  ap0.gain = 0.7f;
+    ap1.buf = (float32_t*) &apbuf1;  ap1.gain = 0.7f;
+    ap2.buf = (float32_t*) &apbuf2;  ap2.gain = 0.7f;
+
+    wet0 = 1.0f;
+    wet1 = 0.0f;
+    result = 0.0f;
+    decim_count = 0;
+
+    AudioReverb_SetDelay();
+    AudioReverb_SetWet();
+}
+
+void AudioReverb_SetDelay()
+{
+    float32_t x = ts.reverb_delay / 100.f;
+    cf0.index = 0;  cf0.delay = (uint16_t) (x * CF0);
+    cf1.index = 0;  cf1.delay = (uint16_t) (x * CF1);
+    cf2.index = 0;  cf2.delay = (uint16_t) (x * CF2);
+    cf3.index = 0;  cf3.delay = (uint16_t) (x * CF3);
+
+    ap0.index = 0;  ap0.delay = (uint16_t) (x * AP0);
+    ap1.index = 0;  ap1.delay = (uint16_t) (x * AP1);
+    ap2.index = 0;  ap2.delay = (uint16_t) (x * AP2);
+}
+
+void AudioReverb_SetWet()
+{
+    float32_t x = ts.reverb_gain / 100.0f;
+    wet0 = x;
+    wet1 = 1.0f - x;
+}
+
+float32_t AudioReverb_Calc(float32_t in)
+{
+    decim_count++;
+
+    if (decim_count >= DECIM)
+    {
+        result = (CalcComb(in, &cf0) + CalcComb(in, &cf1) + CalcComb(in, &cf2) + CalcComb(in, &cf3)) / 4.0f;
+
+        result = CalcAllPass(result, &ap0);
+        result = CalcAllPass(result, &ap1);
+        result = CalcAllPass(result, &ap2);
+
+        decim_count = 0;
+    }
+
+    return wet0 * result + wet1 * in;
+}
+#endif

@@ -243,9 +243,9 @@ typedef struct {
 }
 keyer_mode_t;
 
-extern uint32_t mem_data[4][2][20];
-extern uint32_t xvtr_data[4][3];
-extern uint16_t bw_data[10][20];
+uint32_t mem_data[4][2][20];
+uint32_t xvtr_data[4][3];
+uint16_t bw_data[10][20];
 
 typedef enum
 {
@@ -264,8 +264,8 @@ typedef struct vfo_reg_s
     uint32_t dial_value;
     uint8_t  decod_mode;
     uint8_t  digital_mode;
-    int32_t  dial_delta;
 //    uint32_t filter_mode;
+    int32_t  dial_delta;
 } VfoReg;
 
 typedef enum
@@ -567,22 +567,41 @@ typedef struct TransceiverState
 
     uint16_t    expflags2;              // Used to hold flags for options in menu, stored in EEPROM location "EEPROM_EXPFLAGS2"
 #define EXPFLAGS2_TEMP_MEM_BW_MOD_BAND  0x01      // 1 - Remember the filter settings of each mode in each range for the duration of the session
-#define EXPFLAGS2_ILLUM_BUTT              0x02    // 1 - Amber, illumination of buttons is ON
-#define EXPFLAGS2_3_ADD_BPF               0x04    // 1 - On Amber-RF board the BPF-option is present, add. BPF 6, 160 and <160m (usually 6 and <=160m)
-#define EXPFLAGS2_XVTR_OFF_PA             0x08    // 1 - Amber - OFF PA in XVTR mode TX
-#define EXPFLAGS2_DISABLE_TP              0x10    // 1 - Disabled touchscreen actions
-#define EXPFLAGS2_FMENUS_SELECT           0x20    // 0 - carousel, 1 - menu
-#define EXPFLAGS2_AMBER_4INCH_F6_IND      0x40    // Amber 4": 0 - Soft, 1 - AT (Autotuner UT0UM)
-#define EXPFLAGS2_AMBER_4INCH_F7_IND      0x80    // Amber 4": 0 - AT, 1 - POWER
-#define EXPFLAGS2_ALT_PWR_CTRL            0x100   // 1 - Alternative POWER level control via DAC -> mosfet in TX preamp
-#define EXPFLAGS2_IMPROV_IQ_ADJ           0x200   // 1 - Improved I/Q adjusting. Added 160, 40, 30, 17, 12m
-#define EXPFLAGS2_ENC2_REVERSE            0x400   // 1 - encoder2 are reversed
-#define EXPFLAGS2_ENC3_REVERSE            0x800   // 1 - encoder3 are reversed
-//#define EXPFLAGS2_BLABLABLA             0x1000  // reserved
-//#define EXPFLAGS2_BLABLABLA             0x2000  // reserved
-//#define EXPFLAGS2_BLABLABLA             0x4000  // reserved
-//#define EXPFLAGS2_BLABLABLA             0x8000  // reserved
+#define EXPFLAGS2_ILLUM_BUTT            0x02    // 1 - Amber, illumination of buttons is ON
+#define EXPFLAGS2_3_ADD_BPF             0x04    // 1 - On Amber-RF board the BPF-option is present, add. BPF 6, 160 and <160m (usually 6 and <=160m)
+#define EXPFLAGS2_XVTR_OFF_PA           0x08    // 1 - Amber - OFF PA in XVTR mode TX
+#define EXPFLAGS2_DISABLE_TP            0x10    // 1 - Disabled touchscreen actions
+#define EXPFLAGS2_FMENUS_SELECT         0x20    // 0 - carousel, 1 - menu
+#define EXPFLAGS2_AMBER_4INCH_F6_IND    0x40    // Amber 4": 0 - Soft, 1 - AT (Autotuner UT0UM)
+#define EXPFLAGS2_AMBER_4INCH_F7_IND    0x80    // Amber 4": 0 - AT, 1 - POWER
+#define EXPFLAGS2_ALT_PWR_CTRL          0x100   // 1 - Alternative POWER level control via DAC -> mosfet in TX preamp
+#define EXPFLAGS2_IMPROV_IQ_ADJ         0x200   // 1 - Improved I/Q adjusting. Added 160, 40, 30, 17, 12m
+#define EXPFLAGS2_ENC2_REVERSE          0x400   // 1 - encoder2 are reversed
+#define EXPFLAGS2_ENC3_REVERSE          0x800   // 1 - encoder3 are reversed
+#define EXPFLAGS2_BEEP_GEN              0x1000  // 1 - Beep (as button beep set) when the band border is crossed
+#define EXPFLAGS2_SHOW_SWR_ONLY_TUNE    0x2000  // 1 - Show SWR only in TUNE mode.
+#define EXPFLAGS2_CONTEST_MODE_F3_ON    0x4000  // 1 - Contest mode F3 activation is ON.
+#define EXPFLAGS2_AMBER_DCDC_FREQSW_ON	0x8000  // 1 - TRX Amber, DC-DC converter 5V freq switching ON
 #define EXPFLAGS2_CONFIG_DEFAULT        0x0000  // Default flags state
+
+    uint16_t    expflags3;              // Used to hold flags for options in menu, stored in EEPROM location "EEPROM_EXPFLAGS3"
+#define EXPFLAGS3_BAND_OFF_160M         0x01    // 1 - Remove this band from switching queue
+#define EXPFLAGS3_BAND_OFF_80M          0x02    // 1 - Remove this band from switching queue
+#define EXPFLAGS3_BAND_OFF_60M          0x04    // 1 - Remove this band from switching queue
+#define EXPFLAGS3_BAND_OFF_40M          0x08    // 1 - Remove this band from switching queue
+#define EXPFLAGS3_BAND_OFF_30M          0x10    // 1 - Remove this band from switching queue
+#define EXPFLAGS3_BAND_OFF_20M          0x20    // 1 - Remove this band from switching queue
+#define EXPFLAGS3_BAND_OFF_17M          0x40    // 1 - Remove this band from switching queue
+#define EXPFLAGS3_BAND_OFF_15M          0x80    // 1 - Remove this band from switching queue
+#define EXPFLAGS3_BAND_OFF_12M          0x100   // 1 - Remove this band from switching queue
+#define EXPFLAGS3_BAND_OFF_10M          0x200   // 1 - Remove this band from switching queue
+#define EXPFLAGS3_BAND_OFF_6M           0x400   // 1 - Remove this band from switching queue
+#define EXPFLAGS3_LOW_BAND_BIAS_REDUCE_MORE 0x800  // 1 - Reduce power x20 (instead of x4) for F < 8 MHz.
+//#define EXPFLAGS3_BLABLABLA           0x1000  // reserved
+//#define EXPFLAGS3_BLABLABLA           0x2000  // reserved
+//#define EXPFLAGS3_BLABLABLA           0x4000  // reserved
+//#define EXPFLAGS3_BLABLABLA           0x8000  // reserved
+#define EXPFLAGS3_CONFIG_DEFAULT        0x0000  // Default flags state
 
 #ifdef UI_BRD_MCHF
     // the default screen needs no reversed touch
@@ -807,8 +826,9 @@ typedef struct TransceiverState
 #define LO_TX_SUPR_DAC1_WRITE     194 // address I2C_2
 #define LO_TX_SUPR_DAC1_READ      195 // address I2C_2
 
-#ifdef SDR_AMBER
+//#ifdef SDR_AMBER
 	uint8_t amber_input_state;		  // Amber - state of RX input group
+#ifdef SDR_AMBER
 	bool amber_io8_present;           // Amber - I/Ox8 PCF8574A is present?
 	uint8_t amber_io8_state;
     #define AMBER_IO8_WRITE           112 // address I2C_2
@@ -831,12 +851,35 @@ typedef struct TransceiverState
     uint16_t freq_enc_timer;
 #endif
     bool disabled_tp;
-    int32_t    iq_freq_delta;
+    int32_t iq_freq_delta;
     uint8_t     reverb_gain;
     uint8_t     reverb_delay;
+    bool it_is_band;
+    //Contest mode - F4IYT
+    //uint8_t		cq_colour;
+    uint8_t		maxi_pos_contest;
+    uint32_t	matrix_contest[24];
+    uint8_t		pos_id_contest;
+    uint8_t		maxi_pos_contesttry;
+    uint32_t	matrix_contesttry[24];
+    uint8_t		pos_id_contesttry;
+    uint8_t		swtcqtry;
+    int			cmem_colour;
+	//Contest mode - end
+    uint32_t	temp_dial_freq; // Need in the RX Slide mode
+    uint16_t	amber_tx_2_0_w;
+    uint16_t	amber_tx_1_0_w;
+    uint16_t	amber_tx_0_5_w;
+    uint8_t		amber_dcdc_freq;  // 0/1
+    int16_t     amber_dcdc_freq1; // in kHz
+    int16_t 	amber_dcdc_freq2; // in kHz
+    uint8_t     freedv_tx_level;  // 100 - 100% from SSB level
+    uint8_t     mute_iq_codec_count;
+    bool        muted_iq_codec;
 } TransceiverState;
 
 extern __IO TransceiverState ts;
+//extern TransceiverState ts;
 
 #define	POWERDOWN_DELAY_COUNT	30	// Delay in main service loop for the "last second" before power-down - to allow EEPROM write to complete
 
@@ -865,6 +908,12 @@ typedef enum {
     LED_STATE_TOGGLE = 2
 } ledstate_t;
 
+typedef enum {
+    DCDC_STATE_OFF = 0,
+    DCDC_STATE_ON = 1,
+    DCDC_STATE_TOGGLE = 2
+} dcdc_state_t;
+
 
 
 void Board_SetPaBiasValue(uint16_t bias);
@@ -884,7 +933,11 @@ void Board_GreenLed(ledstate_t state);
 void Board_RedLed(ledstate_t state);
 
 #ifdef UI_BRD_OVI40
+#ifndef SDR_AMBER
 void Board_BlueLed(ledstate_t state);
+#else
+void Board_DCDC_FREQ_SHIFT(dcdc_state_t state);
+#endif
 #endif
 
 #ifdef SDR_AMBER

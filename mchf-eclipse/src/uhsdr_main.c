@@ -263,6 +263,8 @@ void TransceiverStateInit(void)
     ts.txrx_switch_audio_muting_timing = 0;					// timing value used for muting TX audio when keying PTT to suppress "click" or "thump"
     ts.audio_dac_muting_timer = 0;					// timer used for muting TX audio when keying PTT to suppress "click" or "thump"
     ts.audio_dac_muting_flag = 0;					// when TRUE, audio is to be muted after PTT/keyup
+    ts.mute_iq_codec_count = 0;
+    ts.muted_iq_codec = false;
 
     //CONFIG LOADED:ts.filter_disp_colour = FILTER_DISP_COLOUR_DEFAULT;
     ts.vfo_mem_flag = 0;						// when TRUE, memory mode is enabled
@@ -346,8 +348,9 @@ void TransceiverStateInit(void)
     ts.band_lo_tx_supr_old = 255; // Invalid band number - old value bla-bla-bla
 
     ts.band_effective = NULL;  // this is an invalid band number, which will trigger a redisplay of the band name and the effective power
+//#ifdef SDR_AMBER
+//  ts.amber_input_state = 0;              // Amber - state of RX input group, - PRE(amp)
 #ifdef SDR_AMBER
-    ts.amber_input_state = 0;              // Amber - state of RX input group, - PRE(amp)
     ts.amber_io8_present = false;          // I/Ox8 PCF8574A
     ts.amber_io8_state = 255;
     ts.amber_io4_present = false;          // I/Ox4 PCA9536
@@ -371,6 +374,12 @@ void TransceiverStateInit(void)
 #ifdef FAST_FREQ_ENC
     ts.freq_enc_timer = 0;
 #endif
+//    ts.iq_freq_delta = 10;//0;  //Hz
+    ts.it_is_band = true;
+
+    ts.maxi_pos_contest = 23;
+    ts.maxi_pos_contesttry = 23;
+    ts.cmem_colour = White;
 }
 
 // #include "Trace.h"
@@ -526,6 +535,12 @@ int mchfMain(void)
     ts.paddles_active = true;
 
     Board_RedLed(LED_STATE_OFF);
+
+    // Eliminate sound blocking on boot in RX-slide mode
+    if(ts.iq_freq_delta == 0)
+    {
+      ts.iq_freq_delta = 10; // Hz
+    }
 
 
     // Transceiver main loop

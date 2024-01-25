@@ -36,7 +36,6 @@ am = ['MENU_TOP',
       'MENU_CW',
       'MENU_POW',
       'MENU_DISPLAY',
-      'MENU_MEN2TOUCH', 
       'MENU_SYSINFO',
       'MENU_DEBUG',
       ]

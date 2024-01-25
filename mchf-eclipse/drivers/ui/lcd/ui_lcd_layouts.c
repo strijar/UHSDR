@@ -534,7 +534,11 @@ const LcdLayout LcdLayouts[LcdLayoutsCount]=
 #else //Amber_480x320
 				.Size = { 480, 320 },
 				.StartUpScreen_START = { 80, 60 },
+	#ifdef SDR_AMBER_480_320_SPAN
+				.SpectrumWindow = { .x = 4, .y = 123, .w = 472, .h = 174 },
+	#else
 				.SpectrumWindow = { .x = 0, .y = 123, .w = 480, .h = 174 },
+	#endif
 				.SpectrumWindowPadding = 0,
 
 				.TUNE_FREQ = { 276, 90 },
